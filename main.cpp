@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    MyApplication app(argc, argv);
 
     FP fenetre;
     fenetre.show();

@@ -11,10 +11,12 @@ public :
     Pierre(const coup* c);
     const coup* getCoup() const {return corres;}
     const QRect& getRect() const {return rect;}
+    void setEllipse(QGraphicsEllipseItem* el);
 
 private :
     QRect rect;
     const coup* corres;
+    QGraphicsEllipseItem* ellipse;
 };
 
 #endif // PIERRE_H

@@ -30,20 +30,105 @@ Goban::Goban() : QGraphicsScene()
 
 void Goban::ajouterPierre(Pierre* p)
 {
-    pierres.push_back(p);
+    /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
+    const int ord = p->getCoup()->getOrd();
+    const int abs = p->getCoup()->getAbs();
+    pair<int,int> coord = make_pair(abs,ord);
+    plateau.insert(pair<pair<int,int>,Pierre*>(coord,p));
+    std::cout << "Ajout de la pierre à la map plateau : ok" << std::endl;
 
+    /* On regarde s'il y a des pierres autour de la pierre qu'on pose
+    Si oui, on doit ajouter cette pierre à un groupe déjà existant
+    Si non, on doit créer un nouveau groupe avec juste cette nouvelle pierre*/
+    vector<Pierre*> autour = pierresAutour(p);
+
+    if (autour.size()==0) // la nouvelle pierre n'appartient à aucun groupe
+    {
+        std::cout << "Pierre isolée, création d'un nouveau groupe" << std::endl;
+        Groupe* g = new Groupe();
+        g->ajouterPierre(p);
+        groupes.insert(g);
+    }
+    else if (autour.size()==1)
+    {
+        //il faut trouver le groupe auquel la pierre va être ajoutée
+        std::cout << "Une pierre à côté" << std::endl;
+        trouverGroupe(autour[0])->ajouterPierre(p);
+    }
+    else if (autour.size()==2)
+    {
+        //on doit fusionner les deux groupes
+        Groupe* g1 = new Groupe();
+        g1 = trouverGroupe(autour[0]);
+        Groupe* g2 = new Groupe();
+        g2 = trouverGroupe(autour[1]);
+
+        Groupe* g3 = new Groupe();
+        g3 = &(*g1 + *g2);
+        groupes.erase(g1);
+        delete g1;
+        groupes.erase(g2);
+        delete g2;
+        groupes.insert(g3);
+    }
+
+    /* Affichage */
     if (p->getCoup()->getJoueur()->couleur()=="Noir")
     {
         //si le coup est joué par noir, on ajoute une pierre noire sur le goban :
-        addEllipse(p->getRect(),pen,noir);
+        p->setEllipse(this->addEllipse(p->getRect(),pen,noir));
         //et on met à jour la matrice plateau :
-        plateau[p->getCoup()->getAbs()][p->getCoup()->getOrd()] = -1;
+       // plateau[abs][ord] = -1;
     }
     else
     {
-        addEllipse(p->getRect(),pen,blanc);
-        plateau[p->getCoup()->getAbs()][p->getCoup()->getOrd()] = 1;
+        p->setEllipse(this->addEllipse(p->getRect(),pen,blanc));
+        //plateau[abs][ord] = 1;
     }
 
 
+
+}
+
+
+vector<Pierre*> Goban::pierresAutour(Pierre* p) const
+{
+    int abs = p->getCoup()->getAbs();
+    int ord = p->getCoup()->getOrd();
+    vector<Pierre*> resultat;
+
+    /* On cherche à récupérer les pierres qui sont juste autour de la pierre p
+    On utilise l'attribut plateau = map<pair<abs,ord>,Pierre*> */
+    if (plateau.find(pair<int,int>(abs,ord-1))!=plateau.end())
+    {
+        //il existe une pierre en abs,ord-1
+        resultat.push_back(plateau.find(pair<int,int>(abs,ord-1))->second);
+    }
+    if (plateau.find(pair<int,int>(abs,ord+1))!=plateau.end())
+    {
+        //il existe une pierre en abs,ord+1
+        resultat.push_back(plateau.find(pair<int,int>(abs,ord+1))->second);
+    }
+    if (plateau.find(pair<int,int>(abs+1,ord))!=plateau.end())
+    {
+        //il existe une pierre en abs+1,ord
+        resultat.push_back(plateau.find(pair<int,int>(abs+1,ord))->second);
+    }
+    if (plateau.find(pair<int,int>(abs-1,ord))!=plateau.end())
+    {
+        //il existe une pierre en abs-1,ord
+        resultat.push_back(plateau.find(pair<int,int>(abs-1,ord))->second);
+    }
+
+    return resultat;
+}
+
+
+Groupe* Goban::trouverGroupe(Pierre* p) const
+{
+    for(set<Groupe*>::iterator it=groupes.begin() ; it!=groupes.end() ; ++it)
+    {
+        if ((*it)->faitPartie(p)) return *it;
+    }
+    throw coup_exception("Cette pierre ne fait partie d'aucun groupe");
 }

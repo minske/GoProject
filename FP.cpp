@@ -77,13 +77,6 @@ void FP::nextMove()
 {
     if(Partie->getCourant()!=Partie->fin())
     {
-        /*if (Partie->getCourant()==partie::iterateur(0))
-        {
-            //on est au tout début de la partie, on affiche le premier coup
-            Partie->debut();
-        }
-        else Partie->avancer();*/
-
         Pierre* p = new Pierre(Partie->getCourant().getPtr());
         goban->ajouterPierre(p);
         Partie->avancer();

@@ -29,3 +29,50 @@ void Groupe::capture()
         }
     }
 }
+
+Groupe& Groupe::operator+=(Groupe const& g)
+{
+    if (g!=*this)
+    {
+        for (list<Pierre*>::iterator it = appartient.begin() ;it != appartient.end() ; ++it)
+        {
+            ajouterPierre(*it);
+        }
+    }
+
+    return *this;
+}
+
+bool Groupe::operator==(Groupe const& g) const
+{
+    if (faitPartie(g.appartient.back()))
+        return true;
+    else return false;
+}
+
+bool Groupe::operator!=(Groupe const& g) const
+{
+    return !(*this==g);
+}
+
+Groupe operator+(Groupe const& a, Groupe const& b)
+{
+    Groupe c(a);
+    c+=b;
+    return c;
+}
+
+
+Groupe::Groupe(Groupe const& g)
+{
+    /*int statut; //0 pour mort, 1 pour vivant
+    unsigned int libertes;
+    list<Pierre*> appartient;*/
+
+    statut = g.statut;
+    libertes = g.libertes;
+    for (list<Pierre*>::const_iterator it=g.appartient.begin(); it!=g.appartient.end() ; ++it)
+    {
+        appartient.push_back(*it);
+    }
+}

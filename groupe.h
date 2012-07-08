@@ -11,12 +11,18 @@ class Groupe
 
 public :
     Groupe();
+    Groupe(Groupe const& g);
     int getStatut() const {return statut;}
     unsigned int nbLibertes() const {return libertes;}
     void capture();
     void ajouterPierre(Pierre* p);
     bool faitPartie(const Pierre* p) const;
+    Groupe& operator+=(Groupe const& g);
+    bool operator!=(Groupe const& g) const;
+    bool operator==(Groupe const& g) const;
 
 };
+
+Groupe operator+(Groupe const& a, Groupe const& b);
 
 #endif // GROUPE_H

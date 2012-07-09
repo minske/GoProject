@@ -22,6 +22,7 @@ public :
     int getOrd() const {return ordonnee;}
     Joueur* getJoueur() const {return j;}
     void setJoueur(Joueur* J) {j = J;}
+    ~coup();
 };
 
 
@@ -57,6 +58,8 @@ public :
     Blanc* getBlanc() const {return joueurBlanc;}
     Noir* getNoir() const {return joueurNoir;}
     std::string infos() const;
+    ~partie();
+    static void libereInstance();
 
 private :
     vector<coup> listeCoups;

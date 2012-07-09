@@ -5,6 +5,11 @@
 Noir* Noir::instanceUnique = 0;
 Blanc* Blanc::instanceUnique = 0;
 
+Joueur::~Joueur()
+{
+    delete nom; delete niveau; delete pierresCapturees;
+}
+
 Joueur::Joueur(QString const& Nom, QString const& rank)
 {
     nom = new QLabel(Nom);
@@ -93,4 +98,24 @@ void Joueur::addCapt(unsigned int i)
 QWidget* Joueur::getInfos() const
 {
     return infos;
+}
+
+void Blanc::libereInstance()
+{
+    instanceUnique = 0;
+}
+
+void Noir::libereInstance()
+{
+    instanceUnique = 0;
+}
+
+Blanc::~Blanc()
+{
+    Blanc::libereInstance();
+}
+
+Noir::~Noir()
+{
+    Noir::libereInstance();
 }

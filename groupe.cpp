@@ -32,12 +32,10 @@ void Groupe::capture()
 
 Groupe& Groupe::operator+=(Groupe const& g)
 {
-    if (g!=*this)
+    for (list<Pierre*>::const_iterator it = g.appartient.begin() ;it != g.appartient.end() ; ++it)
     {
-        for (list<Pierre*>::iterator it = appartient.begin() ;it != appartient.end() ; ++it)
-        {
-            ajouterPierre(*it);
-        }
+        if (!faitPartie(*it))
+            appartient.push_back(*it);
     }
 
     return *this;

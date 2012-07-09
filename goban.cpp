@@ -40,37 +40,94 @@ void Goban::ajouterPierre(Pierre* p)
     /* On regarde s'il y a des pierres autour de la pierre qu'on pose
     Si oui, on doit ajouter cette pierre à un groupe déjà existant
     Si non, on doit créer un nouveau groupe avec juste cette nouvelle pierre*/
-    vector<Pierre*> autour = pierresAutour(p);
+    vector<Pierre*> autourMemeCouleur = pierresAutourMemeCouleur(p);
 
-    if (autour.size()==0) // la nouvelle pierre n'appartient à aucun groupe
+    switch(autourMemeCouleur.size())
+    {
+    case 0 :
     {
         std::cout << "Pierre isolée, création d'un nouveau groupe" << std::endl;
         Groupe* g = new Groupe();
         g->ajouterPierre(p);
         groupes.insert(g);
+        break;
     }
-    else if (autour.size()==1)
+
+    case 1 :
     {
         //il faut trouver le groupe auquel la pierre va être ajoutée
         std::cout << "Une pierre à côté" << std::endl;
-        trouverGroupe(autour[0])->ajouterPierre(p);
+        trouverGroupe(autourMemeCouleur[0])->ajouterPierre(p);
+        std::cout << "Groupe de " << trouverGroupe(autourMemeCouleur[0])->getPierres().size() << " pierres." << std::endl;
+        break;
     }
-    else if (autour.size()==2)
+
+    case 2 :
     {
         //on doit fusionner les deux groupes
-        Groupe* g1 = new Groupe();
-        g1 = trouverGroupe(autour[0]);
-        Groupe* g2 = new Groupe();
-        g2 = trouverGroupe(autour[1]);
+        std::cout << "Deux pierres à côté" << std::endl;
+        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
+        Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
 
-        Groupe* g3 = new Groupe();
-        g3 = &(*g1 + *g2);
-        groupes.erase(g1);
-        delete g1;
+        std::cout << "Fusion de deux groupes" << std::endl;
+        g1->operator +=(*g2);
         groupes.erase(g2);
-        delete g2;
-        groupes.insert(g3);
+
+        g1->ajouterPierre(p);
+        //g1->supprimerDoublons();
+
+        std::cout << "Groupe de " << g1->getPierres().size() << " pierres" << std::endl;
+        break;
     }
+
+    case 3 :
+    {
+        //on fusionne trois groupes
+        std::cout << "Trois pierres à côté" << std::endl;
+        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
+        Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
+        Groupe* g3= trouverGroupe(autourMemeCouleur[2]);
+
+
+        std::cout << "Fusion de trois groupes" << std::endl;
+        g1->operator +=(*g2);
+        g1->operator +=(*g3);
+        groupes.erase(g2);
+        groupes.erase(g3);
+
+        g1->ajouterPierre(p);
+
+        //g1->supprimerDoublons();
+
+        std::cout << "Groupe de " << g1->getPierres().size() << " pierres." << std::endl;
+        break;
+    }
+
+    case 4 :
+    {
+        //on fusionne quatre groupes max
+        std::cout << "Quatre pierres à côté" << std::endl;
+        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
+        Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
+        Groupe* g3= trouverGroupe(autourMemeCouleur[2]);
+        Groupe* g4 = trouverGroupe(autourMemeCouleur[3]);
+
+        g1->operator +=(*g2);
+        g1->operator +=(*g3);
+        g1->operator +=(*g4);
+        groupes.erase(g2); groupes.erase(g3); groupes.erase(g4);
+        //g1->supprimerDoublons();
+        g1->ajouterPierre(p);
+
+        std::cout << "Groupe de " << g1->getPierres().size() << " pierres." << std::endl;
+        break;
+    }
+
+    default :
+        throw coup_exception("Plus de 5 pierres ou moins de 0 pierre autour : impossible.");
+        break;
+    }
+
 
     /* Affichage */
     if (p->getCoup()->getJoueur()->couleur()=="Noir")
@@ -131,4 +188,44 @@ Groupe* Goban::trouverGroupe(Pierre* p) const
         if ((*it)->faitPartie(p)) return *it;
     }
     throw coup_exception("Cette pierre ne fait partie d'aucun groupe");
+}
+
+vector<Pierre*> Goban::pierresAutourMemeCouleur(Pierre* p) const
+{
+    int abs = p->getCoup()->getAbs();
+    int ord = p->getCoup()->getOrd();
+    vector<Pierre*> resultat;
+
+    /* On cherche à récupérer les pierres qui sont juste autour de la pierre p
+    On utilise l'attribut plateau = map<pair<abs,ord>,Pierre*> */
+    if ((plateau.find(pair<int,int>(abs,ord-1))!=plateau.end()))
+    {
+        //il existe une pierre en abs,ord-1
+        Pierre* a = plateau.find(pair<int,int>(abs,ord-1))->second;
+        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
+            resultat.push_back(a);
+    }
+    if (plateau.find(pair<int,int>(abs,ord+1))!=plateau.end())
+    {
+        //il existe une pierre en abs,ord+1
+        Pierre* a = plateau.find(pair<int,int>(abs,ord+1))->second;
+        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
+        resultat.push_back(a);
+    }
+    if (plateau.find(pair<int,int>(abs+1,ord))!=plateau.end())
+    {
+        //il existe une pierre en abs+1,ord
+        Pierre* a = plateau.find(pair<int,int>(abs+1,ord))->second;
+        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
+        resultat.push_back(a);
+    }
+    if (plateau.find(pair<int,int>(abs-1,ord))!=plateau.end())
+    {
+        //il existe une pierre en abs-1,ord
+        Pierre* a = plateau.find(pair<int,int>(abs-1,ord))->second;
+        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
+        resultat.push_back(a);
+    }
+
+    return resultat;
 }

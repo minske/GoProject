@@ -12,9 +12,11 @@ public :
     Goban();
     void ajouterPierre(Pierre* p);
     vector<Pierre*> pierresAutour(Pierre* p) const;
+    vector<Pierre*> pierresAutourMemeCouleur(Pierre* p) const;
     Groupe* trouverGroupe(Pierre* p) const;
     set<Groupe*> getGroupes() const {return groupes;}
     map<pair<int,int>,Pierre*> getPlateau() const {return plateau;}
+    ~Goban() {delete lignes;}
 
 private :
     static QBrush noir;

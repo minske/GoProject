@@ -84,3 +84,8 @@ void FP::nextMove()
         //Partie->getBlanc()->addCapt(5);
     }
 }
+
+FP::~FP()
+{
+    delete goban; delete Partie; delete infosJoueurs;
+}

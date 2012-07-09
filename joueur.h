@@ -20,6 +20,7 @@ public :
     void addCapt(unsigned int i);
     virtual QString couleur() const=0;
     virtual QWidget* getInfos() const;
+    virtual ~Joueur();
 };
 
 class Noir : public Joueur
@@ -32,8 +33,9 @@ private :
 public :
     unsigned int getHandi() const {return handicap;}
     static Noir* donneInstance(QString const& Nom, QString const& rank, unsigned int h=0);
-    //static void libereInstance();
+    static void libereInstance();
     QString couleur() const {return "Noir";}
+    ~Noir();
 };
 
 class Blanc : public Joueur
@@ -46,8 +48,9 @@ private :
 public :
     double getKomi() const {return komi;}
     static Blanc* donneInstance(QString const& Nom, QString const& rank, double k=6.5);
-    //static void libereInstance();
+    static void libereInstance();
     QString couleur() const {return "Blanc";}
+    ~Blanc();
 };
 
 

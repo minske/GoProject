@@ -31,6 +31,8 @@ string coup::print() const
     return r.str();
 }
 
+coup::~coup(){}
+
 void partie::chargerFichier(string const& f)
 {
     /* Ouverture du fichier et test */
@@ -129,4 +131,14 @@ std::string partie::infos() const
     r << "Noir : " << joueurNoir->getNom().toStdString() << " - " << joueurNoir->getRank().toStdString() << std::endl;
     r << "Blanc : " << joueurBlanc->getNom().toStdString() << " - " << joueurBlanc->getRank().toStdString() << std::endl;
     return r.str();
+}
+
+void partie::libereInstance()
+{
+    instanceUnique=0;
+}
+
+partie::~partie()
+{
+    delete joueurBlanc; delete joueurNoir; partie::libereInstance();
 }

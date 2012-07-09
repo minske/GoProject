@@ -34,6 +34,7 @@ private :
 
 public :
     FP();
+    ~FP();
 
 public slots :
     void ouvrirFichier();

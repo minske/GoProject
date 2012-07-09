@@ -58,7 +58,7 @@ void Goban::ajouterPierre(Pierre* p)
         //il faut trouver le groupe auquel la pierre va être ajoutée
         std::cout << "Une pierre à côté" << std::endl;
         trouverGroupe(autourMemeCouleur[0])->ajouterPierre(p);
-        std::cout << "Groupe de " << trouverGroupe(autourMemeCouleur[0])->getPierres().size() << " pierres." << std::endl;
+        std::cout << "Groupe de " << trouverGroupe(autourMemeCouleur[0])->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
         break;
     }
 
@@ -76,7 +76,7 @@ void Goban::ajouterPierre(Pierre* p)
         g1->ajouterPierre(p);
         //g1->supprimerDoublons();
 
-        std::cout << "Groupe de " << g1->getPierres().size() << " pierres" << std::endl;
+        std::cout << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
         break;
     }
 
@@ -99,7 +99,7 @@ void Goban::ajouterPierre(Pierre* p)
 
         //g1->supprimerDoublons();
 
-        std::cout << "Groupe de " << g1->getPierres().size() << " pierres." << std::endl;
+        std::cout << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
         break;
     }
 
@@ -143,7 +143,17 @@ void Goban::ajouterPierre(Pierre* p)
         //plateau[abs][ord] = 1;
     }
 
-
+    /*il faut vérifier si on doit supprimer des pierres*/
+    vector<Pierre*> autourAdv = pierresAutourAdversaire(p);
+    for (vector<Pierre*>::const_iterator it = autourAdv.begin() ; it != autourAdv.end() ; ++it)
+    {
+        Groupe* g = trouverGroupe(*it);
+        if (nbLibertes(g)==0)
+        {
+            std::cout << "Un groupe à supprimer" << std::endl;
+            supprimerGroupe(g);
+        }
+    }
 
 }
 
@@ -228,4 +238,127 @@ vector<Pierre*> Goban::pierresAutourMemeCouleur(Pierre* p) const
     }
 
     return resultat;
+}
+
+
+void Goban::supprimerPierre(Pierre* p)
+{
+    int a = p->getCoup()->getAbs();
+    int o = p->getCoup()->getOrd();
+    plateau.erase(pair<int,int>(a,o));
+    delete p;
+}
+
+void Goban::supprimerGroupe(Groupe* g)
+{
+    set<Pierre*> ltmp = g->getPierres();
+    for (set<Pierre*>::const_iterator it = ltmp.begin() ; it != ltmp.end() ; ++it)
+    {
+        supprimerPierre(*it);
+    }
+    groupes.erase(g);
+    delete g;
+}
+
+
+vector<Pierre*> Goban::pierresAutourAdversaire(Pierre* p) const
+{
+    int abs = p->getCoup()->getAbs();
+    int ord = p->getCoup()->getOrd();
+    vector<Pierre*> resultat;
+
+    /* On cherche à récupérer les pierres qui sont juste autour de la pierre p
+    On utilise l'attribut plateau = map<pair<abs,ord>,Pierre*> */
+    if ((plateau.find(pair<int,int>(abs,ord-1))!=plateau.end()))
+    {
+        //il existe une pierre en abs,ord-1
+        Pierre* a = plateau.find(pair<int,int>(abs,ord-1))->second;
+        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
+            resultat.push_back(a);
+    }
+    if (plateau.find(pair<int,int>(abs,ord+1))!=plateau.end())
+    {
+        //il existe une pierre en abs,ord+1
+        Pierre* a = plateau.find(pair<int,int>(abs,ord+1))->second;
+        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
+        resultat.push_back(a);
+    }
+    if (plateau.find(pair<int,int>(abs+1,ord))!=plateau.end())
+    {
+        //il existe une pierre en abs+1,ord
+        Pierre* a = plateau.find(pair<int,int>(abs+1,ord))->second;
+        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
+        resultat.push_back(a);
+    }
+    if (plateau.find(pair<int,int>(abs-1,ord))!=plateau.end())
+    {
+        //il existe une pierre en abs-1,ord
+        Pierre* a = plateau.find(pair<int,int>(abs-1,ord))->second;
+        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
+        resultat.push_back(a);
+    }
+
+    return resultat;
+}
+
+
+
+unsigned int Goban::nbLibertes(Groupe* g) const
+{
+    vector<pair<int,int> > cases;
+    set<Pierre*> pierres = g->getPierres();
+
+    for (set<Pierre*>::const_iterator it = pierres.begin() ; it!=pierres.end() ; ++it)
+    {
+        /* Pour chaque pierre du groupe, on regarde les quatre cases à côté
+        Si elles sont vides et qu'elles ne font pas déjà partie de cases, on les ajoute au vector*/
+        int abs = (*it)->getCoup()->getAbs(), ord = (*it)->getCoup()->getOrd();
+
+        if (ord >0)
+        {
+            if (plateau.find(pair<int,int>(abs,ord-1))==plateau.end())
+            {
+                //il n'y a pas de pierre en abs,ord-1
+                if (find(cases.begin(),cases.end(),pair<int,int>(abs,ord-1))==cases.end())
+                    // la case ne fait pas déjà partie de cases
+                    cases.push_back(pair<int,int>(abs,ord-1));
+            }
+        }
+
+        if (ord<18)
+        {
+            if (plateau.find(pair<int,int>(abs,ord+1))==plateau.end())
+            {
+                //il n'y a pas de pierre en abs,ord+1
+                if (find(cases.begin(),cases.end(),pair<int,int>(abs,ord+1))==cases.end())
+                    // la case ne fait pas déjà partie de cases
+                    cases.push_back(pair<int,int>(abs,ord+1));
+            }
+        }
+
+        if (abs>0)
+        {
+            if (plateau.find(pair<int,int>(abs-1,ord))==plateau.end())
+            {
+                //il n'y a pas de pierre en abs-1,ord
+                if (find(cases.begin(),cases.end(),pair<int,int>(abs-1,ord))==cases.end())
+                    // la case ne fait pas déjà partie de cases
+                    cases.push_back(pair<int,int>(abs-1,ord));
+            }
+        }
+
+        if (abs<18)
+        {
+            if (plateau.find(pair<int,int>(abs+1,ord))==plateau.end())
+            {
+                //il n'y a pas de pierre en abs+1,ord
+                if (find(cases.begin(),cases.end(),pair<int,int>(abs+1,ord))==cases.end())
+                    // la case ne fait pas déjà partie de cases
+                    cases.push_back(pair<int,int>(abs+1,ord));
+            }
+        }
+
+    }
+
+    return cases.size();
 }

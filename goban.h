@@ -13,10 +13,14 @@ public :
     void ajouterPierre(Pierre* p);
     vector<Pierre*> pierresAutour(Pierre* p) const;
     vector<Pierre*> pierresAutourMemeCouleur(Pierre* p) const;
+    vector<Pierre*> pierresAutourAdversaire(Pierre* p) const;
     Groupe* trouverGroupe(Pierre* p) const;
     set<Groupe*> getGroupes() const {return groupes;}
     map<pair<int,int>,Pierre*> getPlateau() const {return plateau;}
     ~Goban() {delete lignes;}
+    void supprimerGroupe(Groupe* g);
+    void supprimerPierre(Pierre* p);
+    unsigned int nbLibertes(Groupe* g) const;
 
 private :
     static QBrush noir;

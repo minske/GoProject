@@ -12,7 +12,7 @@ public :
     const coup* getCoup() const {return corres;}
     const QRect& getRect() const {return rect;}
     void setEllipse(QGraphicsEllipseItem* el);
-    ~Pierre() {}
+    ~Pierre() { delete ellipse;}
 
 private :
     QRect rect;

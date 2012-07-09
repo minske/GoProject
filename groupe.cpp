@@ -1,6 +1,6 @@
 #include "groupe.h"
 
-Groupe::Groupe() : statut(0), libertes(0), appartient(list<Pierre*>())
+Groupe::Groupe() : statut(0), appartient(set<Pierre*>())
 {}
 
 bool Groupe::faitPartie(const Pierre* p) const
@@ -13,29 +13,18 @@ bool Groupe::faitPartie(const Pierre* p) const
 void Groupe::ajouterPierre(Pierre* p)
 {
     if (faitPartie(p)) throw coup_exception("La pierre appartient déjà au groupe");
-    appartient.push_back(p);
+    appartient.insert(p);
 }
 
 void Groupe::capture()
-{
-    if (!appartient.empty())
-    {
-        unsigned int nb = appartient.size();
-        appartient.back()->getCoup()->getJoueur()->addCapt(nb);
-        for (unsigned int i = 0; i<appartient.size() ; i++)
-        {
-
-           // *(it).enleverGoban();
-        }
-    }
-}
+{}
 
 Groupe& Groupe::operator+=(Groupe const& g)
 {
-    for (list<Pierre*>::const_iterator it = g.appartient.begin() ;it != g.appartient.end() ; ++it)
+    for (set<Pierre*>::const_iterator it = g.appartient.begin() ;it != g.appartient.end() ; ++it)
     {
         if (!faitPartie(*it))
-            appartient.push_back(*it);
+            appartient.insert(*it);
     }
 
     return *this;
@@ -43,7 +32,7 @@ Groupe& Groupe::operator+=(Groupe const& g)
 
 bool Groupe::operator==(Groupe const& g) const
 {
-    if (faitPartie(g.appartient.back()))
+    if (faitPartie(*g.appartient.begin()))
         return true;
     else return false;
 }
@@ -65,12 +54,11 @@ Groupe::Groupe(Groupe const& g)
 {
     /*int statut; //0 pour mort, 1 pour vivant
     unsigned int libertes;
-    list<Pierre*> appartient;*/
+    set<Pierre*> appartient;*/
 
     statut = g.statut;
-    libertes = g.libertes;
-    for (list<Pierre*>::const_iterator it=g.appartient.begin(); it!=g.appartient.end() ; ++it)
+    for (set<Pierre*>::const_iterator it=g.appartient.begin(); it!=g.appartient.end() ; ++it)
     {
-        appartient.push_back(*it);
+        appartient.insert(*it);
     }
 }

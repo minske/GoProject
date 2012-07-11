@@ -11,23 +11,44 @@ FP::FP() : QMainWindow(), Partie(0)
     ouvrirFichier->setShortcut(QKeySequence("Ctrl+O"));
     connect(ouvrirFichier,SIGNAL(triggered()),this,SLOT(ouvrirFichier()));
 
+    QAction* fermerFichier = menuFichier->addAction("Fermer");
+    fermerFichier->setShortcut(QKeySequence("Ctrl+W"));
+    connect(fermerFichier,SIGNAL(triggered()),this,SLOT(fermerFichier()));
+
     QAction* actionQuitter = menuFichier->addAction("Quitter");
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
     connect(actionQuitter,SIGNAL(triggered()),qApp,SLOT(quit()));
 
+
     //Layout horizontal principal : à gauche le goban, à droite les infos
-    QHBoxLayout* layoutPrincipal = new QHBoxLayout;
+    layoutPrincipal = new QHBoxLayout;
     //Layout vertical pour le goban de la fenêtre :
-    QVBoxLayout* layoutV = new QVBoxLayout;
+    layoutV = new QVBoxLayout;
+
+    //boutons ouvrir,fermer,quitter
+    QPushButton* ouvrir = new QPushButton("Ouvrir");
+    QPushButton* fermer = new QPushButton("Fermer");
+    QPushButton* quitter = new QPushButton("Quitter");
+    connect(ouvrir,SIGNAL(clicked()),this,SLOT(ouvrirFichier()));
+    connect(fermer,SIGNAL(clicked()),this,SLOT(fermerFichier()));
+    connect(quitter,SIGNAL(clicked()),qApp,SLOT(quit()));
+    QHBoxLayout* layoutBoutonsOFQ = new QHBoxLayout;
+    layoutBoutonsOFQ->addWidget(ouvrir);
+    layoutBoutonsOFQ->addWidget(fermer);
+    layoutBoutonsOFQ->addWidget(quitter);
 
     //boutons avancer et reculer
     QPushButton* prev = new QPushButton("<");
     QPushButton* next = new QPushButton(">");
     next->setShortcut(QKeySequence::MoveToNextChar);
     connect(next,SIGNAL(clicked()),this,SLOT(nextMove()));
-    QHBoxLayout* layoutBoutons = new QHBoxLayout;
-    layoutBoutons->addWidget(prev);
-    layoutBoutons->addWidget(next);
+    QHBoxLayout* layoutBoutonsNP = new QHBoxLayout;
+    layoutBoutonsNP->addWidget(prev);
+    layoutBoutonsNP->addWidget(next);
+
+    layoutBoutons = new QVBoxLayout;
+    layoutBoutons->addLayout(layoutBoutonsOFQ);
+    layoutBoutons->addLayout(layoutBoutonsNP);
 
 
     //on ajoute les boutons au layout goban
@@ -35,7 +56,7 @@ FP::FP() : QMainWindow(), Partie(0)
 
     //définition du goban
     goban = new Goban();
-    QGraphicsView* vue = new QGraphicsView(goban);
+    vue = new QGraphicsView(goban);
     vue->setFixedSize(E*20,E*20);
     layoutV->addWidget(vue);
 
@@ -43,7 +64,7 @@ FP::FP() : QMainWindow(), Partie(0)
     //Définition du widget pour affichage des infos
     infosJoueurs = new QWidget;
     infosJoueurs->setFixedWidth(300);
-    QVBoxLayout* widgetsCote = new QVBoxLayout;
+    widgetsCote = new QVBoxLayout;
     widgetsCote->addWidget(infosJoueurs);
     widgetsCote->addSpacing(500);
     //infosPartie->setFont();
@@ -87,5 +108,15 @@ void FP::nextMove()
 
 FP::~FP()
 {
-    delete goban; delete Partie; delete infosJoueurs;
+    if (goban!=0) delete goban;
+    if (Partie!=0) delete Partie;
+    if (infosJoueurs!=0) delete infosJoueurs;
+}
+
+void FP::fermerFichier()
+{
+    delete Partie;
+    Partie=0;
+    goban->init(); infosJoueurs = new QWidget;
+    infosJoueurs->setFixedWidth(300);
 }

@@ -29,6 +29,17 @@ Goban::Goban() : QGraphicsScene(), coupCourant(0)
 
 }
 
+void Goban::init()
+{
+    removeItem(coupCourant);
+    coupCourant=0;
+    for (map<pair<int,int>,Pierre*>::iterator it = plateau.begin(); it!=plateau.end(); ++it)
+    {
+        removeItem((*it).second->getEllipse());
+    }
+    groupes.clear(); plateau.clear();
+}
+
 void Goban::ajouterPierre(Pierre* p)
 {
     if (coupCourant!=0) removeItem(coupCourant);
@@ -152,13 +163,19 @@ void Goban::ajouterPierre(Pierre* p)
 
     /*il faut vérifier si on doit supprimer des pierres*/
     vector<Pierre*> autourAdv = pierresAutourAdversaire(p);
-    for (vector<Pierre*>::const_iterator it = autourAdv.begin() ; it != autourAdv.end() ; ++it)
+    if (autourAdv.size()!=0)
     {
-        Groupe* g = trouverGroupe(*it);
-        if (nbLibertes(g)==0)
+        for (vector<Pierre*>::iterator it = autourAdv.begin() ; it != autourAdv.end() ; ++it)
         {
-            std::cout << "Un groupe à supprimer" << std::endl;
-            supprimerGroupe(g);
+            if (estSurPlateau(*it))
+            {
+                Groupe* g = trouverGroupe(*it);
+                if (nbLibertes(g)==0)
+                {
+                    std::cout << "Un groupe à supprimer" << std::endl;
+                    supprimerGroupe(g);
+                }
+            }
         }
     }
 
@@ -370,4 +387,11 @@ unsigned int Goban::nbLibertes(Groupe* g) const
     }
 
     return cases.size();
+}
+
+
+bool Goban::estSurPlateau(Pierre* p) const
+{
+    int abs = p->getCoup()->getAbs(), ord = p->getCoup()->getOrd();
+    return (plateau.find(pair<int,int>(abs,ord))!=plateau.end());
 }

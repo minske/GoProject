@@ -31,6 +31,11 @@ private :
     Goban* goban;
     partie* Partie;
     QWidget* infosJoueurs;
+    QHBoxLayout* layoutPrincipal;
+    QVBoxLayout* layoutV;
+    QVBoxLayout* layoutBoutons;
+    QGraphicsView* vue;
+    QVBoxLayout* widgetsCote;
 
 public :
     FP();
@@ -40,6 +45,7 @@ public slots :
     void ouvrirFichier();
     void nextMove();
     //void prevMove();
+    void fermerFichier();
 };
 
 #endif // FORM_H

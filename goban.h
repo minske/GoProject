@@ -21,6 +21,8 @@ public :
     void supprimerGroupe(Groupe* g);
     void supprimerPierre(Pierre* p);
     unsigned int nbLibertes(Groupe* g) const;
+    bool estSurPlateau(Pierre* p) const;
+    void init();
 
 private :
     static QBrush noir;

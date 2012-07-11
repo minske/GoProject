@@ -11,6 +11,7 @@ const char* coup_exception::what() const throw() { return info.c_str(); }
 
 coup::coup(std::string const& s)
 {
+    numero = 0;
     // un coup donné dans le fichier est normalement de la forme B[mc]BL[151.84]OB[11]C[commentaires ...]
     /*
     On cherche à extraire :
@@ -27,7 +28,7 @@ coup::coup(std::string const& s)
 string coup::print() const
 {
     stringstream r;
-    r << j->couleur().toStdString() << " : " << abscisse+1 << "-" << ordonnee+1;
+    r << "Coup n°" << numero <<j->couleur().toStdString() << " : " << abscisse+1 << "-" << ordonnee+1;
     return r.str();
 }
 
@@ -35,30 +36,34 @@ coup::~coup(){}
 
 void partie::chargerFichier(string const& f)
 {
+    int numero = 1;
     /* Ouverture du fichier et test */
     ifstream sgf(f.c_str(),ios::in);
     if (sgf) //si l'ouverture a réussi
     {
         /* Le début du fichier contient des informations sur la partie
-        La liste des coups commence au deuxième ;
+        La liste des coups commence au deuxième ';'
         On va récupérer toutes ces infos dans une chaîne pour les traiter ensuite */
         string contenu;
         string ligne;
         while (getline(sgf,ligne)) contenu += ligne;
 
         //contenu = contenu du fichier
+
+        /********************* AURELIEN -> LA RECUP DES INFOS SUR LA PARTIE COMMENCE ICI ***************************/
         unsigned int i = 2;
-        while (contenu[i] != ';') i++; // i = position avant le premier coup
+        while (contenu[i] != ';') i++; // on avance jusqu'à ce qu'on trouve un ';'
+        //i = position avant le premier coup
         string infos = contenu.substr(2,i-2);
-        unsigned int j=0;
+        /*unsigned int j=0;
         string jblanc, jnoir, nblanc, nnoir, komi;
 
         while (j<infos.size()-1)
-        {
+        {*/
             /*recherche des infos suivantes : PW[NomBlanc], PB[NomNoir],
               WR[NiveauBlanc], BR[NiveauNoir], KM[Komi]
              */
-            string inf;
+           /* string inf;
 
             while (infos[j]!=']')
             {
@@ -69,14 +74,18 @@ void partie::chargerFichier(string const& f)
             else if (inf.substr(0,2)=="PB") jnoir=inf.substr(3);
             else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
             else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
-            //else if (inf.substr(0,2)=="KM") komi=inf.substr(2);
+            else if (inf.substr(0,2)=="KM") komi=inf.substr(3);
 
             j++;
-        }
+        }*/
 
         //Initialisation des joueurs
-        joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
-        joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+        //joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
+        //joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+
+        /***  init en attendant que les infos de la partie fonctionnent  ***/
+        joueurNoir = Noir::donneInstance("Noir","NiveauNoir");
+        joueurBlanc = Blanc::donneInstance("Blanc","NiveauBlanc");
 
         i++;
         //while(contenu[i]!='\0')
@@ -99,6 +108,8 @@ void partie::chargerFichier(string const& f)
             if (coup[0]=='B')
                 listeCoups.back().setJoueur(joueurNoir);
             else listeCoups.back().setJoueur(joueurBlanc);
+            listeCoups.back().setNum(numero);
+            numero++;
             cout << listeCoups.back().print() << endl;
             i++;
         }

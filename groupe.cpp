@@ -5,9 +5,7 @@ Groupe::Groupe() : statut(0), appartient(set<Pierre*>())
 
 bool Groupe::faitPartie(const Pierre* p) const
 {
-    if (find(appartient.begin(), appartient.end(),p)==appartient.end())
-        return false;
-    else return true;
+    return (find(appartient.begin(), appartient.end(),p)!=appartient.end());
 }
 
 void Groupe::ajouterPierre(Pierre* p)

@@ -13,15 +13,18 @@ class coup
     int abscisse;
     int ordonnee;
     Joueur* j;
+    int numero;
 
 public :
-    coup() : abscisse(0), ordonnee(0), j(0) {}
+    coup() : abscisse(0), ordonnee(0), j(0), numero(0) {}
     coup(std::string const& s);
     std::string print() const;
     int getAbs() const {return abscisse;}
     int getOrd() const {return ordonnee;}
     Joueur* getJoueur() const {return j;}
     void setJoueur(Joueur* J) {j = J;}
+    void setNum(int n) {numero = n;}
+    int getNum() const {return numero;}
     ~coup();
 };
 

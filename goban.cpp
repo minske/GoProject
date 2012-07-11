@@ -1,10 +1,11 @@
 #include "goban.h"
 
 QPen Goban::pen(Qt::black,1);
+QPen Goban::rouge(Qt::red,1.5);
 QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
 
-Goban::Goban() : QGraphicsScene()
+Goban::Goban() : QGraphicsScene(), coupCourant(0)
 {
     //brush pour la couleur de fond
     QBrush brush(QColor(236,184,82));
@@ -30,12 +31,16 @@ Goban::Goban() : QGraphicsScene()
 
 void Goban::ajouterPierre(Pierre* p)
 {
+    if (coupCourant!=0) removeItem(coupCourant);
+
+    std::cout << "\n ---------- \nCoup n°" << p->getCoup()->getNum() << std::endl;
+
     /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
     const int ord = p->getCoup()->getOrd();
     const int abs = p->getCoup()->getAbs();
     pair<int,int> coord = make_pair(abs,ord);
-    plateau.insert(pair<pair<int,int>,Pierre*>(coord,p));
-    std::cout << "Ajout de la pierre à la map plateau : ok" << std::endl;
+    if (plateau.insert(pair<pair<int,int>,Pierre*>(coord,p)).second)
+        std::cout << "Ajout de la pierre à la map plateau : ok" << std::endl;
 
     /* On regarde s'il y a des pierres autour de la pierre qu'on pose
     Si oui, on doit ajouter cette pierre à un groupe déjà existant
@@ -57,8 +62,9 @@ void Goban::ajouterPierre(Pierre* p)
     {
         //il faut trouver le groupe auquel la pierre va être ajoutée
         std::cout << "Une pierre à côté" << std::endl;
-        trouverGroupe(autourMemeCouleur[0])->ajouterPierre(p);
-        std::cout << "Groupe de " << trouverGroupe(autourMemeCouleur[0])->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
+        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
+        g1->ajouterPierre(p);
+        std::cout << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
         break;
     }
 
@@ -143,6 +149,7 @@ void Goban::ajouterPierre(Pierre* p)
         //plateau[abs][ord] = 1;
     }
 
+
     /*il faut vérifier si on doit supprimer des pierres*/
     vector<Pierre*> autourAdv = pierresAutourAdversaire(p);
     for (vector<Pierre*>::const_iterator it = autourAdv.begin() ; it != autourAdv.end() ; ++it)
@@ -154,6 +161,8 @@ void Goban::ajouterPierre(Pierre* p)
             supprimerGroupe(g);
         }
     }
+
+    coupCourant = this->addEllipse((abs+1)*E-(E*0.3),(ord+1)*E-(E*0.3),E*0.6,E*0.6,rouge);
 
 }
 
@@ -245,7 +254,7 @@ void Goban::supprimerPierre(Pierre* p)
 {
     int a = p->getCoup()->getAbs();
     int o = p->getCoup()->getOrd();
-    plateau.erase(pair<int,int>(a,o));
+    if (plateau.erase(pair<int,int>(a,o))!=1) throw coup_exception("Erreur à la suppression d'une pierre");
     delete p;
 }
 

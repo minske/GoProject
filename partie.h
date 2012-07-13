@@ -34,8 +34,8 @@ class partie
 public :
     static partie* donneInstance();
     void chargerFichier(std::string const& nomFichier);
-    void avancer() {++courant;}
-    void reculer() {--courant;}
+    //void avancer() {++courant;}
+    //void reculer() {--courant;}
     vector<coup> getListeCoups() const {return listeCoups;}
 
     class iterateur
@@ -56,7 +56,7 @@ public :
     iterateur dernierCoup() const {return iterateur(listeCoups.back());}
     iterateur fin() const { iterateur it(listeCoups.back()); ++it; return it; }
     iterateur debut() const { return iterateur(listeCoups.front()); }
-    iterateur getCourant() const {return courant;}
+    //iterateur getCourant() const {return courant;}
 
     Blanc* getBlanc() const {return joueurBlanc;}
     Noir* getNoir() const {return joueurNoir;}
@@ -67,8 +67,8 @@ public :
 private :
     vector<coup> listeCoups;
     static partie* instanceUnique;
-    partie::iterateur courant;
-    partie() : courant(0), joueurBlanc(0), joueurNoir(0) {}
+//    partie::iterateur courant;
+    partie() : /*courant(0),*/ joueurBlanc(0), joueurNoir(0) {}
     Blanc* joueurBlanc;
     Noir* joueurNoir;
 

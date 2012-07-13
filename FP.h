@@ -4,6 +4,9 @@
 #include <QApplication>
 #include <QtGui>
 #include "goban.h"
+#include <stack>
+
+class infosJoueurs;
 
 class MyApplication : public QApplication
 {
@@ -30,7 +33,9 @@ class FP : public QMainWindow
 private :
     Goban* goban;
     partie* Partie;
-    QWidget* infosJoueurs;
+    QHBoxLayout* infosJoueur;
+    infosJoueurs* infosNoir;
+    infosJoueurs* infosBlanc;
     QHBoxLayout* layoutPrincipal;
     QVBoxLayout* layoutV;
     QVBoxLayout* layoutBoutons;
@@ -40,12 +45,35 @@ private :
 public :
     FP();
     ~FP();
+    QGraphicsView* getVue() const {return vue;}
+    void setVue(QGraphicsView* v) {vue = v;}
 
 public slots :
     void ouvrirFichier();
     void nextMove();
-    //void prevMove();
+    void prevMove();
     void fermerFichier();
+};
+
+class infosJoueurs : public QGridLayout
+{
+    QLabel* titre;
+    QLabel* nom;
+    QLabel* niveau;
+    QLabel* pierresCapturees;
+    Joueur* j;
+
+public :
+    infosJoueurs();
+    void setTitre(QString const& t) {titre->setText(t);}
+    void setTitre(QLabel* t) {titre=t;}
+    void setNom(QString const& n) {nom->setText(n);}
+    void setNom(QLabel* n) {nom=n;}
+    void setNiveau(QString const& n) {niveau->setText(n);}
+    void setNiveau(QLabel* n) {niveau=n;}
+    void setCapt(QString const& c) {pierresCapturees->setText(c);}
+    void setCapt(QLabel* c) {pierresCapturees=c;}
+    void setJoueur(Joueur* J);
 };
 
 #endif // FORM_H

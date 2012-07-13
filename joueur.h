@@ -6,20 +6,18 @@ class Joueur
 {
 protected :
     unsigned int territoire;
-    QWidget* infos;
-    QLabel* nom;
-    QLabel* niveau;
-    QLabel* pierresCapturees;
+    QString nom;
+    QString niveau;
+    unsigned int pierresCapturees;
 
 public :
     Joueur(QString const& Nom, QString const& rank);
-    QString getNom() const {return nom->text();}
-    QString getRank() const {return niveau->text();}
-    unsigned int getCapt() const {return pierresCapturees->text().toInt();}
+    QString getNom() const {return nom;}
+    QString getRank() const {return niveau;}
+    unsigned int getCapt() const {return pierresCapturees;}
     unsigned int getTerr() const {return territoire;}
     void addCapt(unsigned int i);
     virtual QString couleur() const=0;
-    virtual QWidget* getInfos() const;
     virtual ~Joueur();
 };
 

@@ -5,7 +5,7 @@ QPen Goban::rouge(Qt::red,1.5);
 QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
 
-Goban::Goban() : QGraphicsScene(), coupCourant(0)
+Goban::Goban() : QGraphicsScene(), coupCourant(0), courant(partie::iterateur(0))
 {
     //brush pour la couleur de fond
     QBrush brush(QColor(236,184,82));
@@ -29,10 +29,23 @@ Goban::Goban() : QGraphicsScene(), coupCourant(0)
 
 }
 
+Goban::Goban(Goban const& g) : courant(0)
+{
+    Goban::Goban();
+    /*QGraphicsItemGroup* lignes;
+    set<Groupe*> groupes;
+    map<pair<int,int>,Pierre*> plateau;
+    QGraphicsEllipseItem* coupCourant;*/
+
+    /*lignes=g.lignes;*/ groupes=g.groupes; plateau=g.plateau;
+    coupCourant = g.coupCourant; courant=g.courant;
+}
+
+
 void Goban::init()
 {
     removeItem(coupCourant);
-    coupCourant=0;
+    coupCourant=0; courant=0;
     for (map<pair<int,int>,Pierre*>::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {
         removeItem((*it).second->getEllipse());
@@ -40,7 +53,7 @@ void Goban::init()
     groupes.clear(); plateau.clear();
 }
 
-void Goban::ajouterPierre(Pierre* p)
+unsigned int Goban::ajouterPierre(Pierre* p)
 {
     if (coupCourant!=0) removeItem(coupCourant);
 
@@ -162,6 +175,7 @@ void Goban::ajouterPierre(Pierre* p)
 
 
     /*il faut vérifier si on doit supprimer des pierres*/
+    unsigned int nbcapt = 0;
     vector<Pierre*> autourAdv = pierresAutourAdversaire(p);
     if (autourAdv.size()!=0)
     {
@@ -173,6 +187,7 @@ void Goban::ajouterPierre(Pierre* p)
                 if (nbLibertes(g)==0)
                 {
                     std::cout << "Un groupe à supprimer" << std::endl;
+                    nbcapt+=g->getPierres().size();
                     supprimerGroupe(g);
                 }
             }
@@ -180,6 +195,8 @@ void Goban::ajouterPierre(Pierre* p)
     }
 
     coupCourant = this->addEllipse((abs+1)*E-(E*0.3),(ord+1)*E-(E*0.3),E*0.6,E*0.6,rouge);
+
+    return nbcapt;
 
 }
 

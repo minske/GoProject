@@ -10,7 +10,8 @@ class Goban : public QGraphicsScene
 {
 public :
     Goban();
-    void ajouterPierre(Pierre* p);
+    Goban(Goban const& g);
+    unsigned int ajouterPierre(Pierre* p);
     vector<Pierre*> pierresAutour(Pierre* p) const;
     vector<Pierre*> pierresAutourMemeCouleur(Pierre* p) const;
     vector<Pierre*> pierresAutourAdversaire(Pierre* p) const;
@@ -23,6 +24,10 @@ public :
     unsigned int nbLibertes(Groupe* g) const;
     bool estSurPlateau(Pierre* p) const;
     void init();
+    partie::iterateur getCourant() const {return courant;}
+    void avancer() {++courant;}
+    void reculer() {--courant;}
+    void setCourant(partie::iterateur it) {courant=it;}
 
 private :
     static QBrush noir;
@@ -33,6 +38,8 @@ private :
     set<Groupe*> groupes;
     map<pair<int,int>,Pierre*> plateau;
     QGraphicsEllipseItem* coupCourant;
+    partie::iterateur courant;
+
     //plateau : pierres avec pair<abs,ord> comme clé (pair<int,int>)
 };
 

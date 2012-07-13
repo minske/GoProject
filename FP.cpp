@@ -42,6 +42,7 @@ FP::FP() : QMainWindow(), Partie(0)
     QPushButton* next = new QPushButton(">");
     next->setShortcut(QKeySequence::MoveToNextChar);
     connect(next,SIGNAL(clicked()),this,SLOT(nextMove()));
+    connect(prev,SIGNAL(clicked()),this,SLOT(prevMove()));
     QHBoxLayout* layoutBoutonsNP = new QHBoxLayout;
     layoutBoutonsNP->addWidget(prev);
     layoutBoutonsNP->addWidget(next);
@@ -62,10 +63,19 @@ FP::FP() : QMainWindow(), Partie(0)
 
 
     //Définition du widget pour affichage des infos
-    infosJoueurs = new QWidget;
-    infosJoueurs->setFixedWidth(300);
+    infosJoueur = new QHBoxLayout;
+
+    //construction du widget pour les infos de noir et blanc
+    infosNoir = new infosJoueurs;
+    infosBlanc = new infosJoueurs;
+    infosNoir->setTitre("<b>Noir</b>"); infosBlanc->setTitre("<b>Blanc</b>");
+
+    infosJoueur->addLayout(infosNoir);
+    infosJoueur->addLayout(infosBlanc);
+
+
     widgetsCote = new QVBoxLayout;
-    widgetsCote->addWidget(infosJoueurs);
+    widgetsCote->addLayout(infosJoueur);
     widgetsCote->addSpacing(500);
     //infosPartie->setFont();
 
@@ -86,23 +96,46 @@ void FP::ouvrirFichier()
     QMessageBox::information(this, "Fichier", "Vous avez sélectionné :\n" + fichier);
     Partie = partie::donneInstance();
     Partie->chargerFichier(fichier.toStdString());
+    goban->setCourant(partie::iterateur(Partie->debut()));
 
-    QHBoxLayout* joueurs = new QHBoxLayout;
-    joueurs->addWidget(Partie->getNoir()->getInfos());
-    joueurs->addWidget(Partie->getBlanc()->getInfos());
-    infosJoueurs->setLayout(joueurs);
+    infosNoir->setNom("SuperCool");
+    infosNoir->setNiveau("154D");
+    infosNoir->setCapt("0");
+
+    infosBlanc->setNom("MegaFort");
+    infosBlanc->setNiveau("-1000k");
+    infosBlanc->setCapt("0");
+
 }
 
 
 void FP::nextMove()
 {
-    if(Partie->getCourant()!=Partie->fin())
+    if(goban->getCourant()!=Partie->fin())
     {
-        Pierre* p = new Pierre(Partie->getCourant().getPtr());
-        goban->ajouterPierre(p);
-        Partie->avancer();
+        Pierre* p = new Pierre(goban->getCourant().getPtr());
+        unsigned int nbCapt = goban->ajouterPierre(p);
+        if (nbCapt>0)
+        {
+            if (p->getCoup()->getJoueur()->couleur()=="Blanc")
+            {
+                ostringstream os;
+                os << Partie->getBlanc()->getCapt() + nbCapt;
+                Partie->getBlanc()->addCapt(nbCapt);
+                infosBlanc->setCapt(QString::fromStdString(os.str()));
 
-        //Partie->getBlanc()->addCapt(5);
+            }
+            else
+            {
+                ostringstream os;
+                os << Partie->getNoir()->getCapt() + nbCapt;
+                Partie->getNoir()->addCapt(nbCapt);
+                infosNoir->setCapt(QString::fromStdString(os.str()));
+
+            }
+        }
+
+        goban->avancer();
     }
 }
 
@@ -110,13 +143,46 @@ FP::~FP()
 {
     if (goban!=0) delete goban;
     if (Partie!=0) delete Partie;
-    if (infosJoueurs!=0) delete infosJoueurs;
+    if (infosJoueur!=0) delete infosJoueur;
 }
 
 void FP::fermerFichier()
 {
     delete Partie;
     Partie=0;
-    goban->init(); infosJoueurs = new QWidget;
-    infosJoueurs->setFixedWidth(300);
+    goban->init();
+    //infosJoueurs = new QWidget;
+    //infosJoueurs->setFixedWidth(300);
+}
+
+void FP::prevMove()
+{
+
+}
+
+
+infosJoueurs::infosJoueurs() : QGridLayout(), j(0)
+{
+    QLabel* rank = new QLabel("Niveau : ");
+    QLabel* name = new QLabel("Nom : ");
+    QLabel* capt = new QLabel("Capturées : ");
+    nom = new QLabel(" ");
+    niveau = new QLabel(" ");
+    pierresCapturees= new QLabel(" ");
+    titre= new QLabel(" ");
+
+    addWidget(titre,0,0,1,2, Qt::AlignCenter);
+    addWidget(name,1,0);
+    addWidget(nom,1,1);
+    addWidget(rank,2,0);
+    addWidget(niveau,2,1);
+    addWidget(capt,3,0);
+    addWidget(pierresCapturees,3,1);
+}
+
+void infosJoueurs::setJoueur(Joueur* J)
+{
+    j=J;
+    nom->setText(j->getNom());
+    niveau->setText(j->getRank());
 }

@@ -54,16 +54,16 @@ void partie::chargerFichier(string const& f)
         unsigned int i = 2;
         while (contenu[i] != ';') i++; // on avance jusqu'à ce qu'on trouve un ';'
         //i = position avant le premier coup
-        string infos = contenu.substr(2,i-2);
-        /*unsigned int j=0;
-        string jblanc, jnoir, nblanc, nnoir, komi;
+        string infos = contenu.substr(2,i-1);
+        unsigned int j=0;
+        string jblanc, jnoir, nblanc, nnoir, komi, date, resultat;
 
         while (j<infos.size()-1)
-        {*/
+        {
             /*recherche des infos suivantes : PW[NomBlanc], PB[NomNoir],
               WR[NiveauBlanc], BR[NiveauNoir], KM[Komi]
              */
-           /* string inf;
+            string inf;
 
             while (infos[j]!=']')
             {
@@ -75,21 +75,23 @@ void partie::chargerFichier(string const& f)
             else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
             else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
             else if (inf.substr(0,2)=="KM") komi=inf.substr(3);
+            else if (inf.substr(0,2)=="DT") date=inf.substr(3);
+            else if (inf.substr(0,2)=="DT") resultat=inf.substr(3);
 
             j++;
-        }*/
+        }
 
         //Initialisation des joueurs
-        //joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
-        //joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+        joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
+        joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
 
         /***  init en attendant que les infos de la partie fonctionnent  ***/
-        joueurNoir = Noir::donneInstance("Noir","NiveauNoir");
-        joueurBlanc = Blanc::donneInstance("Blanc","NiveauBlanc");
+        //joueurNoir = Noir::donneInstance("Noir","NiveauNoir");
+        //joueurBlanc = Blanc::donneInstance("Blanc","NiveauBlanc");
 
         i++;
         //while(contenu[i]!='\0')
-        while(i<contenu.size())
+        while((i<contenu.size()) && ( contenu[i]!=')'))
         {
             /* On va lire la liste des coups un par un
             On lit jusqu'à ce qu'on trouve un ; */
@@ -111,6 +113,7 @@ void partie::chargerFichier(string const& f)
             listeCoups.back().setNum(numero);
             numero++;
             cout << listeCoups.back().print() << endl;
+            if (contenu[i]==')') break;
             i++;
         }
 

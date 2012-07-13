@@ -98,12 +98,12 @@ void FP::ouvrirFichier()
     Partie->chargerFichier(fichier.toStdString());
     goban->setCourant(partie::iterateur(Partie->debut()));
 
-    infosNoir->setNom("SuperCool");
-    infosNoir->setNiveau("154D");
+    infosNoir->setNom(Partie->getNoir()->getNom());
+    infosNoir->setNiveau(Partie->getNoir()->getRank());
     infosNoir->setCapt("0");
 
-    infosBlanc->setNom("MegaFort");
-    infosBlanc->setNiveau("-1000k");
+    infosBlanc->setNom(Partie->getBlanc()->getNom());
+    infosBlanc->setNiveau(Partie->getBlanc()->getRank());
     infosBlanc->setCapt("0");
 
 }
@@ -151,6 +151,8 @@ void FP::fermerFichier()
     delete Partie;
     Partie=0;
     goban->init();
+    infosNoir->setNom(" "); infosNoir->setNiveau(" ");
+    infosBlanc->setNom(" "); infosBlanc->setNiveau(" ");
     //infosJoueurs = new QWidget;
     //infosJoueurs->setFixedWidth(300);
 }

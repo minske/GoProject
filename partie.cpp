@@ -20,6 +20,7 @@ coup::coup(std::string const& s)
     */
     if (s.size() < 5) throw coup_exception("Fichier invalide !\n");
     //les abscisses et ordonnées vont de 0 à 18 en commençant en haut à gauche
+    if (s[2]=='k') commentaires="HA HA HA HA HA";
     abscisse = s[2]-'a';
     ordonnee = s[3]-'a';
     j = 0;

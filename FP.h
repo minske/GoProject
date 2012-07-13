@@ -41,6 +41,7 @@ private :
     QVBoxLayout* layoutBoutons;
     QGraphicsView* vue;
     QVBoxLayout* widgetsCote;
+    QTextEdit* commentaires;
 
 public :
     FP();

@@ -73,10 +73,15 @@ FP::FP() : QMainWindow(), Partie(0)
     infosJoueur->addLayout(infosNoir);
     infosJoueur->addLayout(infosBlanc);
 
+    //widget pour l'affichage des commentaires
+    commentaires = new QTextEdit;
+    commentaires->setFixedHeight(350); commentaires->setFixedWidth(300);
+    commentaires->setFrameStyle(2);
 
     widgetsCote = new QVBoxLayout;
     widgetsCote->addLayout(infosJoueur);
-    widgetsCote->addSpacing(500);
+    widgetsCote->addWidget(commentaires);
+    widgetsCote->addSpacing(200);
     //infosPartie->setFont();
 
     layoutPrincipal->addLayout(layoutV);
@@ -106,6 +111,8 @@ void FP::ouvrirFichier()
     infosBlanc->setNiveau(Partie->getBlanc()->getRank());
     infosBlanc->setCapt("0");
 
+    commentaires->setText("Fichier : "+fichier+". Début de la partie.");
+
 }
 
 
@@ -134,9 +141,14 @@ void FP::nextMove()
 
             }
         }
+        ostringstream os;
+        os << goban->getCourant().getPtr()->getNum();
+        commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "
+                              +goban->getCourant().getPtr()->getComm());
 
         goban->avancer();
     }
+    else commentaires->setText("Fin de la partie.");
 }
 
 FP::~FP()
@@ -144,6 +156,7 @@ FP::~FP()
     if (goban!=0) delete goban;
     if (Partie!=0) delete Partie;
     if (infosJoueur!=0) delete infosJoueur;
+    if (commentaires!=0) delete commentaires;
 }
 
 void FP::fermerFichier()
@@ -153,6 +166,7 @@ void FP::fermerFichier()
     goban->init();
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
     infosBlanc->setNom(" "); infosBlanc->setNiveau(" ");
+    commentaires->setText(" ");
     //infosJoueurs = new QWidget;
     //infosJoueurs->setFixedWidth(300);
 }

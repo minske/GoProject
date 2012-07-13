@@ -14,9 +14,10 @@ class coup
     int ordonnee;
     Joueur* j;
     int numero;
+    QString commentaires;
 
 public :
-    coup() : abscisse(0), ordonnee(0), j(0), numero(0) {}
+    coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
     coup(std::string const& s);
     std::string print() const;
     int getAbs() const {return abscisse;}
@@ -25,6 +26,7 @@ public :
     void setJoueur(Joueur* J) {j = J;}
     void setNum(int n) {numero = n;}
     int getNum() const {return numero;}
+    QString getComm() const {return commentaires;}
     ~coup();
 };
 

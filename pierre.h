@@ -18,10 +18,7 @@ public :
 private :
     QRect rect;
     const coup* corres;
-    QGraphicsPixmapItem* ellipse;/*
-    static QPixmap pierreNoire;
-    static QPixmap pierreBlanche;
-    static QPixmap pierreRose;*/
+    QGraphicsPixmapItem* ellipse;
 };
 
 #endif // PIERRE_H

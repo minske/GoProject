@@ -25,8 +25,15 @@ FP::FP() : QMainWindow(), Partie(0)
     //Layout vertical pour le goban de la fenêtre :
     layoutV = new QVBoxLayout;
 
+
+    /*************** BARRE D'OUTILS ******************/
+    QToolBar* barreOutils = new QToolBar("nom");
+    addToolBar(barreOutils);
+    barreOutils->addAction(ouvrirFichier);
+    barreOutils->addAction(fermerFichier);
+    barreOutils->addAction(actionQuitter);
     //boutons ouvrir,fermer,quitter
-    QPushButton* ouvrir = new QPushButton("Ouvrir");
+    /*QPushButton* ouvrir = new QPushButton("Ouvrir");
     QPushButton* fermer = new QPushButton("Fermer");
     QPushButton* quitter = new QPushButton("Quitter");
     connect(ouvrir,SIGNAL(clicked()),this,SLOT(ouvrirFichier()));
@@ -35,25 +42,37 @@ FP::FP() : QMainWindow(), Partie(0)
     QHBoxLayout* layoutBoutonsOFQ = new QHBoxLayout;
     layoutBoutonsOFQ->addWidget(ouvrir);
     layoutBoutonsOFQ->addWidget(fermer);
-    layoutBoutonsOFQ->addWidget(quitter);
+    layoutBoutonsOFQ->addWidget(quitter);*/
 
     //boutons avancer et reculer
     QPushButton* prev = new QPushButton("<");
     QPushButton* next = new QPushButton(">");
+    QPushButton* next5 = new QPushButton(">>");
+    QPushButton* prev5 = new QPushButton("<<");
+    QPushButton* debutPartie = new QPushButton("Début");
+    QPushButton* finPartie = new QPushButton("Fin");
     next->setShortcut(QKeySequence::MoveToNextChar);
     connect(next,SIGNAL(clicked()),this,SLOT(nextMove()));
     connect(prev,SIGNAL(clicked()),this,SLOT(prevMove()));
+    connect(next5,SIGNAL(clicked()),this,SLOT(next5Moves()));
+    connect(prev5,SIGNAL(clicked()),this,SLOT(prev5Moves()));
+    connect(debutPartie,SIGNAL(clicked()),this,SLOT(debutPartie()));
+    connect(finPartie,SIGNAL(clicked()),this,SLOT(finPartie()));
     QHBoxLayout* layoutBoutonsNP = new QHBoxLayout;
+    layoutBoutonsNP->addWidget(debutPartie);
+    layoutBoutonsNP->addWidget(prev5);
     layoutBoutonsNP->addWidget(prev);
     layoutBoutonsNP->addWidget(next);
+    layoutBoutonsNP->addWidget(next5);
+    layoutBoutonsNP->addWidget(finPartie);
 
-    layoutBoutons = new QVBoxLayout;
+    /*layoutBoutons = new QVBoxLayout;
     layoutBoutons->addLayout(layoutBoutonsOFQ);
-    layoutBoutons->addLayout(layoutBoutonsNP);
+    layoutBoutons->addLayout(layoutBoutonsNP);*/
 
 
     //on ajoute les boutons au layout goban
-    layoutV->addLayout(layoutBoutons);
+    //layoutV->addLayout(layoutBoutonsNP);
 
     //définition du goban
     goban = new Goban();
@@ -80,6 +99,7 @@ FP::FP() : QMainWindow(), Partie(0)
 
     widgetsCote = new QVBoxLayout;
     widgetsCote->addLayout(infosJoueur);
+    widgetsCote->addLayout(layoutBoutonsNP);
     widgetsCote->addWidget(commentaires);
     widgetsCote->addSpacing(200);
     //infosPartie->setFont();
@@ -118,37 +138,40 @@ void FP::ouvrirFichier()
 
 void FP::nextMove()
 {
-    if(goban->getCourant()!=Partie->fin())
+    if (Partie!=0)
     {
-        Pierre* p = new Pierre(goban->getCourant().getPtr());
-        unsigned int nbCapt = goban->ajouterPierre(p);
-        if (nbCapt>0)
+        if(goban->getCourant()!=Partie->fin())
         {
-            if (p->getCoup()->getJoueur()->couleur()=="Blanc")
+            Pierre* p = new Pierre(goban->getCourant().getPtr());
+            unsigned int nbCapt = goban->ajouterPierre(p);
+            if (nbCapt>0)
             {
-                ostringstream os;
-                os << Partie->getBlanc()->getCapt() + nbCapt;
-                Partie->getBlanc()->addCapt(nbCapt);
-                infosBlanc->setCapt(QString::fromStdString(os.str()));
+                if (p->getCoup()->getJoueur()->couleur()=="Blanc")
+                {
+                    ostringstream os;
+                    os << Partie->getBlanc()->getCapt() + nbCapt;
+                    Partie->getBlanc()->addCapt(nbCapt);
+                    infosBlanc->setCapt(QString::fromStdString(os.str()));
 
-            }
-            else
-            {
-                ostringstream os;
-                os << Partie->getNoir()->getCapt() + nbCapt;
-                Partie->getNoir()->addCapt(nbCapt);
-                infosNoir->setCapt(QString::fromStdString(os.str()));
+                }
+                else
+                {
+                    ostringstream os;
+                    os << Partie->getNoir()->getCapt() + nbCapt;
+                    Partie->getNoir()->addCapt(nbCapt);
+                    infosNoir->setCapt(QString::fromStdString(os.str()));
 
+                }
             }
+            ostringstream os;
+            os << goban->getCourant().getPtr()->getNum();
+            commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "
+                                  +goban->getCourant().getPtr()->getComm());
+
+            goban->avancer();
         }
-        ostringstream os;
-        os << goban->getCourant().getPtr()->getNum();
-        commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "
-                              +goban->getCourant().getPtr()->getComm());
-
-        goban->avancer();
+        else commentaires->setText("Fin de la partie. Résultat : " + Partie->getResultat());
     }
-    else commentaires->setText("Fin de la partie. Résultat : " + Partie->getResultat());
 }
 
 FP::~FP()
@@ -201,4 +224,37 @@ void infosJoueurs::setJoueur(Joueur* J)
     j=J;
     nom->setText(j->getNom());
     niveau->setText(j->getRank());
+}
+
+
+void FP::prev5Moves()
+{
+
+}
+
+void FP::debutPartie()
+{
+    goban->init();
+    Partie->getBlanc()->setCapt(0); Partie->getNoir()->setCapt(0);
+    goban->setCourant(Partie->debut());
+    commentaires->setText("Début de la partie.\n Partie jouée le "+Partie->getDate());
+
+}
+
+void FP::next5Moves()
+{
+    if (Partie!=0)
+    {
+        for (unsigned int i = 0; i<5; i++)
+            FP::nextMove();
+    }
+}
+
+void FP::finPartie()
+{
+    if (Partie!=0)
+    {
+        while (goban->getCourant()!=Partie->fin())
+            FP::nextMove();
+    }
 }

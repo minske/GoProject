@@ -19,6 +19,7 @@ public :
     void addCapt(unsigned int i);
     virtual QString couleur() const=0;
     virtual ~Joueur();
+    void setCapt(unsigned int i) {pierresCapturees=i;}
 };
 
 class Noir : public Joueur

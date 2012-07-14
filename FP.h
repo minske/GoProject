@@ -53,6 +53,10 @@ public slots :
     void ouvrirFichier();
     void nextMove();
     void prevMove();
+    void next5Moves();
+    void prev5Moves();
+    void debutPartie();
+    void finPartie();
     void fermerFichier();
 };
 

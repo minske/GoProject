@@ -77,7 +77,7 @@ void partie::chargerFichier(string const& f)
             else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
             else if (inf.substr(0,2)=="KM") komi=inf.substr(3);
             else if (inf.substr(0,2)=="DT") date=inf.substr(3);
-            else if (inf.substr(0,2)=="DT") resultat=inf.substr(3);
+            else if (inf.substr(0,2)=="RE") resultat=inf.substr(3);
 
             j++;
         }
@@ -118,7 +118,7 @@ void partie::chargerFichier(string const& f)
             i++;
         }
 
-        //courant = debut();
+        courant = debut();
     }
     else cout << "Ce fichier n'existe pas.\n";
 }

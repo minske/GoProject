@@ -97,10 +97,28 @@ void partie::chargerFichier(string const& f)
             /* On va lire la liste des coups un par un
             On lit jusqu'à ce qu'on trouve un ; */
             string coup;
-            while ((contenu[i]!=';') && (contenu[i]!=')'))
+            int k=0;
+            while ((contenu[i]!=';') && (contenu[i]!=')') && (k!=2)) // on arrete si on trouve le bon nombre de crochet fermé
             {
                 coup+=contenu[i];
+                if ((contenu[i]==']') && (contenu[i+1]!='O')) k++; /* si on trouve un crochet fermé non suivit d'un O
+                                                                     (il resterait alors le nombre de byo restant à lire)
+                                                                     on augmente k */
                 i++;
+            }
+            if (contenu[i]=='C') // si il y a un C, il y aura un commentaire
+            {
+                string comCom("z");
+                int l=1; // permet de savoir où on en est des crochets
+               i++; i++;
+               while (l!=0)
+               {
+                   if (contenu[i]== '[') l++;
+                   if (contenu[i]== ']') l--;
+                   comCom.push_back(contenu[i]);
+                   i++;
+               }
+
             }
             /* Si longueur(coup) = 0 -> erreur ... */
             if (coup.size()==0) throw coup_exception("Problème de lecture du coup\n");
@@ -115,6 +133,7 @@ void partie::chargerFichier(string const& f)
             numero++;
             cout << listeCoups.back().print() << endl;
             if (contenu[i]==')') break;
+            if (contenu[i]!=';') i++;
             i++;
         }
 

@@ -8,7 +8,8 @@ QBrush Goban::blanc(Qt::white);
 Goban::Goban() : QGraphicsScene(), coupCourant(0), courant(partie::iterateur(0))
 {
     //brush pour la couleur de fond
-    QBrush brush(QColor(236,184,82));
+    //QBrush brush(QColor(236,184,82));
+    QBrush brush(QPixmap("fondBois.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     lignes = createItemGroup(QList<QGraphicsItem*>());
 
     for (unsigned int i = 0; i<19 ; i++)

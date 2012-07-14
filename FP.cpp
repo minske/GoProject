@@ -32,17 +32,6 @@ FP::FP() : QMainWindow(), Partie(0)
     barreOutils->addAction(ouvrirFichier);
     barreOutils->addAction(fermerFichier);
     barreOutils->addAction(actionQuitter);
-    //boutons ouvrir,fermer,quitter
-    /*QPushButton* ouvrir = new QPushButton("Ouvrir");
-    QPushButton* fermer = new QPushButton("Fermer");
-    QPushButton* quitter = new QPushButton("Quitter");
-    connect(ouvrir,SIGNAL(clicked()),this,SLOT(ouvrirFichier()));
-    connect(fermer,SIGNAL(clicked()),this,SLOT(fermerFichier()));
-    connect(quitter,SIGNAL(clicked()),qApp,SLOT(quit()));
-    QHBoxLayout* layoutBoutonsOFQ = new QHBoxLayout;
-    layoutBoutonsOFQ->addWidget(ouvrir);
-    layoutBoutonsOFQ->addWidget(fermer);
-    layoutBoutonsOFQ->addWidget(quitter);*/
 
     //boutons avancer et reculer
     QPushButton* prev = new QPushButton("<");

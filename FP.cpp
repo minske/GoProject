@@ -111,7 +111,7 @@ void FP::ouvrirFichier()
     infosBlanc->setNiveau(Partie->getBlanc()->getRank());
     infosBlanc->setCapt("0");
 
-    commentaires->setText("Fichier : "+fichier+". Début de la partie.");
+    commentaires->setText("Fichier : "+fichier+". Début de la partie.\n Partie jouée le "+Partie->getDate());
 
 }
 
@@ -148,7 +148,7 @@ void FP::nextMove()
 
         goban->avancer();
     }
-    else commentaires->setText("Fin de la partie.");
+    else commentaires->setText("Fin de la partie. Résultat : " + Partie->getResultat());
 }
 
 FP::~FP()

@@ -16,6 +16,7 @@ class coup
     int numero;
     QString commentaires;
 
+
 public :
     coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
     coup(std::string const& s);
@@ -27,6 +28,7 @@ public :
     void setNum(int n) {numero = n;}
     int getNum() const {return numero;}
     QString getComm() const {return commentaires;}
+
     ~coup();
 };
 
@@ -65,14 +67,18 @@ public :
     std::string infos() const;
     ~partie();
     static void libereInstance();
+    QString getDate() const {return date;}
+    QString getResultat() const {return resultat;}
 
 private :
     vector<coup> listeCoups;
     static partie* instanceUnique;
 //    partie::iterateur courant;
-    partie() : /*courant(0),*/ joueurBlanc(0), joueurNoir(0) {}
+    partie() : /*courant(0),*/ joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString())  {}
     Blanc* joueurBlanc;
     Noir* joueurNoir;
+    QString date;
+    QString resultat;
 
 };
 

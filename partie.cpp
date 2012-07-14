@@ -57,7 +57,7 @@ void partie::chargerFichier(string const& f)
         //i = position avant le premier coup
         string infos = contenu.substr(2,i-1);
         unsigned int j=0;
-        string jblanc, jnoir, nblanc, nnoir, komi, date, resultat;
+        string jblanc, jnoir, nblanc, nnoir, komi, Date, Resultat;
 
         while (j<infos.size()-1)
         {
@@ -76,8 +76,8 @@ void partie::chargerFichier(string const& f)
             else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
             else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
             else if (inf.substr(0,2)=="KM") komi=inf.substr(3);
-            else if (inf.substr(0,2)=="DT") date=inf.substr(3);
-            else if (inf.substr(0,2)=="DT") resultat=inf.substr(3);
+            else if (inf.substr(0,2)=="DT") date=QString::fromStdString(inf.substr(3));
+            else if (inf.substr(0,2)=="RE") resultat=QString::fromStdString(inf.substr(3));
 
             j++;
         }

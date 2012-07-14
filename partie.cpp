@@ -118,7 +118,7 @@ void partie::chargerFichier(string const& f)
             i++;
         }
 
-        courant = debut();
+        //courant = debut();
     }
     else cout << "Ce fichier n'existe pas.\n";
 }

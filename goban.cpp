@@ -240,7 +240,9 @@ Groupe* Goban::trouverGroupe(Pierre* p) const
     {
         if ((*it)->faitPartie(p)) return *it;
     }
-    throw coup_exception("Cette pierre ne fait partie d'aucun groupe");
+    ostringstream os;
+    os << "La pierre " << p->getCoup()->getAbs() << " - " << p->getCoup()->getAbs() << "ne fait partie d'aucun groupe";
+    throw coup_exception(os.str());
 }
 
 vector<Pierre*> Goban::pierresAutourMemeCouleur(Pierre* p) const

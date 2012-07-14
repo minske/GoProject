@@ -1,0 +1,5 @@
+Le sgf hide-findol pose problème : il ne lit pas tous les coups et 
+s'arrête avant la fin.
+
+Pour Idn-Kiral, il dit au coup 95 que la pierre en 8-8 n'appartient à aucun
+groupe ...

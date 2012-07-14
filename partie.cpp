@@ -75,9 +75,9 @@ void partie::chargerFichier(string const& f)
             else if (inf.substr(0,2)=="PB") jnoir=inf.substr(3);
             else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
             else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
-            else if (inf.substr(0,2)=="KM") komi=inf.substr(3);
             else if (inf.substr(0,2)=="DT") date=QString::fromStdString(inf.substr(3));
             else if (inf.substr(0,2)=="RE") resultat=QString::fromStdString(inf.substr(3));
+
 
             j++;
         }
@@ -118,7 +118,7 @@ void partie::chargerFichier(string const& f)
             i++;
         }
 
-        //courant = debut();
+        courant = debut();
     }
     else cout << "Ce fichier n'existe pas.\n";
 }

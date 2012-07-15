@@ -6,7 +6,7 @@ QPixmap Pierre::pierreBlanche(QPixmap("pierreBlanche.png").scaled(E*0.9,E*0.9,Qt
 QPixmap Pierre::pierreNoire(QPixmap("pierreNoir.png").scaled(E*0.9,E*0.9,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 QPixmap Pierre::pierreRose(QPixmap("pierreRose.png").scaled(E*0.9,E*0.9,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 */
-Pierre::Pierre(const coup* c)
+Pierre::Pierre(const Coup* c)
 {
     if (c->getJoueur()->getNom()=="Kiral")
         ellipse = new QGraphicsPixmapItem(QPixmap("pierreRose.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));

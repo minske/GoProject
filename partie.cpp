@@ -9,7 +9,7 @@ coup_exception::coup_exception(const std::string& i) throw():info(i){}
 const char* coup_exception::what() const throw() { return info.c_str(); }
 
 
-coup::coup(std::string const& s)
+Coup::Coup(std::string const& s, std::string const& com)
 {
     numero = 0;
     // un coup donné dans le fichier est normalement de la forme B[mc]BL[151.84]OB[11]C[commentaires ...]
@@ -20,20 +20,20 @@ coup::coup(std::string const& s)
     */
     if (s.size() < 5) throw coup_exception("Fichier invalide !\n");
     //les abscisses et ordonnées vont de 0 à 18 en commençant en haut à gauche
-    if (s[2]=='k') commentaires="HA HA HA HA HA";
+    commentaires=QString::fromStdString(com);
     abscisse = s[2]-'a';
     ordonnee = s[3]-'a';
     j = 0;
 }
 
-string coup::print() const
+string Coup::print() const
 {
     stringstream r;
     r << "Coup n°" << numero <<j->couleur().toStdString() << " : " << abscisse+1 << "-" << ordonnee+1;
     return r.str();
 }
 
-coup::~coup(){}
+Coup::~Coup(){}
 
 void partie::chargerFichier(string const& f)
 {
@@ -97,17 +97,36 @@ void partie::chargerFichier(string const& f)
             /* On va lire la liste des coups un par un
             On lit jusqu'à ce qu'on trouve un ; */
             string coup;
-            while ((contenu[i]!=';') && (contenu[i]!=')'))
+            int k=0;
+            string comCom("z");
+            while ((contenu[i]!=';') && (contenu[i]!=')') && (k!=2)) // on arrete si on trouve le bon nombre de crochet fermé
             {
                 coup+=contenu[i];
+                if ((contenu[i]==']') && (contenu[i+1]!='O')) k++; /* si on trouve un crochet fermé non suivit d'un O
+                                                                     (il resterait alors le nombre de byo restant à lire)
+                                                                     on augmente k */
                 i++;
+            }
+            if (contenu[i]=='C') // si il y a un C, il y aura un commentaire
+            {
+                int l=1; // permet de savoir où on en est des crochets
+               i++; i++;
+               while (l!=0)
+               {
+                   if (contenu[i]== '[') l++;
+                   if (contenu[i]== ']') l--;
+                   comCom.push_back(contenu[i]);
+                   i++;
+               }
+               comCom.erase(comCom.size()-1,1);
             }
             /* Si longueur(coup) = 0 -> erreur ... */
             if (coup.size()==0) throw coup_exception("Problème de lecture du coup\n");
             if (coup[2]==']') break;
             /* Sinon, on crée un objet de type coup et on l'ajoute à la liste des coups */
             //cout << coup << endl;
-            listeCoups.push_back(coup);
+            comCom.erase(0,1);
+            listeCoups.push_back(Coup(coup, comCom));
             if (coup[0]=='B')
                 listeCoups.back().setJoueur(joueurNoir);
             else listeCoups.back().setJoueur(joueurBlanc);
@@ -115,6 +134,7 @@ void partie::chargerFichier(string const& f)
             numero++;
             cout << listeCoups.back().print() << endl;
             if (contenu[i]==')') break;
+            if (contenu[i]!=';') i++;
             i++;
         }
 
@@ -133,7 +153,7 @@ partie* partie::donneInstance()
 }
 
 
-ostream& operator<<(ostream& f, coup const& c)
+ostream& operator<<(ostream& f, Coup const& c)
 {
     f << c.print();
     return f;

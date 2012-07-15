@@ -8,8 +8,8 @@
 class Pierre
 {
 public :
-    Pierre(const coup* c);
-    const coup* getCoup() const {return corres;}
+    Pierre(const Coup* c);
+    const Coup* getCoup() const {return corres;}
     const QRect& getRect() const {return rect;}
     void setEllipse(QGraphicsPixmapItem* el);
     QGraphicsPixmapItem* getEllipse() const {return ellipse;}
@@ -17,7 +17,7 @@ public :
 
 private :
     QRect rect;
-    const coup* corres;
+    const Coup* corres;
     QGraphicsPixmapItem* ellipse;
 };
 

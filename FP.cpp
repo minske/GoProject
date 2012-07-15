@@ -1,8 +1,11 @@
 #include "FP.h"
 #include "partie.h"
+#include "actionNext.h"
 
-FP::FP() : QMainWindow(), Partie(0)
+FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
 {
+    pileUndo = new QUndoStack(this);
+    viewUndo = new QUndoView(pileUndo);
     //menu
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QMenu *menuOptions = menuBar()->addMenu("&Options");
@@ -52,6 +55,7 @@ FP::FP() : QMainWindow(), Partie(0)
     QPushButton* debutPartie = new QPushButton("Début");
     QPushButton* finPartie = new QPushButton("Fin");
     next->setShortcut(QKeySequence::MoveToNextChar);
+    prev->setShortcut(QKeySequence::MoveToPreviousChar);
     connect(next,SIGNAL(clicked()),this,SLOT(nextMove()));
     connect(prev,SIGNAL(clicked()),this,SLOT(prevMove()));
     connect(next5,SIGNAL(clicked()),this,SLOT(next5Moves()));
@@ -101,7 +105,9 @@ FP::FP() : QMainWindow(), Partie(0)
     widgetsCote->addLayout(infosJoueur);
     widgetsCote->addLayout(layoutBoutonsNP);
     widgetsCote->addWidget(commentaires);
-    widgetsCote->addSpacing(200);
+    widgetsCote->addWidget(viewUndo);
+    viewUndo->setFixedWidth(300);
+    //widgetsCote->addSpacing(200);
     //infosPartie->setFont();
 
     layoutPrincipal->addLayout(layoutV);
@@ -165,6 +171,9 @@ void FP::nextMove()
 
                 }
             }
+            std::cout << "Ajout dans la pile undoStack" << std::endl;
+            pileUndo->push(new actionNext(goban->getGroupes(),goban->getPlateau(),goban,p));
+
             ostringstream os;
             os << goban->getCourant().getPtr()->getNum();
             commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "
@@ -198,7 +207,10 @@ void FP::fermerFichier()
 
 void FP::prevMove()
 {
-
+    if (pileUndo->canUndo())
+    {
+        pileUndo->undo();
+    }
 }
 
 

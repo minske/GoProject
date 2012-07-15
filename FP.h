@@ -42,6 +42,8 @@ private :
     QGraphicsView* vue;
     QVBoxLayout* widgetsCote;
     QTextEdit* commentaires;
+    QUndoStack* pileUndo;
+    QUndoView* viewUndo;
 
 public :
     FP();

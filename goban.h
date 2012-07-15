@@ -32,6 +32,8 @@ public :
     QBrush getBrushMoyen() const {return fondMoyen;}
     QBrush getBrushClair() const {return fondClair;}
     QBrush getBrushSansMotif() const {return sansMotif;}
+    void setPlateau(map<pair<int,int>,Pierre*> pl) {plateau=pl;}
+    void setGroupes(set<Groupe*> gr) {groupes=gr;}
 
 private :
     static QBrush noir;

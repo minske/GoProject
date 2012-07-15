@@ -8,7 +8,7 @@
 
 using namespace std;
 
-class coup
+class Coup
 {
     int abscisse;
     int ordonnee;
@@ -18,8 +18,8 @@ class coup
 
 
 public :
-    coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
-    coup(std::string const& s);
+    Coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
+    Coup(std::string const& s, std::string const& com=std::string());
     std::string print() const;
     int getAbs() const {return abscisse;}
     int getOrd() const {return ordonnee;}
@@ -29,7 +29,7 @@ public :
     int getNum() const {return numero;}
     QString getComm() const {return commentaires;}
 
-    ~coup();
+    ~Coup();
 };
 
 
@@ -40,21 +40,21 @@ public :
     void chargerFichier(std::string const& nomFichier);
     //void avancer() {++courant;}
     //void reculer() {--courant;}
-    vector<coup> getListeCoups() const {return listeCoups;}
+    vector<Coup> getListeCoups() const {return listeCoups;}
 
     class iterateur
     {
-        const coup* ptr;
+        const Coup* ptr;
 
         public :
-            iterateur(coup* c) : ptr(c) {}
-            iterateur(coup const& c) : ptr(&c) {}
-            const coup* getPtr() const {return ptr;}
+            iterateur(Coup* c) : ptr(c) {}
+            iterateur(Coup const& c) : ptr(&c) {}
+            const Coup* getPtr() const {return ptr;}
             void operator++() {++ptr;}
             void operator--() {--ptr;}
             bool operator!=(iterateur const& i) const {return i.ptr!=ptr;}
             bool operator==(iterateur const& i) const {return i.ptr==ptr;}
-            const coup& operator*() const {return *ptr;}
+            const Coup& operator*() const {return *ptr;}
     };
 
     iterateur dernierCoup() const {return iterateur(listeCoups.back());}
@@ -71,7 +71,7 @@ public :
     QString getResultat() const {return resultat;}
 
 private :
-    vector<coup> listeCoups;
+    vector<Coup> listeCoups;
     static partie* instanceUnique;
 //    partie::iterateur courant;
     partie() : /*courant(0),*/ joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString())  {}
@@ -82,7 +82,7 @@ private :
 
 };
 
-ostream& operator<<(ostream& f, coup const& c);
+ostream& operator<<(ostream& f, Coup const& c);
 
 class coup_exception : public exception {
 	std::string info;

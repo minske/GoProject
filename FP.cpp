@@ -146,6 +146,13 @@ void FP::ouvrirFichier()
 
 void FP::nextMove()
 {
+    bool suppr = false;
+    set<Groupe*> OldGroupes = goban->getGroupes();
+    map<pair<int,int>,Pierre*> OldPlateau = goban->getPlateau();
+    unsigned int OldCaptNoir = Partie->getNoir()->getCapt();
+    unsigned int OldCaptBlanc = Partie->getBlanc()->getCapt();
+    vector<Groupe*> GrpSuppr;
+
     if (Partie!=0)
     {
         if(goban->getCourant()!=Partie->fin())
@@ -154,6 +161,7 @@ void FP::nextMove()
             unsigned int nbCapt = goban->ajouterPierre(p);
             if (nbCapt>0)
             {
+                suppr=true;
                 if (p->getCoup()->getJoueur()->couleur()=="Blanc")
                 {
                     ostringstream os;
@@ -172,12 +180,11 @@ void FP::nextMove()
                 }
             }
             std::cout << "Ajout dans la pile undoStack" << std::endl;
-            pileUndo->push(new actionNext(goban->getGroupes(),goban->getPlateau(),goban,p));
+            pileUndo->push(new actionNext(OldGroupes, goban->getGroupes(),OldPlateau, goban->getPlateau(),goban,p,Partie,suppr,GrpSuppr,OldCaptNoir,Partie->getNoir()->getCapt(),OldCaptBlanc,Partie->getBlanc()->getCapt()));
 
             ostringstream os;
             os << goban->getCourant().getPtr()->getNum();
-            commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "
-                                  +goban->getCourant().getPtr()->getComm());
+            commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+goban->getCourant().getPtr()->getComm());
 
             goban->avancer();
         }

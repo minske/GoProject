@@ -143,8 +143,7 @@ void FP::ouvrirFichier()
 
 }
 
-
-void FP::nextMove()
+QUndoCommand* FP::nextaction()
 {
     bool suppr = false;
     set<Groupe*> OldGroupes = goban->getGroupes();
@@ -161,7 +160,7 @@ void FP::nextMove()
             unsigned int nbCapt = goban->ajouterPierre(p);
             if (nbCapt>0)
             {
-                suppr=true;
+                suppr=true; std::cout << nbCapt << " pierre(s) à supprimer." << std::endl;
                 if (p->getCoup()->getJoueur()->couleur()=="Blanc")
                 {
                     ostringstream os;
@@ -179,17 +178,29 @@ void FP::nextMove()
 
                 }
             }
-            std::cout << "Ajout dans la pile undoStack" << std::endl;
-            pileUndo->push(new actionNext(OldGroupes, goban->getGroupes(),OldPlateau, goban->getPlateau(),goban,p,Partie,suppr,GrpSuppr,OldCaptNoir,Partie->getNoir()->getCapt(),OldCaptBlanc,Partie->getBlanc()->getCapt()));
 
             ostringstream os;
             os << goban->getCourant().getPtr()->getNum();
             commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+goban->getCourant().getPtr()->getComm());
 
             goban->avancer();
+            return new actionNext(OldGroupes, goban->getGroupes(),OldPlateau, goban->getPlateau(),goban,p,Partie,suppr,GrpSuppr,OldCaptNoir,Partie->getNoir()->getCapt(),OldCaptBlanc,Partie->getBlanc()->getCapt());
+
         }
         else commentaires->setText("Fin de la partie. Résultat : " + Partie->getResultat());
+        return 0;
     }
+
+}
+
+void FP::nextMove()
+{
+    if (Partie!=0)
+    {
+        std::cout << "Ajout dans la pile undoStack" << std::endl;
+        pileUndo->push(nextaction());
+    }
+
 }
 
 FP::~FP()
@@ -203,6 +214,7 @@ FP::~FP()
 void FP::fermerFichier()
 {
     delete Partie;
+    pileUndo->clear();
     Partie=0;
     goban->init();
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
@@ -255,6 +267,7 @@ void FP::prev5Moves()
 
 void FP::debutPartie()
 {
+    pileUndo->clear();
     goban->init();
     Partie->getBlanc()->setCapt(0); Partie->getNoir()->setCapt(0);
     goban->setCourant(Partie->debut());

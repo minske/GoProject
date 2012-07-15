@@ -35,6 +35,7 @@ private :
     unsigned int NnbPierresCaptBlanc;
 
 
+
 };
 
 #endif // ACTIONNEXT_H

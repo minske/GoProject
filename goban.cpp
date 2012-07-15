@@ -166,20 +166,7 @@ unsigned int Goban::ajouterPierre(Pierre* p)
 
 
     /****************************************** Affichage ******************************************/
-    if (p->getCoup()->getJoueur()->couleur()=="Noir")
-    {
-        //si le coup est joué par noir, on ajoute une pierre noire sur le goban :
-
-        addItem(p->getEllipse());
-        //et on met à jour la matrice plateau :
-       // plateau[abs][ord] = -1;
-    }
-    else
-    {
-        addItem(p->getEllipse());
-        //p->setEllipse(addPixmap(QPixmap("circle_rose.png")));
-        //plateau[abs][ord] = 1;
-    }
+    addItem(p->getEllipse());
 
 
     /*il faut vérifier si on doit supprimer des pierres*/

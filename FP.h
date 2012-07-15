@@ -5,6 +5,7 @@
 #include <QtGui>
 #include "goban.h"
 #include <stack>
+#include "actionNext.h"
 
 class infosJoueurs;
 
@@ -48,6 +49,7 @@ private :
 public :
     FP();
     ~FP();
+    QUndoCommand* nextaction();
     QGraphicsView* getVue() const {return vue;}
     void setVue(QGraphicsView* v) {vue = v;}
 

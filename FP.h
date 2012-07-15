@@ -58,6 +58,10 @@ public slots :
     void debutPartie();
     void finPartie();
     void fermerFichier();
+    void changerFondFonce();
+    void changerFondClair();
+    void changerFondMoyen();
+    void changerFondSansMotif();
 };
 
 class infosJoueurs : public QGridLayout

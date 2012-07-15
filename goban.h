@@ -28,6 +28,10 @@ public :
     void avancer() {++courant;}
     void reculer() {--courant;}
     void setCourant(partie::iterateur it) {courant=it;}
+    QBrush getBrushFonce() const {return Goban::fondFonce;}
+    QBrush getBrushMoyen() const {return fondMoyen;}
+    QBrush getBrushClair() const {return fondClair;}
+    QBrush getBrushSansMotif() const {return sansMotif;}
 
 private :
     static QBrush noir;
@@ -39,6 +43,10 @@ private :
     map<pair<int,int>,Pierre*> plateau;
     QGraphicsEllipseItem* coupCourant;
     partie::iterateur courant;
+    QBrush fondClair;
+    QBrush fondMoyen;
+    QBrush fondFonce;
+    QBrush sansMotif;
 
     //plateau : pierres avec pair<abs,ord> comme clé (pair<int,int>)
 };

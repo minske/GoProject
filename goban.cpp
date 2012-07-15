@@ -5,11 +5,16 @@ QPen Goban::rouge(Qt::red,1.5);
 QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
 
+
 Goban::Goban() : QGraphicsScene(), coupCourant(0), courant(partie::iterateur(0))
 {
     //brush pour la couleur de fond
     //QBrush brush(QColor(236,184,82));
-    QBrush brush(QPixmap("fondBois.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondClair = QBrush(QPixmap("fondBoisClair.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondMoyen = QBrush(QPixmap("fondBois.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondFonce = QBrush(QPixmap("fondBoisFonce.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    sansMotif = QBrush(QColor(236,184,82));
+    //QBrush brush(QPixmap("fondBois.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     lignes = createItemGroup(QList<QGraphicsItem*>());
 
     for (unsigned int i = 0; i<19 ; i++)
@@ -26,7 +31,7 @@ Goban::Goban() : QGraphicsScene(), coupCourant(0), courant(partie::iterateur(0))
         lignes->addToGroup(addEllipse((E*4+(i*E*6))-1,E*16-1,2,2,penE,noir));
     }
 
-    setBackgroundBrush(brush);
+    setBackgroundBrush(fondClair);
 
 }
 

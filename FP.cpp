@@ -5,6 +5,7 @@ FP::FP() : QMainWindow(), Partie(0)
 {
     //menu
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
+    QMenu *menuOptions = menuBar()->addMenu("&Options");
 
 
     QAction* ouvrirFichier = menuFichier->addAction("Ouvrir");
@@ -18,6 +19,16 @@ FP::FP() : QMainWindow(), Partie(0)
     QAction* actionQuitter = menuFichier->addAction("Quitter");
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
     connect(actionQuitter,SIGNAL(triggered()),qApp,SLOT(quit()));
+
+    QMenu *changerFond = menuOptions->addMenu("Choisir le fond du goban");
+    QAction* changerFondClair = changerFond->addAction("Fond clair");
+    QAction* changerFondMoyen = changerFond->addAction("Fond moyen");
+    QAction* changerFondFonce = changerFond->addAction("Fond foncé");
+    QAction* changerFondSansMotif = changerFond->addAction("Aucun motif");
+    connect(changerFondClair,SIGNAL(triggered()),this,SLOT(changerFondClair()));
+    connect(changerFondMoyen,SIGNAL(triggered()),this,SLOT(changerFondMoyen()));
+    connect(changerFondFonce,SIGNAL(triggered()),this,SLOT(changerFondFonce()));
+    connect(changerFondSansMotif,SIGNAL(triggered()),this,SLOT(changerFondSansMotif()));
 
 
     //Layout horizontal principal : à gauche le goban, à droite les infos
@@ -246,4 +257,24 @@ void FP::finPartie()
         while (goban->getCourant()!=Partie->fin())
             FP::nextMove();
     }
+}
+
+void FP::changerFondClair()
+{
+    goban->setBackgroundBrush(goban->getBrushClair());
+}
+
+void FP::changerFondFonce()
+{
+    goban->setBackgroundBrush(goban->getBrushFonce());
+}
+
+void FP::changerFondMoyen()
+{
+    goban->setBackgroundBrush(goban->getBrushMoyen());
+}
+
+void FP::changerFondSansMotif()
+{
+    goban->setBackgroundBrush(goban->getBrushSansMotif());
 }

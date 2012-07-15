@@ -117,6 +117,8 @@ FP::FP() : QMainWindow(), Partie(0)
 
 void FP::ouvrirFichier()
 {
+    if (Partie!=0) FP::fermerFichier();
+
     QString fichier = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", QString(), "Fichier SGF (*.sgf)");
     QMessageBox::information(this, "Fichier", "Vous avez sélectionné :\n" + fichier);
     Partie = partie::donneInstance();

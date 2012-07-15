@@ -202,7 +202,8 @@ unsigned int Goban::ajouterPierre(Pierre* p)
         }
     }
 
-    coupCourant = this->addEllipse((abs+1)*E-(E*0.3),(ord+1)*E-(E*0.3),E*0.6,E*0.6,rouge);
+    QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
+    coupCourant = this->addEllipse(rect,rouge);
 
     return nbcapt;
 

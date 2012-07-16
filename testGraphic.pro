@@ -5,7 +5,8 @@ SOURCES += \
     goban.cpp \
     pierre.cpp \
     joueur.cpp \
-    groupe.cpp
+    groupe.cpp \
+    actionNext.cpp
 
 HEADERS += \
     partie.h \
@@ -13,6 +14,7 @@ HEADERS += \
     FP.h \
     pierre.h \
     joueur.h \
-    groupe.h
+    groupe.h \
+    actionNext.h
 
 FORMS +=

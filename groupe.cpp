@@ -10,7 +10,12 @@ bool Groupe::faitPartie(const Pierre* p) const
 
 void Groupe::ajouterPierre(Pierre* p)
 {
-    if (faitPartie(p)) throw coup_exception("La pierre appartient déjà au groupe");
+    if (faitPartie(p))
+    {
+        ostringstream res;
+        res << "La pierre " << p->getCoup()->getAbs() << "-" << p->getCoup()->getOrd() << " appartient déjà au groupe";
+        throw coup_exception(res.str());
+    }
     appartient.insert(p);
 }
 

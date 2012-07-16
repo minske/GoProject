@@ -14,13 +14,14 @@ public :
     Groupe(Groupe const& g);
     int getStatut() const {return statut;}
     unsigned int nbLibertes() const;
-    set<Pierre*> getPierres() const {return appartient;}
+    set<Pierre*>& getPierres() {return appartient;}
     void capture();
     void ajouterPierre(Pierre* p);
     bool faitPartie(const Pierre* p) const;
     Groupe& operator+=(Groupe const& g);
     bool operator!=(Groupe const& g) const;
     bool operator==(Groupe const& g) const;
+    void supprimerPierre(Pierre* p) { appartient.erase(p);}
 };
 
 Groupe operator+(Groupe const& a, Groupe const& b);

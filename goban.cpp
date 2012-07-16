@@ -59,9 +59,10 @@ void Goban::init()
     groupes.clear(); plateau.clear();
 }
 
-unsigned int Goban::ajouterPierre(Pierre* p)
+set<Pierre*> Goban::ajouterPierre(Pierre* p)
 {
-    if (coupCourant!=0) removeItem(coupCourant);
+    //if (coupCourant!=0) removeItem(coupCourant);
+
 
     std::cout << "\n ---------- \nCoup n°" << p->getCoup()->getNum() << std::endl;
 
@@ -167,10 +168,17 @@ unsigned int Goban::ajouterPierre(Pierre* p)
 
     /****************************************** Affichage ******************************************/
     addItem(p->getEllipse());
+    if (coupCourant==0)
+    {
+        QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
+        coupCourant=  this->addEllipse(rect,rouge);
+
+    }
 
 
-    /*il faut vérifier si on doit supprimer des pierres*/
-    unsigned int nbcapt = 0;
+    /************************* Suppression des pierres *********************************************/
+    //unsigned int nbcapt = 0;
+    set<Pierre*> pierresSupprimees;
     vector<Pierre*> autourAdv = pierresAutourAdversaire(p);
     if (autourAdv.size()!=0)
     {
@@ -182,17 +190,22 @@ unsigned int Goban::ajouterPierre(Pierre* p)
                 if (nbLibertes(g)==0)
                 {
                     std::cout << "Un groupe à supprimer" << std::endl;
-                    nbcapt+=g->getPierres().size();
+                    //nbcapt+=g->getPierres().size();
+                    for (set<Pierre*>::iterator it = g->getPierres().begin(); it!=g->getPierres().end(); ++it)
+                    {
+                        //pour chaque pierre qui appartient au groupe, on va la stocker dans pierresSupprimees
+                        pierresSupprimees.insert(*it);
+                    }
                     supprimerGroupe(g);
                 }
             }
         }
     }
 
-    QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
-    coupCourant = this->addEllipse(rect,rouge);
 
-    return nbcapt;
+
+    //return nbcapt;
+    return pierresSupprimees;
 
 }
 
@@ -287,13 +300,16 @@ void Goban::supprimerPierre(Pierre* p)
     int a = p->getCoup()->getAbs();
     int o = p->getCoup()->getOrd();
     if (plateau.erase(pair<int,int>(a,o))!=1) throw coup_exception("Erreur à la suppression d'une pierre");
-    delete p;
+    Groupe* g = trouverGroupe(p);
+    if (g!=0) g->supprimerPierre(p);
+    removeItem(p->getEllipse());
+    //delete p;
 }
 
 void Goban::supprimerGroupe(Groupe* g)
 {
     set<Pierre*> ltmp = g->getPierres();
-    for (set<Pierre*>::const_iterator it = ltmp.begin() ; it != ltmp.end() ; ++it)
+    for (set<Pierre*>::iterator it = ltmp.begin() ; it != ltmp.end() ; ++it)
     {
         supprimerPierre(*it);
     }

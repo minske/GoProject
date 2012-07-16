@@ -212,7 +212,8 @@ void infosJoueurs::setJoueur(Joueur* J)
 
 void FP::prev5Moves()
 {
-
+    for (unsigned int i = 0; i<5 ; i++)
+        prevMove();
 }
 
 void FP::debutPartie()

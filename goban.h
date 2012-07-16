@@ -11,13 +11,13 @@ class Goban : public QGraphicsScene
 public :
     Goban();
     Goban(Goban const& g);
-    unsigned int ajouterPierre(Pierre* p);
+    set<Pierre*> ajouterPierre(Pierre* p); //renvoie les pierres qui ont été supprimées du goban
     vector<Pierre*> pierresAutour(Pierre* p) const;
     vector<Pierre*> pierresAutourMemeCouleur(Pierre* p) const;
     vector<Pierre*> pierresAutourAdversaire(Pierre* p) const;
     Groupe* trouverGroupe(Pierre* p) const;
-    set<Groupe*> getGroupes() const {return groupes;}
-    map<pair<int,int>,Pierre*> getPlateau() const {return plateau;}
+    set<Groupe*>& getGroupes() {return groupes;}
+    map<pair<int,int>,Pierre*>& getPlateau()  {return plateau;}
     ~Goban() {delete lignes;}
     void supprimerGroupe(Groupe* g);
     void supprimerPierre(Pierre* p);
@@ -34,6 +34,7 @@ public :
     QBrush getBrushSansMotif() const {return sansMotif;}
     void setPlateau(map<pair<int,int>,Pierre*> pl) {plateau=pl;}
     void setGroupes(set<Groupe*> gr) {groupes=gr;}
+    void setCoupCourant(qreal x, qreal y) {coupCourant->setPos(x,y);}
 
 private :
     static QBrush noir;

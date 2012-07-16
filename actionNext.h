@@ -16,17 +16,8 @@ public :
 
 private :
     //A pour Ancien, N pour Nouveau
-    vector<Groupe> Agroupes;
-    vector<Groupe> Ngroupes;
-    map<pair<int,int>,Pierre*> Aplateau;
-    map<pair<int,int>,Pierre*> Nplateau;
     Pierre* m_pierre;
-    bool Suppression;
-    vector<Groupe*> groupesSupprimes;
-    unsigned int AnbPierresCaptNoir;
-    unsigned int NnbPierresCaptNoir;
-    unsigned int AnbPierresCaptBlanc;
-    unsigned int NnbPierresCaptBlanc;
+   set<Pierre*> pierresSupprimees;
     FP* fp;
 
 };

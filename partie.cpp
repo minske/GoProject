@@ -9,7 +9,7 @@ coup_exception::coup_exception(const std::string& i) throw():info(i){}
 const char* coup_exception::what() const throw() { return info.c_str(); }
 
 
-Coup::Coup(std::string const& s, std::string const& com)
+Coup::Coup(std::string const& s, std::string com)
 {
     numero = 0;
     // un coup donné dans le fichier est normalement de la forme B[mc]BL[151.84]OB[11]C[commentaires ...]
@@ -20,6 +20,11 @@ Coup::Coup(std::string const& s, std::string const& com)
     */
     if (s.size() < 5) throw coup_exception("Fichier invalide !\n");
     //les abscisses et ordonnées vont de 0 à 18 en commençant en haut à gauche
+    int p=com.size();
+    for (int n=0; n<p; n++)
+    {
+        if (com[n]=='&') com.replace(n,1,1,'\n');
+    }
     commentaires=QString::fromStdString(com);
     abscisse = s[2]-'a';
     ordonnee = s[3]-'a';
@@ -47,7 +52,11 @@ void partie::chargerFichier(string const& f)
         On va récupérer toutes ces infos dans une chaîne pour les traiter ensuite */
         string contenu;
         string ligne;
-        while (getline(sgf,ligne)) contenu += ligne;
+        while (getline(sgf,ligne))
+        {
+            contenu += ligne;
+            contenu += '&';
+        }
 
         //contenu = contenu du fichier
 
@@ -118,6 +127,7 @@ void partie::chargerFichier(string const& f)
                    comCom.push_back(contenu[i]);
                    i++;
                }
+
                comCom.erase(comCom.size()-1,1);
             }
             /* Si longueur(coup) = 0 -> erreur ... */
@@ -134,6 +144,7 @@ void partie::chargerFichier(string const& f)
             numero++;
             cout << listeCoups.back().print() << endl;
             if (contenu[i]==')') break;
+            if (contenu[i]=='&') i++;
             if (contenu[i]!=';') i++;
             i++;
         }

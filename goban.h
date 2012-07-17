@@ -34,7 +34,9 @@ public :
     QBrush getBrushSansMotif() const {return sansMotif;}
     void setPlateau(map<pair<int,int>,Pierre*> pl) {plateau=pl;}
     void setGroupes(set<Groupe*> gr) {groupes=gr;}
-    void setCoupCourant(qreal x, qreal y) {coupCourant->setPos(x,y);}
+    void setCoupCourant(QGraphicsEllipseItem* q) {coupCourant=q;}
+    QGraphicsEllipseItem* getCoupCourant() const {return coupCourant;}
+    static QPen getRouge();
 
 private :
     static QBrush noir;

@@ -5,6 +5,11 @@ QPen Goban::rouge(Qt::red,1.5);
 QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
 
+QPen Goban::getRouge()
+{
+    return rouge;
+}
+
 
 Goban::Goban() : QGraphicsScene(), coupCourant(0), courant(partie::iterateur(0))
 {

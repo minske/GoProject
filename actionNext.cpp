@@ -20,14 +20,12 @@ void actionNext::undo()
         }
     }
     g->reculer();
-
     int abs = (g->getCourant().getPtr()-1)->getAbs();
     int ord = (g->getCourant().getPtr()-1)->getOrd();
 
     g->removeItem(g->getCoupCourant());
     QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
     g->setCoupCourant(g->addEllipse(rect,Goban::getRouge()));
-
     //g->setCoupCourant((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31));
 
 
@@ -44,9 +42,7 @@ void actionNext::redo()
         {
             Pierre* p = new Pierre(goban->getCourant().getPtr()); //on récupère l'itérateur courant
             m_pierre = p;
-
             int abs = p->getCoup()->getAbs(); int ord = p->getCoup()->getOrd();
-
             pierresSupprimees = goban->ajouterPierre(p);
             //on ajoute la pierre au goban, ce qui renvoie les pierres capturées
             unsigned int nbCapt = pierresSupprimees.size();
@@ -77,11 +73,9 @@ void actionNext::redo()
 
             goban->avancer();
 
-
             goban->removeItem(goban->getCoupCourant());
             QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
             goban->setCoupCourant(goban->addEllipse(rect,Goban::getRouge()));
-
 
 
         }

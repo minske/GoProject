@@ -19,7 +19,7 @@ class Coup
 
 public :
     Coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
-    Coup(std::string const& s, std::string const& com=std::string());
+    Coup(std::string const& s, std::string com=std::string());
     std::string print() const;
     int getAbs() const {return abscisse;}
     int getOrd() const {return ordonnee;}

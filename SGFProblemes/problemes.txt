@@ -1,9 +1,0 @@
-Le sgf hide-findol pose problème : il ne lit pas tous les coups et 
-s'arrête avant la fin.
-
-Pour Idn-Kiral, il dit au coup 95 que la pierre en 8-8 n'appartient à aucun
-groupe ...
-
-Cork-Darkyrua : Coup 134, la pierre 16-16 ne fait partie d'aucun groupe
-
-Kenja-Babin : coups en -64 ou -21, partie finie trop tôt

@@ -15,7 +15,14 @@ Pierre::Pierre(const Coup* c)
     ellipse = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
 
 
-    else ellipse = new QGraphicsPixmapItem(QPixmap("pierreBlanche.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    else
+    {
+        unsigned int nb = rand() % 6 +1;
+        ostringstream os;
+        os << "pierreBlanche" << nb << ".png";
+        QString nomFichier = QString::fromStdString(os.str());
+        ellipse = new QGraphicsPixmapItem(QPixmap(nomFichier).scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    }
     corres = c;
 
     ellipse->setX((c->getAbs()+1)*E-(E*R/2));

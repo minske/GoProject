@@ -42,12 +42,21 @@ private :
     QGraphicsView* vue;
     QVBoxLayout* widgetsCote;
     QTextEdit* commentaires;
+    QUndoStack* pileUndo;
+    QUndoView* viewUndo;
 
 public :
     FP();
     ~FP();
+    QUndoCommand* nextaction();
     QGraphicsView* getVue() const {return vue;}
     void setVue(QGraphicsView* v) {vue = v;}
+    Goban* getGoban() const {return goban;}
+    partie* getPartie() const {return Partie;}
+    infosJoueurs* getInfosNoir() const {return infosNoir;}
+    infosJoueurs* getInfosBlanc() const {return infosBlanc;}
+    QTextEdit* getComm() const {return commentaires;}
+
 
 public slots :
     void ouvrirFichier();

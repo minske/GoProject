@@ -1,8 +1,11 @@
 #include "FP.h"
 #include "partie.h"
+#include "actionNext.h"
 
-FP::FP() : QMainWindow(), Partie(0)
+FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
 {
+    pileUndo = new QUndoStack(this);
+    viewUndo = new QUndoView(pileUndo);
     //menu
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QMenu *menuOptions = menuBar()->addMenu("&Options");
@@ -52,6 +55,7 @@ FP::FP() : QMainWindow(), Partie(0)
     QPushButton* debutPartie = new QPushButton("Début");
     QPushButton* finPartie = new QPushButton("Fin");
     next->setShortcut(QKeySequence::MoveToNextChar);
+    prev->setShortcut(QKeySequence::MoveToPreviousChar);
     connect(next,SIGNAL(clicked()),this,SLOT(nextMove()));
     connect(prev,SIGNAL(clicked()),this,SLOT(prevMove()));
     connect(next5,SIGNAL(clicked()),this,SLOT(next5Moves()));
@@ -101,7 +105,9 @@ FP::FP() : QMainWindow(), Partie(0)
     widgetsCote->addLayout(infosJoueur);
     widgetsCote->addLayout(layoutBoutonsNP);
     widgetsCote->addWidget(commentaires);
-    widgetsCote->addSpacing(200);
+    widgetsCote->addWidget(viewUndo);
+    viewUndo->setFixedWidth(300);
+    //widgetsCote->addSpacing(200);
     //infosPartie->setFont();
 
     layoutPrincipal->addLayout(layoutV);
@@ -137,43 +143,14 @@ void FP::ouvrirFichier()
 
 }
 
-
 void FP::nextMove()
 {
     if (Partie!=0)
     {
-        if(goban->getCourant()!=Partie->fin())
-        {
-            Pierre* p = new Pierre(goban->getCourant().getPtr());
-            unsigned int nbCapt = goban->ajouterPierre(p);
-            if (nbCapt>0)
-            {
-                if (p->getCoup()->getJoueur()->couleur()=="Blanc")
-                {
-                    ostringstream os;
-                    os << Partie->getBlanc()->getCapt() + nbCapt;
-                    Partie->getBlanc()->addCapt(nbCapt);
-                    infosBlanc->setCapt(QString::fromStdString(os.str()));
-
-                }
-                else
-                {
-                    ostringstream os;
-                    os << Partie->getNoir()->getCapt() + nbCapt;
-                    Partie->getNoir()->addCapt(nbCapt);
-                    infosNoir->setCapt(QString::fromStdString(os.str()));
-
-                }
-            }
-            ostringstream os;
-            os << goban->getCourant().getPtr()->getNum();
-            commentaires->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "
-                                  +goban->getCourant().getPtr()->getComm());
-
-            goban->avancer();
-        }
-        else commentaires->setText("Fin de la partie. Résultat : " + Partie->getResultat());
+        std::cout << "Ajout dans la pile undoStack" << std::endl;
+        pileUndo->push(new actionNext(this));
     }
+
 }
 
 FP::~FP()
@@ -187,6 +164,7 @@ FP::~FP()
 void FP::fermerFichier()
 {
     delete Partie;
+    pileUndo->clear();
     Partie=0;
     goban->init();
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
@@ -198,7 +176,10 @@ void FP::fermerFichier()
 
 void FP::prevMove()
 {
-
+    if (pileUndo->canUndo())
+    {
+        pileUndo->undo();
+    }
 }
 
 
@@ -231,11 +212,13 @@ void infosJoueurs::setJoueur(Joueur* J)
 
 void FP::prev5Moves()
 {
-
+    for (unsigned int i = 0; i<5 ; i++)
+        prevMove();
 }
 
 void FP::debutPartie()
 {
+    pileUndo->clear();
     goban->init();
     Partie->getBlanc()->setCapt(0); Partie->getNoir()->setCapt(0);
     goban->setCourant(Partie->debut());

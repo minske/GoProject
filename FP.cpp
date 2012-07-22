@@ -168,7 +168,7 @@ void FP::nextMove()
         pileUndo->redo();
     }
 
-    else if (Partie!=0)
+    else if ((Partie!=0) && (goban->getCourant()!=Partie->fin()))
     {
         std::cout << "Ajout dans la pile undoStack" << std::endl;
         pileUndo->push(new actionNext(this));

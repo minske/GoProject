@@ -87,7 +87,7 @@ void actionNext::redo()
 
 
         }
-        else fp->getComm()->setText("Fin de la partie. Résultat : " + Partie->getResultat());
+        if (goban->getCourant()==Partie->fin()) fp->getComm()->setText("Fin de la partie. Résultat : " + Partie->getResultat());
     }
 
 }

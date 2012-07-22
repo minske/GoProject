@@ -17,11 +17,11 @@ Pierre::Pierre(const Coup* c)
 
     else
     {
-        unsigned int nb = rand() % 6 +1;
+       /* unsigned int nb = rand() % 6 +1;
         ostringstream os;
         os << "pierreBlanche" << nb << ".png";
-        QString nomFichier = QString::fromStdString(os.str());
-        ellipse = new QGraphicsPixmapItem(QPixmap(nomFichier).scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        QString nomFichier = QString::fromStdString(os.str());*/
+        ellipse = new QGraphicsPixmapItem(QPixmap("pierreBlanche.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     }
     corres = c;
 

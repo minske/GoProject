@@ -20,12 +20,13 @@ Coup::Coup(std::string const& s, std::string com)
     */
     if (s.size() < 5) throw coup_exception("Fichier invalide !\n");
     //les abscisses et ordonnées vont de 0 à 18 en commençant en haut à gauche
-    //int p=com.size();
-   /* for (int n=0; n<com.size(); n++)
+
+    int p=com.size();
+    for (int n=0; n<p; n++)
     {
         if (com[n]=='&') com.replace(n,1,1,'\n');
-    }*/
-    //commentaires=QString::fromStdString(com);
+    }
+    commentaires=QString::fromStdString(com);
     abscisse = s[2]-'a';
     ordonnee = s[3]-'a';
     j = 0;

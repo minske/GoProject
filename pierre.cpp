@@ -1,11 +1,8 @@
 #define R 0.98
 
 #include "pierre.h"
-/*
-QPixmap Pierre::pierreBlanche(QPixmap("pierreBlanche.png").scaled(E*0.9,E*0.9,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-QPixmap Pierre::pierreNoire(QPixmap("pierreNoir.png").scaled(E*0.9,E*0.9,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-QPixmap Pierre::pierreRose(QPixmap("pierreRose.png").scaled(E*0.9,E*0.9,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-*/
+
+
 Pierre::Pierre(const Coup* c)
 {
     if (c->getJoueur()->getNom()=="Kiral")

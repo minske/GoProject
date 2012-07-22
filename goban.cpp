@@ -307,6 +307,7 @@ void Goban::supprimerPierre(Pierre* p)
     if (plateau.erase(pair<int,int>(a,o))!=1) throw coup_exception("Erreur à la suppression d'une pierre");
     Groupe* g = trouverGroupe(p);
     if (g!=0) g->supprimerPierre(p);
+    groupes.erase(g);
     removeItem(p->getEllipse());
     //delete p;
 }
@@ -318,7 +319,7 @@ void Goban::supprimerGroupe(Groupe* g)
     {
         supprimerPierre(*it);
     }
-    groupes.erase(g);
+    //groupes.erase(g);
     delete g;
 }
 

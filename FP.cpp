@@ -39,6 +39,10 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     //Layout vertical pour le goban de la fenêtre :
     layoutV = new QVBoxLayout;
 
+    /************ BARRE D'ETAT ***********************/
+    barreEtat = statusBar();
+    nomFichier = new QLabel("Aucun fichier");
+
 
     /*************** BARRE D'OUTILS ******************/
     QToolBar* barreOutils = new QToolBar("nom");
@@ -147,9 +151,16 @@ void FP::ouvrirFichier()
     infosBlanc->setCapt("0");
 
     commentaires->setText("Fichier : "+fichier+". Début de la partie.\n Partie jouée le "+Partie->getDate());
+    nomFichier->setText("Fichier : "+fichier);
+    barreEtat->addWidget(nomFichier);
 
 }
 
+
+/*** nextMove : permet de passer au coup suivant
+ Si on peut refaire une action contenue dans la pileUndo, on le fait
+Sinon on crée une nouvelle actionNext qu'on met dans la pile
+***/
 void FP::nextMove()
 {
     if (pileUndo->canRedo())
@@ -161,7 +172,6 @@ void FP::nextMove()
     {
         std::cout << "Ajout dans la pile undoStack" << std::endl;
         pileUndo->push(new actionNext(this));
-        goban->printGroupes();
 
     }
 
@@ -193,7 +203,6 @@ void FP::prevMove()
     if (pileUndo->canUndo())
     {
         pileUndo->undo();
-        goban->printGroupes();
 
     }
 }

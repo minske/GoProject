@@ -23,6 +23,11 @@ void actionNext::undo()
     int abs = (g->getCourant().getPtr()-1)->getAbs();
     int ord = (g->getCourant().getPtr()-1)->getOrd();
 
+
+    ostringstream os;
+    os << (g->getCourant().getPtr()-1)->getNum();
+    fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+(g->getCourant().getPtr()-1)->getComm());
+
     g->removeItem(g->getCoupCourant());
     QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
     g->setCoupCourant(g->addEllipse(rect,Goban::getRouge()));
@@ -42,6 +47,11 @@ void actionNext::redo()
         {
             Pierre* p = new Pierre(goban->getCourant().getPtr()); //on récupère l'itérateur courant
             m_pierre = p;
+
+            ostringstream os;
+            os << p->getCoup()->getNum();
+            fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup()->getComm());
+
             int abs = p->getCoup()->getAbs(); int ord = p->getCoup()->getOrd();
             pierresSupprimees = goban->ajouterPierre(p);
             //on ajoute la pierre au goban, ce qui renvoie les pierres capturées
@@ -67,15 +77,13 @@ void actionNext::redo()
                 }
             }
 
-            ostringstream os;
-            os << goban->getCourant().getPtr()->getNum();
-            fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+goban->getCourant().getPtr()->getComm());
 
             goban->avancer();
 
             goban->removeItem(goban->getCoupCourant());
             QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
             goban->setCoupCourant(goban->addEllipse(rect,Goban::getRouge()));
+            goban->printGroupes();
 
 
         }

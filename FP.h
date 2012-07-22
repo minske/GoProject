@@ -55,6 +55,8 @@ private :
     QTextEdit* commentaires;
     QUndoStack* pileUndo;
     QUndoView* viewUndo;
+    QStatusBar *barreEtat;
+    QLabel* nomFichier;
 
 public :
     FP();

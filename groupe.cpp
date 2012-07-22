@@ -65,3 +65,13 @@ Groupe::Groupe(Groupe const& g)
         appartient.insert(*it);
     }
 }
+
+void Groupe::print() const
+{
+    if (appartient.size()!=0)
+    {
+        for (set<Pierre*>::iterator it=appartient.begin(); it!=appartient.end(); ++it)
+            std::cout << (*it)->getCoup()->getAbs() <<"-" << (*it)->getCoup()->getOrd() <<" + ";
+    }
+    else std::cout << "Groupe vide";
+}

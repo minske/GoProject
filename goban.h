@@ -37,6 +37,7 @@ public :
     void setCoupCourant(QGraphicsEllipseItem* q) {coupCourant=q;}
     QGraphicsEllipseItem* getCoupCourant() const {return coupCourant;}
     static QPen getRouge();
+    void printGroupes() const;
 
 private :
     static QBrush noir;

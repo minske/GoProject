@@ -22,6 +22,7 @@ public :
     bool operator!=(Groupe const& g) const;
     bool operator==(Groupe const& g) const;
     void supprimerPierre(Pierre* p) { appartient.erase(p);}
+    void print() const;
 };
 
 Groupe operator+(Groupe const& a, Groupe const& b);

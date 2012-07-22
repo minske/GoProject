@@ -431,3 +431,16 @@ bool Goban::estSurPlateau(Pierre* p) const
     int abs = p->getCoup()->getAbs(), ord = p->getCoup()->getOrd();
     return (plateau.find(pair<int,int>(abs,ord))!=plateau.end());
 }
+
+void Goban::printGroupes() const
+{
+    if (!groupes.empty())
+    {
+        for (set<Groupe*>::iterator it=groupes.begin(); it!=groupes.end(); ++it)
+        {
+            (*it)->print();
+            std::cout << "\n";
+        }
+    }
+    else std::cout << "Aucun groupe" << std::endl;
+}

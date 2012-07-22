@@ -48,12 +48,19 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     barreOutils->addAction(actionQuitter);
 
     //boutons avancer et reculer
+    const int w = 45;
     QPushButton* prev = new QPushButton("<");
     QPushButton* next = new QPushButton(">");
     QPushButton* next5 = new QPushButton(">>");
     QPushButton* prev5 = new QPushButton("<<");
     QPushButton* debutPartie = new QPushButton("Début");
     QPushButton* finPartie = new QPushButton("Fin");
+    prev->setFixedWidth(w);
+    next->setFixedWidth(w);
+    prev5->setFixedWidth(w);
+    next5->setFixedWidth(w);
+    debutPartie->setFixedWidth(w);
+    finPartie->setFixedWidth(w);
     next->setShortcut(QKeySequence::MoveToNextChar);
     prev->setShortcut(QKeySequence::MoveToPreviousChar);
     connect(next,SIGNAL(clicked()),this,SLOT(nextMove()));
@@ -105,7 +112,7 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     widgetsCote->addLayout(infosJoueur);
     widgetsCote->addLayout(layoutBoutonsNP);
     widgetsCote->addWidget(commentaires);
-    widgetsCote->addWidget(viewUndo);
+    //widgetsCote->addWidget(viewUndo);
     viewUndo->setFixedWidth(300);
     //widgetsCote->addSpacing(200);
     //infosPartie->setFont();
@@ -145,10 +152,17 @@ void FP::ouvrirFichier()
 
 void FP::nextMove()
 {
-    if (Partie!=0)
+    if (pileUndo->canRedo())
+    {
+        pileUndo->redo();
+    }
+
+    else if (Partie!=0)
     {
         std::cout << "Ajout dans la pile undoStack" << std::endl;
         pileUndo->push(new actionNext(this));
+        goban->printGroupes();
+
     }
 
 }
@@ -179,6 +193,8 @@ void FP::prevMove()
     if (pileUndo->canUndo())
     {
         pileUndo->undo();
+        goban->printGroupes();
+
     }
 }
 

@@ -60,8 +60,6 @@ public :
     iterateur dernierCoup() const {return iterateur(listeCoups.back());}
     iterateur fin() const { iterateur it(listeCoups.back()); ++it; return it; }
     iterateur debut() const { return iterateur(listeCoups.front()); }
-    //iterateur getCourant() const {return courant;}
-
     Blanc* getBlanc() const {return joueurBlanc;}
     Noir* getNoir() const {return joueurNoir;}
     std::string infos() const;
@@ -73,8 +71,7 @@ public :
 private :
     vector<Coup> listeCoups;
     static partie* instanceUnique;
-//    partie::iterateur courant;
-    partie() : /*courant(0),*/ joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString())  {}
+    partie() : joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString())  {}
     Blanc* joueurBlanc;
     Noir* joueurNoir;
     QString date;

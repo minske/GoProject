@@ -4,6 +4,14 @@
 #include "FP.h"
 
 
+/***
+Déclaration de la classe actionNext : hérite de QUndoCommand, permet d'annuler des coups
+Garde en mémoire la pierre qui a été ajoutée, les pierres qui ont été supprimées, et un
+pointeur vers la fenêtre principale pour modifier le goban.
+Lorsqu'une instance d'actionNext est ajoutée à la pile UndoStack, sa méthode redo() est appelée
+et modifie le goban.
+****/
+
 class actionNext : public QUndoCommand
 {
 public :
@@ -15,9 +23,8 @@ public :
     void undo();
 
 private :
-    //A pour Ancien, N pour Nouveau
     Pierre* m_pierre;
-   set<Pierre*> pierresSupprimees;
+    set<Pierre*> pierresSupprimees;
     FP* fp;
 
 };

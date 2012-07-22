@@ -6,6 +6,17 @@
 #include "goban.h"
 #include <stack>
 
+/***
+Classe infosJoueurs : permet d'afficher les infos sur un joueur (blanc ou noir) telles que
+son nom, son niveau, le nombre de pierres qu'il a capturées, dans un GridLayout.
+
+Classe MyApplication : hérite de QApplication, permet de capter les exceptions lancées dans le
+programme (sinon, ne peut capter que les QExceptions)
+
+Classe FP = fenêtre principale, hérite de QMainWindow, affiche le goban, les boutons, les infos
+sur les joueurs, la barre de menus, etc.
+***/
+
 class infosJoueurs;
 
 class MyApplication : public QApplication

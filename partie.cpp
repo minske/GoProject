@@ -8,6 +8,7 @@ coup_exception::coup_exception(const std::string& i) throw():info(i){}
 
 const char* coup_exception::what() const throw() { return info.c_str(); }
 
+/******************* CLASSE COUP ***********************************************************************************/
 
 Coup::Coup(std::string const& s, std::string com)
 {
@@ -41,33 +42,38 @@ string Coup::print() const
 
 Coup::~Coup(){}
 
+
+
+
+/***************************** CLASSE PARTIE **********************************************************************/
+
+/***** Chargement d'un SGF *****/
 void partie::chargerFichier(string const& f)
 {
-    int numero = 1;
-    /* Ouverture du fichier et test */
+    int numero = 1; //sert à numéroter les coups au fur et à mesure qu'on lit le fichier
+
+    /********** Ouverture du fichier et test **************/
     ifstream sgf(f.c_str(),ios::in);
     if (sgf) //si l'ouverture a réussi
     {
         /* Le début du fichier contient des informations sur la partie
         La liste des coups commence au deuxième ';'
         On va récupérer toutes ces infos dans une chaîne pour les traiter ensuite */
-        string contenu;
-        string ligne;
+        string contenu, ligne;
+
         while (getline(sgf,ligne))
         {
             contenu += ligne;
-            contenu += '&';
+            contenu += '&'; //on ajoute un caractère spécial à la fin de chaque ligne
         }
 
-        //contenu = contenu du fichier
-
-        /********************* AURELIEN -> LA RECUP DES INFOS SUR LA PARTIE COMMENCE ICI ***************************/
+        /********** Récupération des infos sur la partie **************/
         unsigned int i = 2;
         while (contenu[i] != ';') i++; // on avance jusqu'à ce qu'on trouve un ';'
         //i = position avant le premier coup
         string infos = contenu.substr(2,i-1);
         unsigned int j=0;
-        string jblanc, jnoir, nblanc, nnoir, komi, Date, Resultat;
+        string jblanc, jnoir, nblanc, nnoir, komi;// Date, Resultat;
 
         while (j<infos.size()-1)
         {
@@ -76,7 +82,7 @@ void partie::chargerFichier(string const& f)
              */
             string inf;
 
-            while (infos[j]!=']')
+            while ((infos[j]!=']') && (j<infos.size()))
             {
                 inf += infos[j];
                 j++;
@@ -87,7 +93,6 @@ void partie::chargerFichier(string const& f)
             else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
             else if (inf.substr(0,2)=="DT") date=QString::fromStdString(inf.substr(3));
             else if (inf.substr(0,2)=="RE") resultat=QString::fromStdString(inf.substr(3));
-
 
             j++;
         }

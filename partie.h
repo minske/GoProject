@@ -37,6 +37,8 @@ class partie
 {
 public :
     static partie* donneInstance();
+    static partie* donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+                                 QString const& blancNiveau, QString const& partieDate);
     void chargerFichier(std::string const& nomFichier);
     //void avancer() {++courant;}
     //void reculer() {--courant;}
@@ -69,7 +71,7 @@ public :
     QString getResultat() const {return resultat;}
     /*std::string getContenuFichier() const {return contenuFichier;}
     void setContenuFichier(std::string const& c) {contenuFichier=c;}*/
-    void enregistrerFichier();
+    void enregistrerFichier(QString nomFich);
 
 private :
     vector<Coup> listeCoups;

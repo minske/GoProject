@@ -68,6 +68,7 @@ public :
     void setVue(QGraphicsView* v) {vue = v;}
     Goban* getGoban() const {return goban;}
     partie* getPartie() const {return Partie;}
+    void setPartie(partie* p) {Partie = p;}
     infosJoueurs* getInfosNoir() const {return infosNoir;}
     infosJoueurs* getInfosBlanc() const {return infosBlanc;}
     QTextEdit* getComm() const {return commentaires;}
@@ -109,6 +110,34 @@ public :
     void setCapt(QString const& c) {pierresCapturees->setText(c);}
     void setCapt(QLabel* c) {pierresCapturees=c;}
     void setJoueur(Joueur* J);
+};
+
+
+class FenetreInfos : public QWidget
+{
+    Q_OBJECT
+
+    QLineEdit* nomNoir;
+    QLineEdit* nomBlanc;
+    QLineEdit* niveauNoir;
+    QLineEdit* niveauBlanc;
+    QLineEdit* datePartie;
+    FP* fenPrincipale;
+
+public :
+    FenetreInfos(FP* f);
+    QLineEdit* getNomNoir() const {return nomNoir;}
+    QLineEdit* getNomBlanc() const {return nomBlanc;}
+    QLineEdit* getNiveauNoir() const {return niveauNoir;}
+    QLineEdit* getNiveauBlanc() const {return niveauBlanc;}
+    QLineEdit* getDatePartie() const {return datePartie;}
+    ~FenetreInfos();
+
+
+public slots :
+    void valider();
+    void annuler();
+
 };
 
 #endif // FORM_H

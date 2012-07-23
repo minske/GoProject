@@ -169,6 +169,20 @@ partie* partie::donneInstance()
     return instanceUnique;
 }
 
+partie* partie::donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+                             QString const& blancNiveau, QString const& partieDate)
+{
+    if (instanceUnique == 0)
+    {
+        instanceUnique = new partie();
+
+        instanceUnique->joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
+        instanceUnique->joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
+        instanceUnique->date = partieDate;
+    }
+    return instanceUnique;
+}
+
 
 ostream& operator<<(ostream& f, Coup const& c)
 {
@@ -195,7 +209,23 @@ partie::~partie()
     delete joueurBlanc; delete joueurNoir; partie::libereInstance();
 }
 
-void partie::enregistrerFichier()
+void partie::enregistrerFichier(QString nomFich)
 {
+    std::ostringstream  os;
+    os << "(;" << std::endl << "PB[" << joueurNoir->getNom().toStdString() << "]" << std::endl;
+    os << "BR[" << joueurNoir->getRank().toStdString() << "]" << std::endl;
+    os << "PW[" << joueurBlanc->getNom().toStdString() << "]" << std::endl;
+    os << "WR[" << joueurBlanc->getRank().toStdString() << "]" << std::endl;
+
+
+    os << ";)";
+    /* ouverture du fichier en écriture, effacé s'il existait déjà*/
+    ofstream fichier(nomFich.toStdString(), ios::out | ios::trunc);
+
+    if (fichier) //si l'ouverture a réussi
+    {
+        fichier << os.str();
+        fichier.close();
+    }
 
 }

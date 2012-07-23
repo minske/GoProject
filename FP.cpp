@@ -2,6 +2,13 @@
 #include "partie.h"
 #include "actionNext.h"
 
+/******************************************************************************************************************/
+/********************************************               *******************************************************/
+/********************************************   CLASSE FP   *******************************************************/
+/********************************************               *******************************************************/
+/******************************************************************************************************************/
+
+
 FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
 {
     pileUndo = new QUndoStack(this);
@@ -11,7 +18,7 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
     QMenu *menuOptions = menuBar()->addMenu("&Options");
 
     QAction* nouveauFichier = menuFichier->addAction("Nouveau");
-    nouveauFichier->setShortcut(QKeySequence("Ctrl+O"));
+    nouveauFichier->setShortcut(QKeySequence("Ctrl+N"));
     connect(nouveauFichier,SIGNAL(triggered()),this,SLOT(nouveauFichier()));
 
     QAction* ouvrirFichier = menuFichier->addAction("Ouvrir");
@@ -151,13 +158,8 @@ void FP::ouvrirFichier()
     Partie->chargerFichier(fichier.toStdString());
     goban->setCourant(partie::iterateur(Partie->debut()));
 
-    infosNoir->setNom(Partie->getNoir()->getNom());
-    infosNoir->setNiveau(Partie->getNoir()->getRank());
-    infosNoir->setCapt("0");
-
-    infosBlanc->setNom(Partie->getBlanc()->getNom());
-    infosBlanc->setNiveau(Partie->getBlanc()->getRank());
-    infosBlanc->setCapt("0");
+    infosNoir->setJoueur(Partie->getNoir());
+    infosBlanc->setJoueur(Partie->getBlanc());
 
     commentaires->setText("Fichier : "+fichier+". Début de la partie.\n Partie jouée le "+Partie->getDate());
     nomFichier->setText("Fichier : "+fichier);
@@ -203,8 +205,6 @@ void FP::fermerFichier()
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
     infosBlanc->setNom(" "); infosBlanc->setNiveau(" ");
     commentaires->setText(" ");
-    //infosJoueurs = new QWidget;
-    //infosJoueurs->setFixedWidth(300);
 }
 
 void FP::prevMove()
@@ -214,33 +214,6 @@ void FP::prevMove()
         pileUndo->undo();
 
     }
-}
-
-
-infosJoueurs::infosJoueurs() : QGridLayout(), j(0)
-{
-    QLabel* rank = new QLabel("Niveau : ");
-    QLabel* name = new QLabel("Nom : ");
-    QLabel* capt = new QLabel("Capturées : ");
-    nom = new QLabel(" ");
-    niveau = new QLabel(" ");
-    pierresCapturees= new QLabel(" ");
-    titre= new QLabel(" ");
-
-    addWidget(titre,0,0,1,2, Qt::AlignCenter);
-    addWidget(name,1,0);
-    addWidget(nom,1,1);
-    addWidget(rank,2,0);
-    addWidget(niveau,2,1);
-    addWidget(capt,3,0);
-    addWidget(pierresCapturees,3,1);
-}
-
-void infosJoueurs::setJoueur(Joueur* J)
-{
-    j=J;
-    nom->setText(j->getNom());
-    niveau->setText(j->getRank());
 }
 
 
@@ -303,7 +276,9 @@ void FP::enregistrerFichier()
 {
     if ((Partie!=0) && (mode==creationSGF))
     {
-        Partie->enregistrerFichier();
+        QString nomFich = QFileDialog::getSaveFileName(this, "Enregistrer un fichier", QString(), "SGF (*.sgf)");
+        if (nomFich.size()!=0)
+            Partie->enregistrerFichier(nomFich);
     }
 }
 
@@ -311,8 +286,35 @@ void FP::nouveauFichier()
 {
     /*** ouverture d'une boîte de dialogue pour demander le nom des joueurs, leur niveau,
     la date de la partie ***/
-    QWidget* fenetreInfos = new QWidget;
+    if ((Partie!=0) && (mode==creationSGF))
+    {
+        enregistrerFichier();
+    }
+    else if (Partie!=0)
+    {
+        fermerFichier();
+        FenetreInfos* fi = new FenetreInfos(this);
+        fi->show();
+        mode=creationSGF;
+    }
+    else
+    {
+        FenetreInfos* fi = new FenetreInfos(this);
+        fi->show();
+        mode=creationSGF;
+    }
+}
 
+
+/******************************************************************************************************************/
+/********************************************                     *************************************************/
+/******************************************** CLASSE FENETREINFOS *************************************************/
+/********************************************                     *************************************************/
+/******************************************************************************************************************/
+
+/********** Constructeur **********************************************************/
+FenetreInfos::FenetreInfos(FP* f) : QWidget(), fenPrincipale(f)
+{
     /*** Définition d'un layout pour positionner les infos à demander */
     QGridLayout* layoutGrille = new QGridLayout;
     QGroupBox* box = new QGroupBox("Informations sur la partie");
@@ -324,11 +326,11 @@ void FP::nouveauFichier()
     QLabel* Nb = new QLabel("Niveau");
     QLabel* d = new QLabel("Date");
 
-    QLineEdit* nomNoir = new QLineEdit("Noir");
-    QLineEdit* nomBlanc = new QLineEdit("Blanc");
-    QLineEdit* niveauNoir = new QLineEdit("-");
-    QLineEdit* niveauBlanc = new QLineEdit("-");
-    QLineEdit* datePartie = new QLineEdit("date");
+    nomNoir = new QLineEdit("Noir");
+    nomBlanc = new QLineEdit("Blanc");
+    niveauNoir = new QLineEdit("-");
+    niveauBlanc = new QLineEdit("-");
+    datePartie = new QLineEdit("date");
 
     layoutGrille->addWidget(jn,0,0,1,2,Qt::AlignCenter); layoutGrille->addWidget(jb,0,2,1,2,Qt::AlignCenter);
     layoutGrille->addWidget(nn,1,0); layoutGrille->addWidget(nomNoir,1,1);
@@ -337,12 +339,77 @@ void FP::nouveauFichier()
     layoutGrille->addWidget(Nb,2,2); layoutGrille->addWidget(niveauBlanc,2,3);
     layoutGrille->addWidget(d,3,0,1,2,Qt::AlignRight); layoutGrille->addWidget(datePartie,3,2,1,2);
 
-    QPushButton* ok = new QPushButton("Ok");
-    layoutGrille->addWidget(ok,4,0,1,4);
+    QPushButton* valider = new QPushButton("Valider");
+    QPushButton* annuler = new QPushButton("Annuler");
+    layoutGrille->addWidget(valider,4,0,1,2);
+    layoutGrille->addWidget(annuler,4,2,1,2);
     box->setLayout(layoutGrille);
     QVBoxLayout* layoutP = new QVBoxLayout;
     layoutP->addWidget(box);
-    fenetreInfos->setLayout(layoutP);
-    connect(ok,SIGNAL(clicked()),fenetreInfos,SLOT(close()));
-    fenetreInfos->show();
+    setLayout(layoutP);
+    connect(valider,SIGNAL(clicked()),this,SLOT(valider()));
+    connect(annuler,SIGNAL(clicked()),this,SLOT(annuler()));
+}
+
+/**********  SLOT annuler : fermeture de la fenêtre **********/
+void FenetreInfos::annuler()
+{
+    close();
+}
+
+FenetreInfos::~FenetreInfos()
+{
+    delete nomNoir; delete nomBlanc; delete niveauNoir; delete niveauBlanc; delete datePartie;
+}
+
+/******** SLOT valider : vérification des infos entrées et création d'une instance de Partie ********/
+void FenetreInfos::valider()
+{
+    QString nom_noir, nom_Blanc, niveau_Noir, niveau_Blanc, date_partie;
+    if (nomNoir->text().size()==0) nom_noir="Noir"; else nom_noir=nomNoir->text();
+    if (nomBlanc->text().size()==0) nom_Blanc="Blanc"; else nom_Blanc=nomBlanc->text();
+    if (niveauNoir->text().size()==0) niveau_Noir="-"; else niveau_Noir=niveauNoir->text();
+    if (niveauBlanc->text().size()==0) niveau_Blanc="-"; else niveau_Blanc=niveauBlanc->text();
+    if (datePartie->text().size()==0) date_partie="inconnue"; else date_partie=datePartie->text();
+    fenPrincipale->setPartie(partie::donneInstance(nom_noir,nom_Blanc,niveau_Noir,niveau_Blanc,date_partie));
+
+    fenPrincipale->getInfosNoir()->setJoueur(fenPrincipale->getPartie()->getNoir());
+    fenPrincipale->getInfosBlanc()->setJoueur(fenPrincipale->getPartie()->getBlanc());
+    close();
+}
+
+
+
+/***************************************************************************************************************/
+/*************************************                             *********************************************/
+/*************************************     CLASSE INFOSJOUEURS     *********************************************/
+/*************************************                             *********************************************/
+/***************************************************************************************************************/
+
+
+infosJoueurs::infosJoueurs() : QGridLayout(), j(0)
+{
+    QLabel* rank = new QLabel("Niveau : ");
+    QLabel* name = new QLabel("Nom : ");
+    QLabel* capt = new QLabel("Capturées : ");
+    nom = new QLabel(" ");
+    niveau = new QLabel(" ");
+    pierresCapturees= new QLabel(" ");
+    titre= new QLabel(" ");
+
+    addWidget(titre,0,0,1,2, Qt::AlignCenter);
+    addWidget(name,1,0);
+    addWidget(nom,1,1);
+    addWidget(rank,2,0);
+    addWidget(niveau,2,1);
+    addWidget(capt,3,0);
+    addWidget(pierresCapturees,3,1);
+}
+
+void infosJoueurs::setJoueur(Joueur* J)
+{
+    j=J;
+    nom->setText(j->getNom());
+    niveau->setText(j->getRank());
+    pierresCapturees->setText("0");
 }

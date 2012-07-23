@@ -194,3 +194,8 @@ partie::~partie()
 {
     delete joueurBlanc; delete joueurNoir; partie::libereInstance();
 }
+
+void partie::enregistrerFichier()
+{
+
+}

@@ -17,6 +17,7 @@ Classe FP = fenêtre principale, hérite de QMainWindow, affiche le goban, les bou
 sur les joueurs, la barre de menus, etc.
 ***/
 
+enum modeSGF { creationSGF, lectureSGF};
 class infosJoueurs;
 
 class MyApplication : public QApplication
@@ -42,6 +43,7 @@ class FP : public QMainWindow
 {
     Q_OBJECT
 private :
+    modeSGF mode;
     Goban* goban;
     partie* Partie;
     QHBoxLayout* infosJoueur;
@@ -73,6 +75,8 @@ public :
 
 public slots :
     void ouvrirFichier();
+    void enregistrerFichier();
+    void nouveauFichier();
     void nextMove();
     void prevMove();
     void next5Moves();

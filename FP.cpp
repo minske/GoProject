@@ -2,7 +2,7 @@
 #include "partie.h"
 #include "actionNext.h"
 
-FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
+FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
 {
     pileUndo = new QUndoStack(this);
     viewUndo = new QUndoView(pileUndo);
@@ -10,10 +10,17 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QMenu *menuOptions = menuBar()->addMenu("&Options");
 
+    QAction* nouveauFichier = menuFichier->addAction("Nouveau");
+    nouveauFichier->setShortcut(QKeySequence("Ctrl+O"));
+    connect(nouveauFichier,SIGNAL(triggered()),this,SLOT(nouveauFichier()));
 
     QAction* ouvrirFichier = menuFichier->addAction("Ouvrir");
     ouvrirFichier->setShortcut(QKeySequence("Ctrl+O"));
     connect(ouvrirFichier,SIGNAL(triggered()),this,SLOT(ouvrirFichier()));
+
+    QAction* enregistrerFichier = menuFichier->addAction("Enregistrer");
+    enregistrerFichier->setShortcut(QKeySequence("Ctrl+S"));
+    connect(enregistrerFichier,SIGNAL(triggered()),this,SLOT(enregistrerFichier()));
 
     QAction* fermerFichier = menuFichier->addAction("Fermer");
     fermerFichier->setShortcut(QKeySequence("Ctrl+W"));
@@ -47,7 +54,9 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     /*************** BARRE D'OUTILS ******************/
     QToolBar* barreOutils = new QToolBar("nom");
     addToolBar(barreOutils);
+    barreOutils->addAction(nouveauFichier);
     barreOutils->addAction(ouvrirFichier);
+    barreOutils->addAction(enregistrerFichier);
     barreOutils->addAction(fermerFichier);
     barreOutils->addAction(actionQuitter);
 
@@ -287,4 +296,53 @@ void FP::changerFondMoyen()
 void FP::changerFondSansMotif()
 {
     goban->setBackgroundBrush(goban->getBrushSansMotif());
+}
+
+
+void FP::enregistrerFichier()
+{
+    if ((Partie!=0) && (mode==creationSGF))
+    {
+        Partie->enregistrerFichier();
+    }
+}
+
+void FP::nouveauFichier()
+{
+    /*** ouverture d'une boîte de dialogue pour demander le nom des joueurs, leur niveau,
+    la date de la partie ***/
+    QWidget* fenetreInfos = new QWidget;
+
+    /*** Définition d'un layout pour positionner les infos à demander */
+    QGridLayout* layoutGrille = new QGridLayout;
+    QGroupBox* box = new QGroupBox("Informations sur la partie");
+    QLabel* jn = new QLabel("<b>Joueur noir</b>");
+    QLabel* jb = new QLabel("<b>Joueur blanc</b>");
+    QLabel* nn = new QLabel("Nom");
+    QLabel* nb = new QLabel("Nom");
+    QLabel* Nn = new QLabel("Niveau");
+    QLabel* Nb = new QLabel("Niveau");
+    QLabel* d = new QLabel("Date");
+
+    QLineEdit* nomNoir = new QLineEdit("Noir");
+    QLineEdit* nomBlanc = new QLineEdit("Blanc");
+    QLineEdit* niveauNoir = new QLineEdit("-");
+    QLineEdit* niveauBlanc = new QLineEdit("-");
+    QLineEdit* datePartie = new QLineEdit("date");
+
+    layoutGrille->addWidget(jn,0,0,1,2,Qt::AlignCenter); layoutGrille->addWidget(jb,0,2,1,2,Qt::AlignCenter);
+    layoutGrille->addWidget(nn,1,0); layoutGrille->addWidget(nomNoir,1,1);
+    layoutGrille->addWidget(nb,1,2); layoutGrille->addWidget(nomBlanc,1,3);
+    layoutGrille->addWidget(Nn,2,0); layoutGrille->addWidget(niveauNoir,2,1);
+    layoutGrille->addWidget(Nb,2,2); layoutGrille->addWidget(niveauBlanc,2,3);
+    layoutGrille->addWidget(d,3,0,1,2,Qt::AlignRight); layoutGrille->addWidget(datePartie,3,2,1,2);
+
+    QPushButton* ok = new QPushButton("Ok");
+    layoutGrille->addWidget(ok,4,0,1,4);
+    box->setLayout(layoutGrille);
+    QVBoxLayout* layoutP = new QVBoxLayout;
+    layoutP->addWidget(box);
+    fenetreInfos->setLayout(layoutP);
+    connect(ok,SIGNAL(clicked()),fenetreInfos,SLOT(close()));
+    fenetreInfos->show();
 }

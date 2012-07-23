@@ -67,16 +67,19 @@ public :
     static void libereInstance();
     QString getDate() const {return date;}
     QString getResultat() const {return resultat;}
+    /*std::string getContenuFichier() const {return contenuFichier;}
+    void setContenuFichier(std::string const& c) {contenuFichier=c;}*/
+    void enregistrerFichier();
 
 private :
     vector<Coup> listeCoups;
     static partie* instanceUnique;
-    partie() : joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString())  {}
+    partie() : joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString()), contenuFichier(std::string())  {}
     Blanc* joueurBlanc;
     Noir* joueurNoir;
     QString date;
     QString resultat;
-
+    std::string contenuFichier;
 };
 
 ostream& operator<<(ostream& f, Coup const& c);

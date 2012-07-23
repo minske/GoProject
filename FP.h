@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QtGui>
 #include "goban.h"
+#include "bouton.h"
 #include <stack>
 
 /***
@@ -59,6 +60,7 @@ private :
     QUndoView* viewUndo;
     QStatusBar *barreEtat;
     QLabel* nomFichier;
+    QGridLayout* grilleBoutonsGoban;
 
 public :
     FP();
@@ -89,6 +91,7 @@ public slots :
     void changerFondClair();
     void changerFondMoyen();
     void changerFondSansMotif();
+    void bouton_goban(int a, int o);
 };
 
 class infosJoueurs : public QGridLayout

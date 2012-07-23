@@ -38,6 +38,7 @@ public :
     QGraphicsEllipseItem* getCoupCourant() const {return coupCourant;}
     static QPen getRouge();
     void printGroupes() const;
+    QGraphicsItemGroup* getLignes() const {return lignes;}
 
 private :
     static QBrush noir;

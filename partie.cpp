@@ -212,13 +212,28 @@ partie::~partie()
 void partie::enregistrerFichier(QString nomFich)
 {
     std::ostringstream  os;
+    /* Ecriture des informations en début de partie */
     os << "(;" << std::endl << "PB[" << joueurNoir->getNom().toStdString() << "]" << std::endl;
     os << "BR[" << joueurNoir->getRank().toStdString() << "]" << std::endl;
     os << "PW[" << joueurBlanc->getNom().toStdString() << "]" << std::endl;
     os << "WR[" << joueurBlanc->getRank().toStdString() << "]" << std::endl;
+    os << ";";
 
+    /* Ecriture de la liste des coups */
+    if (!listeCoups.empty())
+    {
+        for (partie::iterateur it = debut(); it!=fin(); ++it)
+        {
+            /* Pour chaque coup, si joueur=Noir, on écrit B[coup], sinon W
+            L'abscisse et l'ordonnée doivent être converties en caractères : a-a pour 0-0 */
+            if (it.getPtr()->getJoueur()->couleur()=="Noir") os << "B[" ;
+            else os << "W[";
+            os << 'a' + it.getPtr()->getAbs() << 'a' + it.getPtr()->getOrd() << "];" << std::endl;
+        }
+    }
 
-    os << ";)";
+    /* Parenthèse qui ferme le SGF */
+    os << ")";
     /* ouverture du fichier en écriture, effacé s'il existait déjà*/
     ofstream fichier(nomFich.toStdString(), ios::out | ios::trunc);
 

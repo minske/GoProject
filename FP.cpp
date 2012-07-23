@@ -111,6 +111,19 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
     vue->setFixedSize(E*20,E*20);
     layoutV->addWidget(vue);
 
+    /********* Définition d'une grille de boutons correspondant aux intersections *********/
+    grilleBoutonsGoban = new QGridLayout;
+    for (unsigned int i = 0; i<19; i++)
+        for (unsigned int j = 0; j<19; j++)
+        {
+            BoutonGoban* bouton = new BoutonGoban(i,j);
+            grilleBoutonsGoban->addWidget(bouton,i+1,j+1);
+            connect(bouton,SIGNAL(clicked()),bouton,SLOT(envoyerSignalClicked()));
+            connect(bouton,SIGNAL(clickedBouton(int,int)),this,SLOT(bouton_goban(int,int)));
+        }
+    grilleBoutonsGoban->setSpacing(0);
+    grilleBoutonsGoban->setMargin(E/2);
+    vue->setLayout(grilleBoutonsGoban);
 
     //Définition du widget pour affichage des infos
     infosJoueur = new QHBoxLayout;
@@ -145,6 +158,23 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
     m->setLayout(layoutPrincipal);
 
     setCentralWidget(m);
+
+    /*Quand on met une pierre sur un bord pour la première fois, le goban se décale ... En attendant d'avoir
+    réglé le problème, on met des pierres dans les coins pour que le goban soit à la bonne
+    place*/
+    QGraphicsPixmapItem* ellipse = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    ellipse->setX(E-(E*R/2));
+    ellipse->setY(E-(E*R/2));
+    ellipse->setVisible(false);
+    goban->addItem(ellipse);
+
+    QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    ellipse2->setX(19*E-(E*R/2));
+    ellipse2->setY(19*E-(E*R/2));
+    ellipse2->setVisible(false);
+    goban->addItem(ellipse2);
+
+
 }
 
 
@@ -303,6 +333,20 @@ void FP::nouveauFichier()
         fi->show();
         mode=creationSGF;
     }
+}
+
+void FP::bouton_goban(int a, int o)
+{
+    ostringstream os;
+    os << "Vous avez cliqué sur " << a << "-" << o;
+    QWidget* widg = new QWidget;
+    QVBoxLayout* lv = new QVBoxLayout;
+    QLabel* txt = new QLabel(QString::fromStdString(os.str()));
+    QPushButton* ok = new QPushButton("Ok");
+    lv->addWidget(txt); lv->addWidget(ok);
+    connect(ok,SIGNAL(clicked()),widg,SLOT(close()));
+    widg->setLayout(lv);
+    widg->show();
 }
 
 

@@ -217,7 +217,6 @@ void partie::enregistrerFichier(QString nomFich)
     os << "BR[" << joueurNoir->getRank().toStdString() << "]" << std::endl;
     os << "PW[" << joueurBlanc->getNom().toStdString() << "]" << std::endl;
     os << "WR[" << joueurBlanc->getRank().toStdString() << "]" << std::endl;
-    os << ";";
 
     /* Ecriture de la liste des coups */
     if (!listeCoups.empty())
@@ -226,14 +225,15 @@ void partie::enregistrerFichier(QString nomFich)
         {
             /* Pour chaque coup, si joueur=Noir, on écrit B[coup], sinon W
             L'abscisse et l'ordonnée doivent être converties en caractères : a-a pour 0-0 */
-            if (it.getPtr()->getJoueur()->couleur()=="Noir") os << "B[" ;
-            else os << "W[";
-            os << 'a' + it.getPtr()->getAbs() << 'a' + it.getPtr()->getOrd() << "];" << std::endl;
+            if (it.getPtr()->getJoueur()->couleur()=="Noir") os << ";B[" ;
+            else os << ";W[";
+            char abs('a' + it.getPtr()->getAbs()), ord('a' + it.getPtr()->getOrd());
+            os << abs << ord << "]" << std::endl;
         }
     }
 
     /* Parenthèse qui ferme le SGF */
-    os << ")";
+    os << ";)";
     /* ouverture du fichier en écriture, effacé s'il existait déjà*/
     ofstream fichier(nomFich.toStdString(), ios::out | ios::trunc);
 
@@ -243,4 +243,9 @@ void partie::enregistrerFichier(QString nomFich)
         fichier.close();
     }
 
+}
+
+void partie::ajouterCoup(Coup const& c)
+{
+    listeCoups.push_back(c);
 }

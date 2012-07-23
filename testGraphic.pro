@@ -7,7 +7,8 @@ SOURCES += \
     joueur.cpp \
     groupe.cpp \
     actionNext.cpp \
-    bouton.cpp
+    bouton.cpp \
+    fenetreInfos.cpp
 
 HEADERS += \
     partie.h \
@@ -17,6 +18,7 @@ HEADERS += \
     joueur.h \
     groupe.h \
     actionNext.h \
-    bouton.h
+    bouton.h \
+    fenetreInfos.h
 
 FORMS +=

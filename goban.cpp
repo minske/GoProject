@@ -52,10 +52,9 @@ Goban::Goban(Goban const& g) : courant(0)
     coupCourant = g.coupCourant; courant=g.courant;
 }
 
-
 void Goban::init()
 {
-    removeItem(coupCourant);
+    if (coupCourant!=0) removeItem(coupCourant);
     coupCourant=0; courant=0;
     for (map<pair<int,int>,Pierre*>::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {

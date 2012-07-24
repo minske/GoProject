@@ -1,5 +1,3 @@
-#define R 0.98
-
 #include "pierre.h"
 
 

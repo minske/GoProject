@@ -3,7 +3,9 @@
 #include <QtGUI>
 #include <QRect>
 #include "partie.h"
-#define E 32
+#define E 31
+#define R 0.98
+
 
 class Pierre
 {

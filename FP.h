@@ -62,6 +62,7 @@ private :
     QStatusBar *barreEtat;
     QLabel* nomFichier;
     QGridLayout* grilleBoutonsGoban;
+    QTextEdit* messagesExecution;
 
 public :
     FP();
@@ -93,6 +94,7 @@ public slots :
     void changerFondMoyen();
     void changerFondSansMotif();
     void bouton_goban(int a, int o);
+    void afficherMsgExec();
 };
 
 class infosJoueurs : public QGridLayout

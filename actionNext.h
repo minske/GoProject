@@ -21,11 +21,13 @@ public :
     bool mergeWith(const QUndoCommand* other);
     void redo();
     void undo();
+    //QString getLogMsg() const { return logMsg;}
 
 private :
     Pierre* m_pierre;
     set<Pierre*> pierresSupprimees;
     FP* fp;
+    //QString logMsg;
 
 };
 

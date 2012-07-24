@@ -171,6 +171,20 @@ partie* partie::donneInstance()
     return instanceUnique;
 }
 
+partie* partie::donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+                             QString const& blancNiveau, QString const& partieDate)
+{
+    if (instanceUnique == 0)
+    {
+        instanceUnique = new partie();
+
+        instanceUnique->joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
+        instanceUnique->joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
+        instanceUnique->date = partieDate;
+    }
+    return instanceUnique;
+}
+
 
 ostream& operator<<(ostream& f, Coup const& c)
 {
@@ -195,4 +209,45 @@ void partie::libereInstance()
 partie::~partie()
 {
     delete joueurBlanc; delete joueurNoir; partie::libereInstance();
+}
+
+void partie::enregistrerFichier(QString nomFich)
+{
+    std::ostringstream  os;
+    /* Ecriture des informations en début de partie */
+    os << "(;" << std::endl << "PB[" << joueurNoir->getNom().toStdString() << "]" << std::endl;
+    os << "BR[" << joueurNoir->getRank().toStdString() << "]" << std::endl;
+    os << "PW[" << joueurBlanc->getNom().toStdString() << "]" << std::endl;
+    os << "WR[" << joueurBlanc->getRank().toStdString() << "]" << std::endl;
+
+    /* Ecriture de la liste des coups */
+    if (!listeCoups.empty())
+    {
+        for (partie::iterateur it = debut(); it!=fin(); ++it)
+        {
+            /* Pour chaque coup, si joueur=Noir, on écrit B[coup], sinon W
+            L'abscisse et l'ordonnée doivent être converties en caractères : a-a pour 0-0 */
+            if (it.getPtr()->getJoueur()->couleur()=="Noir") os << ";B[" ;
+            else os << ";W[";
+            char abs('a' + it.getPtr()->getAbs()), ord('a' + it.getPtr()->getOrd());
+            os << abs << ord << "]" << std::endl;
+        }
+    }
+
+    /* Parenthèse qui ferme le SGF */
+    os << ";)";
+    /* ouverture du fichier en écriture, effacé s'il existait déjà*/
+    ofstream fichier(nomFich.toStdString(), ios::out | ios::trunc);
+
+    if (fichier) //si l'ouverture a réussi
+    {
+        fichier << os.str();
+        fichier.close();
+    }
+
+}
+
+void partie::ajouterCoup(Coup const& c)
+{
+    listeCoups.push_back(c);
 }

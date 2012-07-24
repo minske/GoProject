@@ -52,10 +52,9 @@ Goban::Goban(Goban const& g) : courant(0)
     coupCourant = g.coupCourant; courant=g.courant;
 }
 
-
 void Goban::init()
 {
-    removeItem(coupCourant);
+    if (coupCourant!=0) removeItem(coupCourant);
     coupCourant=0; courant=0;
     for (map<pair<int,int>,Pierre*>::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {
@@ -68,15 +67,16 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
 {
     //if (coupCourant!=0) removeItem(coupCourant);
 
-
-    std::cout << "\n ---------- \nCoup n°" << p->getCoup()->getNum() << std::endl;
+    ostringstream os;
+    os << "\n ---------- \n Coup n°" << p->getCoup()->getNum() << std::endl;
 
     /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
     const int ord = p->getCoup()->getOrd();
     const int abs = p->getCoup()->getAbs();
     pair<int,int> coord = make_pair(abs,ord);
     if (plateau.insert(pair<pair<int,int>,Pierre*>(coord,p)).second)
-        std::cout << "Ajout de la pierre à la map plateau : ok" << std::endl;
+        os << "Ajout de la pierre à la map plateau : ok" << std::endl;
+        //os << "Ajout de la pierre à la map plateau : ok" << std::endl;
 
     /* On regarde s'il y a des pierres autour de la pierre qu'on pose
     Si oui, on doit ajouter cette pierre à un groupe déjà existant
@@ -87,7 +87,8 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
     {
     case 0 :
     {
-        std::cout << "Pierre isolée, création d'un nouveau groupe" << std::endl;
+        os << "Pierre isolée, création d'un nouveau groupe" << std::endl;
+        //os << "Pierre isolée, création d'un nouveau groupe" << std::endl;
         Groupe* g = new Groupe();
         g->ajouterPierre(p);
         groupes.insert(g);
@@ -97,41 +98,45 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
     case 1 :
     {
         //il faut trouver le groupe auquel la pierre va être ajoutée
-        std::cout << "Une pierre à côté" << std::endl;
+        //os << "Une pierre à côté" << std::endl;
+        os << "Une pierre à côté" << std::endl;
         Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
         g1->ajouterPierre(p);
-        std::cout << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
+        //os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
+        os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
         break;
     }
 
     case 2 :
     {
         //on doit fusionner les deux groupes
-        std::cout << "Deux pierres à côté" << std::endl;
+        //os << "Deux pierres à côté" << std::endl;
+        os << "Deux pierres à côté" << std::endl;
         Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
         Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
 
-        std::cout << "Fusion de deux groupes" << std::endl;
+        //os << "Fusion de deux groupes" << std::endl;
+        os <<  "Fusion de deux groupes" << std::endl;
         g1->operator +=(*g2);
         groupes.erase(g2);
 
         g1->ajouterPierre(p);
         //g1->supprimerDoublons();
 
-        std::cout << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
+        os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
         break;
     }
 
     case 3 :
     {
         //on fusionne trois groupes
-        std::cout << "Trois pierres à côté" << std::endl;
+        os << "Trois pierres à côté" << std::endl;
         Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
         Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
         Groupe* g3= trouverGroupe(autourMemeCouleur[2]);
 
 
-        std::cout << "Fusion de trois groupes" << std::endl;
+        os << "Fusion de trois groupes" << std::endl;
         g1->operator +=(*g2);
         g1->operator +=(*g3);
         groupes.erase(g2);
@@ -141,14 +146,14 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
 
         //g1->supprimerDoublons();
 
-        std::cout << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
+        os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
         break;
     }
 
     case 4 :
     {
         //on fusionne quatre groupes max
-        std::cout << "Quatre pierres à côté" << std::endl;
+        os << "Quatre pierres à côté" << std::endl;
         Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
         Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
         Groupe* g3= trouverGroupe(autourMemeCouleur[2]);
@@ -161,7 +166,7 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
         //g1->supprimerDoublons();
         g1->ajouterPierre(p);
 
-        std::cout << "Groupe de " << g1->getPierres().size() << " pierres." << std::endl;
+        os << "Groupe de " << g1->getPierres().size() << " pierres." << std::endl;
         break;
     }
 
@@ -194,7 +199,7 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
                 Groupe* g = trouverGroupe(*it);
                 if (nbLibertes(g)==0)
                 {
-                    std::cout << "Un groupe à supprimer" << std::endl;
+                    os << "Un groupe à supprimer" << std::endl;
                     //nbcapt+=g->getPierres().size();
                     for (set<Pierre*>::iterator it = g->getPierres().begin(); it!=g->getPierres().end(); ++it)
                     {
@@ -210,6 +215,7 @@ set<Pierre*> Goban::ajouterPierre(Pierre* p)
 
 
     //return nbcapt;
+    logMsg = QString::fromStdString(os.str());
     return pierresSupprimees;
 
 }

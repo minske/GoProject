@@ -38,6 +38,8 @@ public :
     QGraphicsEllipseItem* getCoupCourant() const {return coupCourant;}
     static QPen getRouge();
     void printGroupes() const;
+    QGraphicsItemGroup* getLignes() const {return lignes;}
+    QString getLogMsg() const {return logMsg;}
 
 private :
     static QBrush noir;
@@ -53,6 +55,7 @@ private :
     QBrush fondMoyen;
     QBrush fondFonce;
     QBrush sansMotif;
+    QString logMsg;
 
     //plateau : pierres avec pair<abs,ord> comme clé (pair<int,int>)
 };

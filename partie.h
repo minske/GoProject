@@ -19,6 +19,7 @@ class Coup
 
 public :
     Coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
+    Coup(int abs, int ord, Joueur* jou) : abscisse(abs), ordonnee(ord), j(jou) {}
     Coup(std::string const& s, std::string com=std::string());
     std::string print() const;
     int getAbs() const {return abscisse;}
@@ -37,10 +38,13 @@ class partie
 {
 public :
     static partie* donneInstance();
+    static partie* donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+                                 QString const& blancNiveau, QString const& partieDate);
     void chargerFichier(std::string const& nomFichier);
     //void avancer() {++courant;}
     //void reculer() {--courant;}
     vector<Coup> getListeCoups() const {return listeCoups;}
+    void ajouterCoup(Coup const& c);
 
     class iterateur
     {
@@ -67,16 +71,19 @@ public :
     static void libereInstance();
     QString getDate() const {return date;}
     QString getResultat() const {return resultat;}
+    /*std::string getContenuFichier() const {return contenuFichier;}
+    void setContenuFichier(std::string const& c) {contenuFichier=c;}*/
+    void enregistrerFichier(QString nomFich);
 
 private :
     vector<Coup> listeCoups;
     static partie* instanceUnique;
-    partie() : joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString())  {}
+    partie() : joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString()), contenuFichier(std::string())  {}
     Blanc* joueurBlanc;
     Noir* joueurNoir;
     QString date;
     QString resultat;
-
+    std::string contenuFichier;
 };
 
 ostream& operator<<(ostream& f, Coup const& c);

@@ -6,7 +6,9 @@ SOURCES += \
     pierre.cpp \
     joueur.cpp \
     groupe.cpp \
-    actionNext.cpp
+    actionNext.cpp \
+    bouton.cpp \
+    fenetreInfos.cpp
 
 HEADERS += \
     partie.h \
@@ -15,6 +17,8 @@ HEADERS += \
     pierre.h \
     joueur.h \
     groupe.h \
-    actionNext.h
+    actionNext.h \
+    bouton.h \
+    fenetreInfos.h
 
 FORMS +=

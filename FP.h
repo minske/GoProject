@@ -4,6 +4,8 @@
 #include <QApplication>
 #include <QtGui>
 #include "goban.h"
+#include "bouton.h"
+#include "fenetreInfos.h"
 #include <stack>
 
 /***
@@ -17,6 +19,7 @@ Classe FP = fenêtre principale, hérite de QMainWindow, affiche le goban, les bou
 sur les joueurs, la barre de menus, etc.
 ***/
 
+enum modeSGF { creationSGF, lectureSGF};
 class infosJoueurs;
 
 class MyApplication : public QApplication
@@ -42,6 +45,7 @@ class FP : public QMainWindow
 {
     Q_OBJECT
 private :
+    modeSGF mode;
     Goban* goban;
     partie* Partie;
     QHBoxLayout* infosJoueur;
@@ -57,6 +61,8 @@ private :
     QUndoView* viewUndo;
     QStatusBar *barreEtat;
     QLabel* nomFichier;
+    QGridLayout* grilleBoutonsGoban;
+    QTextEdit* messagesExecution;
 
 public :
     FP();
@@ -66,6 +72,7 @@ public :
     void setVue(QGraphicsView* v) {vue = v;}
     Goban* getGoban() const {return goban;}
     partie* getPartie() const {return Partie;}
+    void setPartie(partie* p) {Partie = p;}
     infosJoueurs* getInfosNoir() const {return infosNoir;}
     infosJoueurs* getInfosBlanc() const {return infosBlanc;}
     QTextEdit* getComm() const {return commentaires;}
@@ -73,6 +80,8 @@ public :
 
 public slots :
     void ouvrirFichier();
+    void enregistrerFichier();
+    void nouveauFichier();
     void nextMove();
     void prevMove();
     void next5Moves();
@@ -84,6 +93,8 @@ public slots :
     void changerFondClair();
     void changerFondMoyen();
     void changerFondSansMotif();
+    void bouton_goban(int a, int o);
+    void afficherMsgExec();
 };
 
 class infosJoueurs : public QGridLayout

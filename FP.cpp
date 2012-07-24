@@ -13,6 +13,7 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
 {
     pileUndo = new QUndoStack(this);
     viewUndo = new QUndoView(pileUndo);
+    messagesExecution = new QTextEdit("Ouverture du programme.");
     //menu
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QMenu *menuOptions = menuBar()->addMenu("&Options");
@@ -47,6 +48,9 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
     connect(changerFondFonce,SIGNAL(triggered()),this,SLOT(changerFondFonce()));
     connect(changerFondSansMotif,SIGNAL(triggered()),this,SLOT(changerFondSansMotif()));
 
+    QAction* msgExec = menuOptions->addAction("Afficher les messages d'exécution");
+    msgExec->setShortcut(QKeySequence("Ctrl+L"));
+    connect(msgExec,SIGNAL(triggered()),this,SLOT(afficherMsgExec()));
 
     //Layout horizontal principal : à gauche le goban, à droite les infos
     layoutPrincipal = new QHBoxLayout;
@@ -211,8 +215,11 @@ void FP::nextMove()
 
     else if ((Partie!=0) && (goban->getCourant()!=Partie->fin()))
     {
-        std::cout << "Ajout dans la pile undoStack" << std::endl;
-        pileUndo->push(new actionNext(this));
+        //std::cout << "Ajout dans la pile undoStack" << std::endl;
+        messagesExecution->append("Ajout dans la pile undoStack");
+        actionNext* an = new actionNext(this);
+        pileUndo->push(an);
+        messagesExecution->append(an->text());
 
     }
 
@@ -345,34 +352,32 @@ void FP::bouton_goban(int a, int o)
         Sinon, on regarde le dernier coup joué.*/
         if (goban->getCourant()==0)
         {
-            QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-            ellipse2->setX((a+1)*E-(E*R/2));
-            ellipse2->setY((o+1)*E-(E*R/2));
-            goban->addItem(ellipse2);
+            Coup* c = new Coup(a,o,Partie->getNoir());
 
-            Partie->ajouterCoup(Coup(a,o,Partie->getNoir()));
+            Partie->ajouterCoup(*c);
+            Pierre* p = new Pierre(c);
+            goban->ajouterPierre(p);
             goban->setCourant(Partie->debut());
         }
         else if ((*(goban->getCourant())).getJoueur()->couleur()=="Noir")
         {
-            QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreBlanche.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-            ellipse2->setX((a+1)*E-(E*R/2));
-            ellipse2->setY((o+1)*E-(E*R/2));
-            goban->addItem(ellipse2);
+            Coup* c = new Coup(a,o,Partie->getBlanc());
 
-            Partie->ajouterCoup(Coup(a,o,Partie->getBlanc()));
+            Partie->ajouterCoup(*c);
+            Pierre* p = new Pierre(c);
+            goban->ajouterPierre(p);
             goban->avancer();
         }
         else if ((*(goban->getCourant())).getJoueur()->couleur()=="Blanc")
         {
-            QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-            ellipse2->setX((a+1)*E-(E*R/2));
-            ellipse2->setY((o+1)*E-(E*R/2));
-            goban->addItem(ellipse2);
+            Coup* c = new Coup(a,o,Partie->getNoir());
 
-            Partie->ajouterCoup(Coup(a,o,Partie->getNoir()));
+            Partie->ajouterCoup(*c);
+            Pierre* p = new Pierre(c);
+            goban->ajouterPierre(p);
             goban->avancer();
         }
+        else throw coup_exception("Impossible d'ajouter un coup.");
 
         /* Test : ok
         QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
@@ -396,6 +401,10 @@ void FP::bouton_goban(int a, int o)
     widg->show();*/
 }
 
+void FP::afficherMsgExec()
+{
+    messagesExecution->show();
+}
 
 
 /***************************************************************************************************************/

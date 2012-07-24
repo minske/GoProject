@@ -87,6 +87,7 @@ void partie::chargerFichier(string const& f)
                 inf += infos[j];
                 j++;
             }
+            if (inf[0] == '&') inf.erase(0,1);
             if (inf.substr(0,2)=="PW") jblanc=inf.substr(3);
             else if (inf.substr(0,2)=="PB") jnoir=inf.substr(3);
             else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
@@ -117,9 +118,10 @@ void partie::chargerFichier(string const& f)
             while ((contenu[i]!=';') && (contenu[i]!=')') && (k!=2)) // on arrete si on trouve le bon nombre de crochet fermé
             {
                 coup+=contenu[i];
-                if ((contenu[i]==']') && (contenu[i+1]!='O')) k++; /* si on trouve un crochet fermé non suivit d'un O
+                if ((contenu[i]==']') && ((contenu[i+1]!='O') && (contenu[i+1]!='W') && (contenu[i+1]!='B' ))) k++; /* si on trouve un crochet fermé non suivi d'un O
                                                                      (il resterait alors le nombre de byo restant à lire)
                                                                      on augmente k */
+                if ((contenu[i+1]=='C') && (k==1) && (contenu[i+2]!='R')) k++;
                 i++;
             }
             if (contenu[i]=='C') // si il y a un C, il y aura un commentaire

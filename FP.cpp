@@ -2,7 +2,14 @@
 #include "partie.h"
 #include "actionNext.h"
 
-FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
+/******************************************************************************************************************/
+/********************************************               *******************************************************/
+/********************************************   CLASSE FP   *******************************************************/
+/********************************************               *******************************************************/
+/******************************************************************************************************************/
+
+
+FP::FP() : QMainWindow(), Partie(0), pileUndo(0), mode(lectureSGF)
 {
     pileUndo = new QUndoStack(this);
     viewUndo = new QUndoView(pileUndo);
@@ -10,10 +17,17 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     QMenu *menuFichier = menuBar()->addMenu("&Fichier");
     QMenu *menuOptions = menuBar()->addMenu("&Options");
 
+    QAction* nouveauFichier = menuFichier->addAction("Nouveau");
+    nouveauFichier->setShortcut(QKeySequence("Ctrl+N"));
+    connect(nouveauFichier,SIGNAL(triggered()),this,SLOT(nouveauFichier()));
 
     QAction* ouvrirFichier = menuFichier->addAction("Ouvrir");
     ouvrirFichier->setShortcut(QKeySequence("Ctrl+O"));
     connect(ouvrirFichier,SIGNAL(triggered()),this,SLOT(ouvrirFichier()));
+
+    QAction* enregistrerFichier = menuFichier->addAction("Enregistrer");
+    enregistrerFichier->setShortcut(QKeySequence("Ctrl+S"));
+    connect(enregistrerFichier,SIGNAL(triggered()),this,SLOT(enregistrerFichier()));
 
     QAction* fermerFichier = menuFichier->addAction("Fermer");
     fermerFichier->setShortcut(QKeySequence("Ctrl+W"));
@@ -47,7 +61,9 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     /*************** BARRE D'OUTILS ******************/
     QToolBar* barreOutils = new QToolBar("nom");
     addToolBar(barreOutils);
+    barreOutils->addAction(nouveauFichier);
     barreOutils->addAction(ouvrirFichier);
+    barreOutils->addAction(enregistrerFichier);
     barreOutils->addAction(fermerFichier);
     barreOutils->addAction(actionQuitter);
 
@@ -95,6 +111,19 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     vue->setFixedSize(E*20,E*20);
     layoutV->addWidget(vue);
 
+    /********* Définition d'une grille de boutons correspondant aux intersections *********/
+    grilleBoutonsGoban = new QGridLayout;
+    for (unsigned int i = 0; i<19; i++)
+        for (unsigned int j = 0; j<19; j++)
+        {
+            BoutonGoban* bouton = new BoutonGoban(i,j);
+            grilleBoutonsGoban->addWidget(bouton,j+1,i+1);
+            connect(bouton,SIGNAL(clicked()),bouton,SLOT(envoyerSignalClicked()));
+            connect(bouton,SIGNAL(clickedBouton(int,int)),this,SLOT(bouton_goban(int,int)));
+        }
+    grilleBoutonsGoban->setSpacing(0);
+    grilleBoutonsGoban->setMargin(E/2);
+    vue->setLayout(grilleBoutonsGoban);
 
     //Définition du widget pour affichage des infos
     infosJoueur = new QHBoxLayout;
@@ -129,6 +158,23 @@ FP::FP() : QMainWindow(), Partie(0), pileUndo(0)
     m->setLayout(layoutPrincipal);
 
     setCentralWidget(m);
+
+    /*Quand on met une pierre sur un bord pour la première fois, le goban se décale ... En attendant d'avoir
+    réglé le problème, on met des pierres dans les coins pour que le goban soit à la bonne
+    place*/
+    QGraphicsPixmapItem* ellipse = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    ellipse->setX(E-(E*R/2));
+    ellipse->setY(E-(E*R/2));
+    ellipse->setVisible(false);
+    goban->addItem(ellipse);
+
+    QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    ellipse2->setX(19*E-(E*R/2));
+    ellipse2->setY(19*E-(E*R/2));
+    ellipse2->setVisible(false);
+    goban->addItem(ellipse2);
+
+
 }
 
 
@@ -142,13 +188,8 @@ void FP::ouvrirFichier()
     Partie->chargerFichier(fichier.toStdString());
     goban->setCourant(partie::iterateur(Partie->debut()));
 
-    infosNoir->setNom(Partie->getNoir()->getNom());
-    infosNoir->setNiveau(Partie->getNoir()->getRank());
-    infosNoir->setCapt("0");
-
-    infosBlanc->setNom(Partie->getBlanc()->getNom());
-    infosBlanc->setNiveau(Partie->getBlanc()->getRank());
-    infosBlanc->setCapt("0");
+    infosNoir->setJoueur(Partie->getNoir());
+    infosBlanc->setJoueur(Partie->getBlanc());
 
     commentaires->setText("Fichier : "+fichier+". Début de la partie.\n Partie jouée le "+Partie->getDate());
     nomFichier->setText("Fichier : "+fichier);
@@ -194,8 +235,6 @@ void FP::fermerFichier()
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
     infosBlanc->setNom(" "); infosBlanc->setNiveau(" ");
     commentaires->setText(" ");
-    //infosJoueurs = new QWidget;
-    //infosJoueurs->setFixedWidth(300);
 }
 
 void FP::prevMove()
@@ -205,33 +244,6 @@ void FP::prevMove()
         pileUndo->undo();
 
     }
-}
-
-
-infosJoueurs::infosJoueurs() : QGridLayout(), j(0)
-{
-    QLabel* rank = new QLabel("Niveau : ");
-    QLabel* name = new QLabel("Nom : ");
-    QLabel* capt = new QLabel("Capturées : ");
-    nom = new QLabel(" ");
-    niveau = new QLabel(" ");
-    pierresCapturees= new QLabel(" ");
-    titre= new QLabel(" ");
-
-    addWidget(titre,0,0,1,2, Qt::AlignCenter);
-    addWidget(name,1,0);
-    addWidget(nom,1,1);
-    addWidget(rank,2,0);
-    addWidget(niveau,2,1);
-    addWidget(capt,3,0);
-    addWidget(pierresCapturees,3,1);
-}
-
-void infosJoueurs::setJoueur(Joueur* J)
-{
-    j=J;
-    nom->setText(j->getNom());
-    niveau->setText(j->getRank());
 }
 
 
@@ -287,4 +299,135 @@ void FP::changerFondMoyen()
 void FP::changerFondSansMotif()
 {
     goban->setBackgroundBrush(goban->getBrushSansMotif());
+}
+
+
+void FP::enregistrerFichier()
+{
+    if ((Partie!=0) && (mode==creationSGF))
+    {
+        QString nomFich = QFileDialog::getSaveFileName(this, "Enregistrer un fichier", QString(), "SGF (*.sgf)");
+        if (nomFich.size()!=0)
+            Partie->enregistrerFichier(nomFich);
+    }
+}
+
+void FP::nouveauFichier()
+{
+    /*** ouverture d'une boîte de dialogue pour demander le nom des joueurs, leur niveau,
+    la date de la partie ***/
+    if ((Partie!=0) && (mode==creationSGF))
+    {
+        enregistrerFichier();
+    }
+    else if (Partie!=0)
+    {
+        fermerFichier();
+        FenetreInfos* fi = new FenetreInfos(this);
+        fi->show();
+        mode=creationSGF;
+    }
+    else
+    {
+        FenetreInfos* fi = new FenetreInfos(this);
+        fi->show();
+        mode=creationSGF;
+
+    }
+}
+
+void FP::bouton_goban(int a, int o)
+{
+
+    if ((mode==creationSGF) && (Partie!=0))
+    {
+        /* Si la partie n'a encore aucun coup, c'est le premier, donc à noir de jouer
+        Sinon, on regarde le dernier coup joué.*/
+        if (goban->getCourant()==0)
+        {
+            QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+            ellipse2->setX((a+1)*E-(E*R/2));
+            ellipse2->setY((o+1)*E-(E*R/2));
+            goban->addItem(ellipse2);
+
+            Partie->ajouterCoup(Coup(a,o,Partie->getNoir()));
+            goban->setCourant(Partie->debut());
+        }
+        else if ((*(goban->getCourant())).getJoueur()->couleur()=="Noir")
+        {
+            QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreBlanche.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+            ellipse2->setX((a+1)*E-(E*R/2));
+            ellipse2->setY((o+1)*E-(E*R/2));
+            goban->addItem(ellipse2);
+
+            Partie->ajouterCoup(Coup(a,o,Partie->getBlanc()));
+            goban->avancer();
+        }
+        else if ((*(goban->getCourant())).getJoueur()->couleur()=="Blanc")
+        {
+            QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+            ellipse2->setX((a+1)*E-(E*R/2));
+            ellipse2->setY((o+1)*E-(E*R/2));
+            goban->addItem(ellipse2);
+
+            Partie->ajouterCoup(Coup(a,o,Partie->getNoir()));
+            goban->avancer();
+        }
+
+        /* Test : ok
+        QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        ellipse2->setX((a+1)*E-(E*R/2));
+        ellipse2->setY((o+1)*E-(E*R/2));
+        goban->addItem(ellipse2);*/
+    }
+
+
+    /* TEST : on récupère les coordonnées correctes
+
+    ostringstream os;
+    os << "Vous avez cliqué sur " << a << "-" << o;
+    QWidget* widg = new QWidget;
+    QVBoxLayout* lv = new QVBoxLayout;
+    QLabel* txt = new QLabel(QString::fromStdString(os.str()));
+    QPushButton* ok = new QPushButton("Ok");
+    lv->addWidget(txt); lv->addWidget(ok);
+    connect(ok,SIGNAL(clicked()),widg,SLOT(close()));
+    widg->setLayout(lv);
+    widg->show();*/
+}
+
+
+
+/***************************************************************************************************************/
+/*************************************                             *********************************************/
+/*************************************     CLASSE INFOSJOUEURS     *********************************************/
+/*************************************                             *********************************************/
+/***************************************************************************************************************/
+
+
+infosJoueurs::infosJoueurs() : QGridLayout(), j(0)
+{
+    QLabel* rank = new QLabel("Niveau : ");
+    QLabel* name = new QLabel("Nom : ");
+    QLabel* capt = new QLabel("Capturées : ");
+    nom = new QLabel(" ");
+    niveau = new QLabel(" ");
+    pierresCapturees= new QLabel(" ");
+    titre= new QLabel(" ");
+
+    addWidget(titre,0,0,1,2, Qt::AlignCenter);
+    addWidget(name,1,0);
+    addWidget(nom,1,1);
+    addWidget(rank,2,0);
+    addWidget(niveau,2,1);
+    addWidget(capt,3,0);
+    addWidget(pierresCapturees,3,1);
+}
+
+void infosJoueurs::setJoueur(Joueur* J)
+{
+    j=J;
+    nom->setText(j->getNom());
+    niveau->setText(j->getRank());
+    pierresCapturees->setText("0");
 }

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <sstream>
 
-Noir* Noir::instanceUnique = 0;
-Blanc* Blanc::instanceUnique = 0;
+boost::shared_ptr<Noir> Noir::instanceUnique;
+boost::shared_ptr<Blanc> Blanc::instanceUnique;
 
 Joueur::~Joueur()
 {
@@ -13,20 +13,20 @@ Joueur::Joueur(QString const& Nom, QString const& rank)
     : nom(Nom), niveau(rank), pierresCapturees(0), territoire(0)
 {}
 
-Noir* Noir::donneInstance(QString const& Nom, QString const& rank, unsigned int h)
+boost::shared_ptr<Noir> Noir::donneInstance(QString const& Nom, QString const& rank, unsigned int h)
 {
     if (instanceUnique == 0)
     {
-        instanceUnique = new Noir(Nom,rank,h);
+        instanceUnique = boost::shared_ptr<Noir>(new Noir(Nom,rank,h));
     }
     return instanceUnique;
 }
 
-Blanc* Blanc::donneInstance(QString const& Nom, QString const& rank, double k)
+boost::shared_ptr<Blanc> Blanc::donneInstance(QString const& Nom, QString const& rank, double k)
 {
     if (instanceUnique == 0)
     {
-        instanceUnique = new Blanc(Nom,rank,k);
+        instanceUnique = boost::shared_ptr<Blanc>(new Blanc(Nom,rank,k));
     }
     return instanceUnique;
 }
@@ -48,12 +48,12 @@ void Joueur::addCapt(unsigned int i)
 
 void Blanc::libereInstance()
 {
-    instanceUnique = 0;
+    instanceUnique.reset();
 }
 
 void Noir::libereInstance()
 {
-    instanceUnique = 0;
+    instanceUnique.reset();
 }
 
 Blanc::~Blanc()

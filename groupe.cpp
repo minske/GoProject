@@ -1,14 +1,28 @@
 #include "groupe.h"
+#include "pierre.h"
 
-Groupe::Groupe() : statut(0), appartient(set<Pierre*>())
+Groupe::Groupe() : statut(0)
 {}
 
-bool Groupe::faitPartie(const Pierre* p) const
+
+unsigned int Groupe::nbLibertes() const
 {
-    return (find(appartient.begin(), appartient.end(),p)!=appartient.end());
+    unsigned int result=0;
+
+    for (vector<boost::shared_ptr<Pierre> >::const_iterator it = m_pierres.begin(); it != m_pierres.end() ; ++it)
+    {
+        result += (*it)->libertes();
+    }
+
+    return result;
 }
 
-void Groupe::ajouterPierre(Pierre* p)
+bool Groupe::faitPartie(const boost::shared_ptr<Pierre> p) const
+{
+    return (find(m_pierres.begin(), m_pierres.end(),p)!=m_pierres.end());
+}
+
+void Groupe::ajouterPierre(boost::shared_ptr<Pierre> p)
 {
     if (faitPartie(p))
     {
@@ -16,62 +30,65 @@ void Groupe::ajouterPierre(Pierre* p)
         res << "La pierre " << p->getCoup()->getAbs() << "-" << p->getCoup()->getOrd() << " appartient déjà au groupe";
         throw coup_exception(res.str());
     }
-    appartient.insert(p);
+    m_pierres.push_back(p);
+}
+
+void Groupe::ajouterGroupe(boost::shared_ptr<Groupe> g)
+{
+    for (vector<boost::shared_ptr<Pierre> >::iterator it = g->getPierres().begin(); it != g->getPierres().end(); it++)
+    {
+        boost::shared_ptr<Pierre> pierrePtr = *it;
+        ajouterPierre(pierrePtr);
+    }
 }
 
 void Groupe::capture()
 {}
 
-Groupe& Groupe::operator+=(Groupe const& g)
-{
-    for (set<Pierre*>::const_iterator it = g.appartient.begin() ;it != g.appartient.end() ; ++it)
-    {
-        if (!faitPartie(*it))
-            appartient.insert(*it);
-    }
 
-    return *this;
-}
-
-bool Groupe::operator==(Groupe const& g) const
-{
-    if (faitPartie(*g.appartient.begin()))
-        return true;
-    else return false;
-}
-
-bool Groupe::operator!=(Groupe const& g) const
-{
-    return !(*this==g);
-}
-
-Groupe operator+(Groupe const& a, Groupe const& b)
-{
-    Groupe c(a);
-    c+=b;
-    return c;
-}
 
 
 Groupe::Groupe(Groupe const& g)
 {
     /*int statut; //0 pour mort, 1 pour vivant
     unsigned int libertes;
-    set<Pierre*> appartient;*/
+    set<Pierre*> m_pierres;*/
 
     statut = g.statut;
-    for (set<Pierre*>::const_iterator it=g.appartient.begin(); it!=g.appartient.end() ; ++it)
+    for (vector<boost::shared_ptr<Pierre> >::const_iterator it=g.m_pierres.begin(); it!=g.m_pierres.end() ; ++it)
     {
-        appartient.insert(*it);
+        m_pierres.push_back(*it);
     }
 }
 
 void Groupe::print() const
 {
-    if (appartient.size()!=0)
+    if (m_pierres.size()!=0)
     {
-        for (set<Pierre*>::iterator it=appartient.begin(); it!=appartient.end(); ++it)
+        for (vector<boost::shared_ptr<Pierre> >::const_iterator it=m_pierres.begin(); it!=m_pierres.end(); ++it)
             std::cout << (*it)->getCoup()->getAbs() <<"-" << (*it)->getCoup()->getOrd() <<" + ";
     }
     else std::cout << "Groupe vide";
+}
+
+std::string Groupe::printToString() const
+{
+    std::ostringstream os;
+
+    if (m_pierres.size()!=0)
+    {
+        for (vector<boost::shared_ptr<Pierre> >::const_iterator it=m_pierres.begin(); it!=m_pierres.end(); ++it)
+            os << (*it)->getCoup()->getAbs() <<"-" << (*it)->getCoup()->getOrd() <<" + ";
+    }
+    else os << "Groupe vide";
+
+    return os.str();
+}
+
+std::string Groupe::couleur() const
+{
+    if (!m_pierres.empty())
+    {
+        return m_pierres[0]->couleur();
+    }
 }

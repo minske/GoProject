@@ -15,18 +15,20 @@ et modifie le goban.
 class actionNext : public QUndoCommand
 {
 public :
-    actionNext(FP* f);
+    actionNext();
+    actionNext(boost::shared_ptr<FP> f);
     ~actionNext() {}
     int id() const {return 42;}
-    bool mergeWith(const QUndoCommand* other);
+    bool mergeWith(const boost::shared_ptr<QUndoCommand> other);
     void redo();
     void undo();
     //QString getLogMsg() const { return logMsg;}
+    void setFpPtr(boost::shared_ptr<FP> fpPtr) {fp = fpPtr;}
 
 private :
-    Pierre* m_pierre;
-    set<Pierre*> pierresSupprimees;
-    FP* fp;
+    boost::shared_ptr<Pierre> m_pierre;
+    vector<boost::shared_ptr<Pierre> > pierresSupprimees;
+    boost::shared_ptr<FP> fp;
     //QString logMsg;
 
 };

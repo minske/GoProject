@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFichier">
+    <property name="title">
+     <string>Fichier</string>
+    </property>
+    <addaction name="actionOuvrir_un_fichier"/>
+    <addaction name="actionFermer_le_fichier"/>
+    <addaction name="actionQuitter"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <widget class="QMenu" name="menuFond_du_goban">
+     <property name="title">
+      <string>Fond du goban</string>
+     </property>
+     <addaction name="actionClair"/>
+     <addaction name="actionMoyen"/>
+     <addaction name="actionFonc"/>
+     <addaction name="actionUni"/>
+    </widget>
+    <addaction name="menuFond_du_goban"/>
+   </widget>
+   <addaction name="menuFichier"/>
+   <addaction name="menuOptions"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionOuvrir_un_fichier">
+   <property name="text">
+    <string>Ouvrir un fichier</string>
+   </property>
+  </action>
+  <action name="actionFermer_le_fichier">
+   <property name="text">
+    <string>Fermer le fichier</string>
+   </property>
+  </action>
+  <action name="actionQuitter">
+   <property name="text">
+    <string>Quitter</string>
+   </property>
+  </action>
+  <action name="actionClair">
+   <property name="text">
+    <string>Clair</string>
+   </property>
+  </action>
+  <action name="actionMoyen">
+   <property name="text">
+    <string>Moyen</string>
+   </property>
+  </action>
+  <action name="actionFonc">
+   <property name="text">
+    <string>Foncé</string>
+   </property>
+  </action>
+  <action name="actionUni">
+   <property name="text">
+    <string>Uni</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

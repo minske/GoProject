@@ -2,6 +2,8 @@
 #define JOUEUR_H
 #include <QtGui>
 
+#include <boost/shared_ptr.hpp>
+
 class Joueur
 {
 protected :
@@ -26,12 +28,12 @@ class Noir : public Joueur
 {
 private :
     unsigned int handicap;
-    static Noir* instanceUnique;
+    static boost::shared_ptr<Noir> instanceUnique;
     Noir(QString const& Nom, QString const& rank, unsigned int h);
 
 public :
     unsigned int getHandi() const {return handicap;}
-    static Noir* donneInstance(QString const& Nom, QString const& rank, unsigned int h=0);
+    static boost::shared_ptr<Noir> donneInstance(QString const& Nom, QString const& rank, unsigned int h=0);
     static void libereInstance();
     QString couleur() const {return "Noir";}
     ~Noir();
@@ -41,12 +43,12 @@ class Blanc : public Joueur
 {
 private :
     double komi;
-    static Blanc* instanceUnique;
+    static boost::shared_ptr<Blanc> instanceUnique;
     Blanc(QString const& Nom, QString const& rank, double k);
 
 public :
     double getKomi() const {return komi;}
-    static Blanc* donneInstance(QString const& Nom, QString const& rank, double k=6.5);
+    static boost::shared_ptr<Blanc> donneInstance(QString const& Nom, QString const& rank, double k=6.5);
     static void libereInstance();
     QString couleur() const {return "Blanc";}
     ~Blanc();

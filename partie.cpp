@@ -1,8 +1,10 @@
 #include "partie.h"
+#include "debug.h"
+
 using namespace std;
 
 
-partie* partie::instanceUnique = 0;
+boost::shared_ptr<partie> partie::instanceUnique;// = boost::shared_ptr<partie>(0);
 
 coup_exception::coup_exception(const std::string& i) throw():info(i){}
 
@@ -30,19 +32,22 @@ Coup::Coup(std::string const& s, std::string com)
     commentaires=QString::fromStdString(com);
     abscisse = s[2]-'a';
     ordonnee = s[3]-'a';
-    j = 0;
+    j.reset();
 }
 
 string Coup::print() const
 {
     stringstream r;
-    r << "Coup n°" << numero <<j->couleur().toStdString() << " : " << abscisse+1 << "-" << ordonnee+1;
+    r << "Coup n°" << numero << " - " <<j->couleur().toStdString() << " : " << abscisse+1 << "-" << ordonnee+1;
     return r.str();
 }
 
 Coup::~Coup(){}
 
-
+void Coup::addComm(QString const& s)
+{
+    commentaires.append(s);
+}
 
 
 /***************************** CLASSE PARTIE **********************************************************************/
@@ -50,6 +55,8 @@ Coup::~Coup(){}
 /***** Chargement d'un SGF *****/
 void partie::chargerFichier(string const& f)
 {
+    SGF::Debug* dbg = SGF::Debug::getInstance();
+    dbg->add(SGF::Normal,"Chargement de la partie. \n");
     int numero = 1; //sert à numéroter les coups au fur et à mesure qu'on lit le fichier
 
     /********** Ouverture du fichier et test **************/
@@ -82,18 +89,24 @@ void partie::chargerFichier(string const& f)
              */
             string inf;
 
-            while ((infos[j]!=']') && (j<infos.size()))
+            /* L'erreur "string subscript out of range" était provoquée par cette ligne : en rajoutant -1, le problème
+              a disparu. Dans la première boucle while on ne va que jusque infos.size()-1, donc ici on ne pouvait pas
+              aller jusque infos.size() ? En tout cas, problème à priori résolu ...*/
+            while ((infos[j]!=']') && (j<infos.size()-1))
             {
                 inf += infos[j];
                 j++;
             }
             if (inf[0] == '&') inf.erase(0,1);
-            if (inf.substr(0,2)=="PW") jblanc=inf.substr(3);
-            else if (inf.substr(0,2)=="PB") jnoir=inf.substr(3);
-            else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
-            else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
-            else if (inf.substr(0,2)=="DT") date=QString::fromStdString(inf.substr(3));
-            else if (inf.substr(0,2)=="RE") resultat=QString::fromStdString(inf.substr(3));
+            if (!inf.empty())
+            {
+                if (inf.substr(0,2)=="PW") jblanc=inf.substr(3);
+                else if (inf.substr(0,2)=="PB") jnoir=inf.substr(3);
+                else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
+                else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
+                else if (inf.substr(0,2)=="DT") date=QString::fromStdString(inf.substr(3));
+                else if (inf.substr(0,2)=="RE") resultat=QString::fromStdString(inf.substr(3));
+            }
 
             j++;
         }
@@ -101,6 +114,8 @@ void partie::chargerFichier(string const& f)
         //Initialisation des joueurs
         joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
         joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+        dbg->add(SGF::Normal,"Joueur Noir : "+jnoir+" "+nnoir);
+        dbg->add(SGF::Normal,"Joueur Blanc : "+jblanc+" "+nblanc+"\n");
 
         /***  init en attendant que les infos de la partie fonctionnent  ***/
         //joueurNoir = Noir::donneInstance("Noir","NiveauNoir");
@@ -150,7 +165,7 @@ void partie::chargerFichier(string const& f)
             else listeCoups.back().setJoueur(joueurBlanc);
             listeCoups.back().setNum(numero);
             numero++;
-            cout << listeCoups.back().print() << endl;
+            dbg->add(SGF::Normal,listeCoups.back().print());
             if (contenu[i]==')') break;
             if (contenu[i]=='&') i++;
             if (contenu[i]!=';') i++;
@@ -159,24 +174,24 @@ void partie::chargerFichier(string const& f)
 
         //courant = debut();
     }
-    else cout << "Ce fichier n'existe pas.\n";
+    else dbg->add(SGF::Exception,"Ce fichier n'existe pas.\n");
 }
 
-partie* partie::donneInstance()
+boost::shared_ptr<partie> partie::donneInstance()
 {
     if (instanceUnique == 0)
     {
-        instanceUnique = new partie();
+        instanceUnique = boost::shared_ptr<partie>(new partie());
     }
     return instanceUnique;
 }
 
-partie* partie::donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+boost::shared_ptr<partie> partie::donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
                              QString const& blancNiveau, QString const& partieDate)
 {
     if (instanceUnique == 0)
     {
-        instanceUnique = new partie();
+        instanceUnique = boost::shared_ptr<partie>(new partie());
 
         instanceUnique->joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
         instanceUnique->joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
@@ -203,12 +218,12 @@ std::string partie::infos() const
 
 void partie::libereInstance()
 {
-    instanceUnique=0;
+    instanceUnique.reset();
 }
 
 partie::~partie()
 {
-    delete joueurBlanc; delete joueurNoir; partie::libereInstance();
+    //delete joueurBlanc; delete joueurNoir; partie::libereInstance();
 }
 
 void partie::enregistrerFichier(QString nomFich)
@@ -227,10 +242,16 @@ void partie::enregistrerFichier(QString nomFich)
         {
             /* Pour chaque coup, si joueur=Noir, on écrit B[coup], sinon W
             L'abscisse et l'ordonnée doivent être converties en caractères : a-a pour 0-0 */
-            if (it.getPtr()->getJoueur()->couleur()=="Noir") os << ";B[" ;
+            if (it->getJoueur()->couleur()=="Noir") os << ";B[" ;
             else os << ";W[";
-            char abs('a' + it.getPtr()->getAbs()), ord('a' + it.getPtr()->getOrd());
+            char abs('a' + it->getAbs()), ord('a' + it->getOrd());
             os << abs << ord << "]" << std::endl;
+
+            if (!it->getComm().toStdString().empty())
+            {
+                //s'il y a des commentaires pour ce coup
+                os << "C[" << it->getComm().toStdString() << "]" << std::endl;
+            }
         }
     }
 

@@ -12,23 +12,24 @@ class Coup
 {
     int abscisse;
     int ordonnee;
-    Joueur* j;
+    boost::shared_ptr<Joueur> j;
     int numero;
     QString commentaires;
 
 
 public :
-    Coup() : abscisse(0), ordonnee(0), j(0), numero(0), commentaires(QString()) {}
-    Coup(int abs, int ord, Joueur* jou) : abscisse(abs), ordonnee(ord), j(jou) {}
+    Coup() : abscisse(0), ordonnee(0), numero(0), commentaires(QString()) {}
+    Coup(int abs, int ord, boost::shared_ptr<Joueur> jou) : abscisse(abs), ordonnee(ord), j(jou) {}
     Coup(std::string const& s, std::string com=std::string());
     std::string print() const;
     int getAbs() const {return abscisse;}
     int getOrd() const {return ordonnee;}
-    Joueur* getJoueur() const {return j;}
-    void setJoueur(Joueur* J) {j = J;}
+    boost::shared_ptr<Joueur> getJoueur() const {return j;}
+    void setJoueur(boost::shared_ptr<Joueur> J) {j = J;}
     void setNum(int n) {numero = n;}
     int getNum() const {return numero;}
     QString getComm() const {return commentaires;}
+    void addComm(QString const& s);
 
     ~Coup();
 };
@@ -37,8 +38,10 @@ public :
 class partie
 {
 public :
-    static partie* donneInstance();
-    static partie* donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+    typedef vector<Coup>::const_iterator iterateur;
+
+    static boost::shared_ptr<partie> donneInstance();
+    static boost::shared_ptr<partie> donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
                                  QString const& blancNiveau, QString const& partieDate);
     void chargerFichier(std::string const& nomFichier);
     //void avancer() {++courant;}
@@ -46,26 +49,28 @@ public :
     vector<Coup> getListeCoups() const {return listeCoups;}
     void ajouterCoup(Coup const& c);
 
-    class iterateur
+    /*class iterateur
     {
-        const Coup* ptr;
+        const boost::shared_ptr<Coup> ptr;
 
         public :
-            iterateur(Coup* c) : ptr(c) {}
+            iterateur(boost::shared_ptr<Coup> c) : ptr(c) {}
             iterateur(Coup const& c) : ptr(&c) {}
-            const Coup* getPtr() const {return ptr;}
-            void operator++() {++ptr;}
-            void operator--() {--ptr;}
+            const boost::shared_ptr<Coup> getPtr() const {return ptr;}
+            void operator++() {++(ptr.get());}
+            void operator--() {--(ptr.get());}
             bool operator!=(iterateur const& i) const {return i.ptr!=ptr;}
             bool operator==(iterateur const& i) const {return i.ptr==ptr;}
-            const Coup& operator*() const {return *ptr;}
+            const Coup& operator*() const {return ptr.get();}
     };
 
     iterateur dernierCoup() const {return iterateur(listeCoups.back());}
     iterateur fin() const { iterateur it(listeCoups.back()); ++it; return it; }
-    iterateur debut() const { return iterateur(listeCoups.front()); }
-    Blanc* getBlanc() const {return joueurBlanc;}
-    Noir* getNoir() const {return joueurNoir;}
+    iterateur debut() const { return iterateur(listeCoups.front()); }*/
+    vector<Coup>::const_iterator debut() const {return listeCoups.begin();}
+    vector<Coup>::const_iterator fin() const {return listeCoups.end();}
+    boost::shared_ptr<Blanc> getBlanc() const {return joueurBlanc;}
+    boost::shared_ptr<Noir> getNoir() const {return joueurNoir;}
     std::string infos() const;
     ~partie();
     static void libereInstance();
@@ -77,10 +82,10 @@ public :
 
 private :
     vector<Coup> listeCoups;
-    static partie* instanceUnique;
-    partie() : joueurBlanc(0), joueurNoir(0), date(QString()), resultat(QString()), contenuFichier(std::string())  {}
-    Blanc* joueurBlanc;
-    Noir* joueurNoir;
+    static boost::shared_ptr<partie> instanceUnique;
+    partie() : date(QString()), resultat(QString()), contenuFichier(std::string())  {}
+    boost::shared_ptr<Blanc> joueurBlanc;
+    boost::shared_ptr<Noir> joueurNoir;
     QString date;
     QString resultat;
     std::string contenuFichier;

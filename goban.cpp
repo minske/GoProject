@@ -1,9 +1,30 @@
 #include "goban.h"
+#include "debug.h"
+#include "FP.h"
 
 QPen Goban::pen(Qt::black,1);
 QPen Goban::rouge(Qt::red,1.5);
 QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
+Goban* Goban::m_instance = 0;
+
+Goban* Goban::getInstance()
+{
+    if (m_instance==0)
+    {
+        m_instance =  new Goban();
+    }
+
+    return m_instance;
+}
+
+void Goban::deleteInstance()
+{
+    if (m_instance!=0) delete m_instance;
+}
+
+
+unsigned int Goban::M_SIZE = 19;
 
 QPen Goban::getRouge()
 {
@@ -11,36 +32,68 @@ QPen Goban::getRouge()
 }
 
 
-Goban::Goban() : QGraphicsScene(), coupCourant(0), courant(partie::iterateur(0))
+Goban::Goban() : QGraphicsScene()
 {
     //brush pour la couleur de fond
     //QBrush brush(QColor(236,184,82));
-    fondClair = QBrush(QPixmap("fondBoisClair.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-    fondMoyen = QBrush(QPixmap("fondBois.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-    fondFonce = QBrush(QPixmap("fondBoisFonce.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondClair = QBrush(QPixmap("fondBoisClair.png").scaled(FP::ECART_T()*(M_SIZE+1),FP::ECART_T()*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondMoyen = QBrush(QPixmap("fondBois.png").scaled(FP::ECART_T()*(M_SIZE+1),FP::ECART_T()*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondFonce = QBrush(QPixmap("fondBoisFonce.png").scaled(FP::ECART_T()*(M_SIZE+1),FP::ECART_T()*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     sansMotif = QBrush(QColor(236,184,82));
-    //QBrush brush(QPixmap("fondBois.png").scaled(E*20,E*20,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+
     lignes = createItemGroup(QList<QGraphicsItem*>());
 
-    for (unsigned int i = 0; i<19 ; i++)
+    for (unsigned int i = 0; i<M_SIZE ; i++)
     {
-        lignes->addToGroup(addLine(E*(i+1),E,E*(i+1),19*E));
-        lignes->addToGroup(addLine(E,E*(i+1),19*E,E*(i+1)));
+        lignes->addToGroup(addLine(FP::ECART_T()*(i+1),FP::ECART_T(),FP::ECART_T()*(i+1),M_SIZE*FP::ECART_T()));
+        lignes->addToGroup(addLine(FP::ECART_T(),FP::ECART_T()*(i+1),M_SIZE*FP::ECART_T(),FP::ECART_T()*(i+1)));
     }
     //ajout des hoshi
     QPen penE(Qt::black,5);
-    for (unsigned int i = 0; i<3; i++)
+
+    /// HOSHIS à placer en fonction de la taille du goban
+    switch (M_SIZE)
     {
-        lignes->addToGroup(addEllipse((E*4+(i*E*6))-1,E*4-1,2,2,penE,noir));
-        lignes->addToGroup(addEllipse((E*4+(i*E*6))-1,E*10-1,2,2,penE,noir));
-        lignes->addToGroup(addEllipse((E*4+(i*E*6))-1,E*16-1,2,2,penE,noir));
+        case 19 :
+        {
+            for (unsigned int i = 0; i<3; i++)
+            {
+                lignes->addToGroup(addEllipse((FP::ECART_T()*4+(i*FP::ECART_T()*6))-1,FP::ECART_T()*4-1,2,2,penE,noir));
+                lignes->addToGroup(addEllipse((FP::ECART_T()*4+(i*FP::ECART_T()*6))-1,FP::ECART_T()*10-1,2,2,penE,noir));
+                lignes->addToGroup(addEllipse((FP::ECART_T()*4+(i*FP::ECART_T()*6))-1,FP::ECART_T()*16-1,2,2,penE,noir));
+            }
+
+            break;
+        }
+
+        case 13 :
+        {
+            lignes->addToGroup(addEllipse((FP::ECART_T()*4)-1,FP::ECART_T()*4-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((FP::ECART_T()*4)-1,FP::ECART_T()*10-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((FP::ECART_T()*10)-1,FP::ECART_T()*4-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((FP::ECART_T()*10)-1,FP::ECART_T()*10-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((FP::ECART_T()*7)-1,FP::ECART_T()*7-1,2,2,penE,noir));
+
+            break;
+        }
+
+        case 9 :
+        {
+            lignes->addToGroup(addEllipse(FP::ECART_T()*3-1,FP::ECART_T()*3-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(FP::ECART_T()*3-1,FP::ECART_T()*7-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(FP::ECART_T()*7-1,FP::ECART_T()*3-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(FP::ECART_T()*7-1,FP::ECART_T()*7-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(FP::ECART_T()*5-1,FP::ECART_T()*5-1,2,2,penE,noir));
+
+            break;
+        }
     }
 
     setBackgroundBrush(fondClair);
 
 }
 
-Goban::Goban(Goban const& g) : courant(0)
+Goban::Goban(Goban const& g)
 {
     Goban::Goban();
     /*QGraphicsItemGroup* lignes;
@@ -48,406 +101,193 @@ Goban::Goban(Goban const& g) : courant(0)
     map<pair<int,int>,Pierre*> plateau;
     QGraphicsEllipseItem* coupCourant;*/
 
-    /*lignes=g.lignes;*/ groupes=g.groupes; plateau=g.plateau;
+    /*lignes=g.lignes;*/
+    //groupes=g.groupes;
+    plateau=g.plateau;
     coupCourant = g.coupCourant; courant=g.courant;
+    M_SIZE = g.M_SIZE;
 }
 
 void Goban::init()
 {
-    if (coupCourant!=0) removeItem(coupCourant);
-    coupCourant=0; courant=0;
-    for (map<pair<int,int>,Pierre*>::iterator it = plateau.begin(); it!=plateau.end(); ++it)
+    /*if (coupCourant!=0) removeItem(coupCourant.get());
+    coupCourant=0; courant=0;*/
+    for (map<pair<int,int>,boost::shared_ptr<Pierre> >::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {
-        removeItem((*it).second->getEllipse());
+        removeItem((*it).second->getEllipse().get());
     }
-    groupes.clear(); plateau.clear();
+    //groupes.clear();
+    plateau.clear();
 }
 
-set<Pierre*> Goban::ajouterPierre(Pierre* p)
+vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre> p)
 {
     //if (coupCourant!=0) removeItem(coupCourant);
 
-    ostringstream os;
-    os << "\n ---------- \n Coup n°" << p->getCoup()->getNum() << std::endl;
+    SGF::Debug* dbg = SGF::Debug::getInstance();
+    //os << "\n ---------- \n Coup n°" << p->getCoup()->getNum() << std::endl;
 
     /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
     const int ord = p->getCoup()->getOrd();
     const int abs = p->getCoup()->getAbs();
     pair<int,int> coord = make_pair(abs,ord);
-    if (plateau.insert(pair<pair<int,int>,Pierre*>(coord,p)).second)
-        os << "Ajout de la pierre à la map plateau : ok" << std::endl;
-        //os << "Ajout de la pierre à la map plateau : ok" << std::endl;
+    if (plateau.insert(pair<pair<int,int>,boost::shared_ptr<Pierre> >(coord,p)).second)
+        dbg->add(SGF::Normal,"Ajout de la pierre à la map plateau : ok");
 
-    /* On regarde s'il y a des pierres autour de la pierre qu'on pose
-    Si oui, on doit ajouter cette pierre à un groupe déjà existant
-    Si non, on doit créer un nouveau groupe avec juste cette nouvelle pierre*/
-    vector<Pierre*> autourMemeCouleur = pierresAutourMemeCouleur(p);
 
-    switch(autourMemeCouleur.size())
+    ostringstream os;
+    os << "Nombre de libertés de la pierre ajoutée : " << p->libertes();
+    dbg->add(SGF::Normal,os.str());
+
+    /**************************************** FUSION DES GROUPES ***********************************/
+
+    vector<boost::shared_ptr<Pierre> > pierresAutour = p->pierresAutourMemeCouleur();
+    vector<boost::shared_ptr<Groupe> > groupesAutour;
+
+    for (vector<boost::shared_ptr<Pierre> >::iterator it = pierresAutour.begin(); it != pierresAutour.end(); it++)
     {
-    case 0 :
-    {
-        os << "Pierre isolée, création d'un nouveau groupe" << std::endl;
-        //os << "Pierre isolée, création d'un nouveau groupe" << std::endl;
-        Groupe* g = new Groupe();
-        g->ajouterPierre(p);
-        groupes.insert(g);
-        break;
+        boost::shared_ptr<Groupe> m_groupe = (*it)->getGroupe();
+        if (find(groupesAutour.begin(), groupesAutour.end(), m_groupe)==groupesAutour.end())
+        {
+            groupesAutour.push_back(m_groupe);
+        }
     }
 
-    case 1 :
+    if (groupesAutour.size()==0)
     {
-        //il faut trouver le groupe auquel la pierre va être ajoutée
-        //os << "Une pierre à côté" << std::endl;
-        os << "Une pierre à côté" << std::endl;
-        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
-        g1->ajouterPierre(p);
-        //os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
-        os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(trouverGroupe(autourMemeCouleur[0])) << " libertés." << std::endl;
-        break;
+        //aucun groupe autour, il faut en créer un nouveau
+        boost::shared_ptr<Groupe> groupePtr(new Groupe());
+        groupePtr->ajouterPierre(p);
+        p->setGroupe(groupePtr->shared_from_this());
+        m_groupes.insert(groupePtr);
     }
-
-    case 2 :
+    else
     {
-        //on doit fusionner les deux groupes
-        //os << "Deux pierres à côté" << std::endl;
-        os << "Deux pierres à côté" << std::endl;
-        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
-        Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
+        /*il y a plusieurs groupes à fusionner : on prend le premier, on lui ajoute les autres
+          un par un, puis on ajoute la nouvelle pierre créée */
+        boost::shared_ptr<Groupe> groupePtr = groupesAutour[0];
+        for (vector<boost::shared_ptr<Groupe> >::iterator it = groupesAutour.begin(); it != groupesAutour.end(); it++)
+        {
+            if (it!=groupesAutour.begin())
+            {
+                groupePtr->ajouterGroupe(*it);
+                m_groupes.erase(*it);
+            }
+        }
 
-        //os << "Fusion de deux groupes" << std::endl;
-        os <<  "Fusion de deux groupes" << std::endl;
-        g1->operator +=(*g2);
-        groupes.erase(g2);
-
-        g1->ajouterPierre(p);
-        //g1->supprimerDoublons();
-
-        os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
-        break;
+        groupePtr->ajouterPierre(p);
+        p->setGroupe(groupePtr->shared_from_this());
     }
-
-    case 3 :
-    {
-        //on fusionne trois groupes
-        os << "Trois pierres à côté" << std::endl;
-        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
-        Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
-        Groupe* g3= trouverGroupe(autourMemeCouleur[2]);
-
-
-        os << "Fusion de trois groupes" << std::endl;
-        g1->operator +=(*g2);
-        g1->operator +=(*g3);
-        groupes.erase(g2);
-        groupes.erase(g3);
-
-        g1->ajouterPierre(p);
-
-        //g1->supprimerDoublons();
-
-        os << "Groupe de " << g1->getPierres().size() << " pierres avec "<< nbLibertes(g1) << " libertés." << std::endl;
-        break;
-    }
-
-    case 4 :
-    {
-        //on fusionne quatre groupes max
-        os << "Quatre pierres à côté" << std::endl;
-        Groupe* g1 = trouverGroupe(autourMemeCouleur[0]);
-        Groupe* g2 = trouverGroupe(autourMemeCouleur[1]);
-        Groupe* g3= trouverGroupe(autourMemeCouleur[2]);
-        Groupe* g4 = trouverGroupe(autourMemeCouleur[3]);
-
-        g1->operator +=(*g2);
-        g1->operator +=(*g3);
-        g1->operator +=(*g4);
-        groupes.erase(g2); groupes.erase(g3); groupes.erase(g4);
-        //g1->supprimerDoublons();
-        g1->ajouterPierre(p);
-
-        os << "Groupe de " << g1->getPierres().size() << " pierres." << std::endl;
-        break;
-    }
-
-    default :
-        throw coup_exception("Plus de 5 pierres ou moins de 0 pierre autour : impossible.");
-        break;
-    }
-
 
     /****************************************** Affichage ******************************************/
-    addItem(p->getEllipse());
-    if (coupCourant==0)
+    addItem(p->getEllipse().get());
+    if (coupCourant.get()==0)
     {
-        QRect rect((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31),E*0.6,E*0.6);
-        coupCourant=  this->addEllipse(rect,rouge);
+        QRect rect((abs+1)*FP::ECART_T()-(FP::ECART_T()*0.31),(ord+1)*FP::ECART_T()-(FP::ECART_T()*0.31),FP::ECART_T()*0.6,FP::ECART_T()*0.6);
+        coupCourant=  boost::shared_ptr<QGraphicsEllipseItem>(this->addEllipse(rect,rouge));
 
     }
 
 
     /************************* Suppression des pierres *********************************************/
     //unsigned int nbcapt = 0;
-    set<Pierre*> pierresSupprimees;
-    vector<Pierre*> autourAdv = pierresAutourAdversaire(p);
-    if (autourAdv.size()!=0)
+    vector<boost::shared_ptr<Pierre> > pierresSupprimees;
+    set<boost::shared_ptr<Groupe> > sansLibertes = groupesSansLiberte();
+    if (sansLibertes.size()!=0)
     {
-        for (vector<Pierre*>::iterator it = autourAdv.begin() ; it != autourAdv.end() ; ++it)
+        std::ostringstream os;
+        os << sansLibertes.size() << " groupes sans libertés sur le plateau";
+        dbg->add(SGF::Normal,os.str());
+        for (set<boost::shared_ptr<Groupe> >::iterator it = sansLibertes.begin() ; it != sansLibertes.end() ; ++it)
         {
-            if (estSurPlateau(*it))
+            boost::shared_ptr<Groupe> groupePtr = *it;
+            //si groupe adversaire, alors on supprime toutes ses pierres une par une, puis on supprime le groupe
+            if (groupePtr->couleur()!=p->couleur())
             {
-                Groupe* g = trouverGroupe(*it);
-                if (nbLibertes(g)==0)
+                vector<boost::shared_ptr<Pierre> > pierres = groupePtr->getPierres();
+                for (vector<boost::shared_ptr<Pierre> >::iterator it_pierre = pierres.begin(); it_pierre != pierres.end(); it_pierre++)
                 {
-                    os << "Un groupe à supprimer" << std::endl;
-                    //nbcapt+=g->getPierres().size();
-                    for (set<Pierre*>::iterator it = g->getPierres().begin(); it!=g->getPierres().end(); ++it)
-                    {
-                        //pour chaque pierre qui appartient au groupe, on va la stocker dans pierresSupprimees
-                        pierresSupprimees.insert(*it);
-                    }
-                    supprimerGroupe(g);
+                    //pour chaque pierre du groupe à supprimer
+                    pierresSupprimees.push_back(*it_pierre);
+                    int abs, ord;
+                    abs = (*it_pierre)->getCoup()->getAbs(); ord = (*it_pierre)->getCoup()->getOrd();
+                    supprimerPierre(*it_pierre);
+
                 }
             }
+
+            m_groupes.erase(groupePtr);
+
         }
     }
 
 
-
     //return nbcapt;
-    logMsg = QString::fromStdString(os.str());
+    //logMsg = QString::fromStdString(os.str());
+    //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
     return pierresSupprimees;
 
 }
 
 
-vector<Pierre*> Goban::pierresAutour(Pierre* p) const
-{
-    int abs = p->getCoup()->getAbs();
-    int ord = p->getCoup()->getOrd();
-    vector<Pierre*> resultat;
-
-    /* On cherche à récupérer les pierres qui sont juste autour de la pierre p
-    On utilise l'attribut plateau = map<pair<abs,ord>,Pierre*> */
-    if (plateau.find(pair<int,int>(abs,ord-1))!=plateau.end())
-    {
-        //il existe une pierre en abs,ord-1
-        resultat.push_back(plateau.find(pair<int,int>(abs,ord-1))->second);
-    }
-    if (plateau.find(pair<int,int>(abs,ord+1))!=plateau.end())
-    {
-        //il existe une pierre en abs,ord+1
-        resultat.push_back(plateau.find(pair<int,int>(abs,ord+1))->second);
-    }
-    if (plateau.find(pair<int,int>(abs+1,ord))!=plateau.end())
-    {
-        //il existe une pierre en abs+1,ord
-        resultat.push_back(plateau.find(pair<int,int>(abs+1,ord))->second);
-    }
-    if (plateau.find(pair<int,int>(abs-1,ord))!=plateau.end())
-    {
-        //il existe une pierre en abs-1,ord
-        resultat.push_back(plateau.find(pair<int,int>(abs-1,ord))->second);
-    }
-
-    return resultat;
-}
 
 
-Groupe* Goban::trouverGroupe(Pierre* p) const
-{
-    for(set<Groupe*>::iterator it=groupes.begin() ; it!=groupes.end() ; ++it)
-    {
-        if ((*it)->faitPartie(p)) return *it;
-    }
-    ostringstream os;
-    os << "La pierre " << p->getCoup()->getAbs() << " - " << p->getCoup()->getAbs() << "ne fait partie d'aucun groupe";
-    //throw coup_exception(os.str());
-}
 
-vector<Pierre*> Goban::pierresAutourMemeCouleur(Pierre* p) const
-{
-    int abs = p->getCoup()->getAbs();
-    int ord = p->getCoup()->getOrd();
-    vector<Pierre*> resultat;
-
-    /* On cherche à récupérer les pierres qui sont juste autour de la pierre p
-    On utilise l'attribut plateau = map<pair<abs,ord>,Pierre*> */
-    if ((plateau.find(pair<int,int>(abs,ord-1))!=plateau.end()))
-    {
-        //il existe une pierre en abs,ord-1
-        Pierre* a = plateau.find(pair<int,int>(abs,ord-1))->second;
-        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
-            resultat.push_back(a);
-    }
-    if (plateau.find(pair<int,int>(abs,ord+1))!=plateau.end())
-    {
-        //il existe une pierre en abs,ord+1
-        Pierre* a = plateau.find(pair<int,int>(abs,ord+1))->second;
-        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
-        resultat.push_back(a);
-    }
-    if (plateau.find(pair<int,int>(abs+1,ord))!=plateau.end())
-    {
-        //il existe une pierre en abs+1,ord
-        Pierre* a = plateau.find(pair<int,int>(abs+1,ord))->second;
-        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
-        resultat.push_back(a);
-    }
-    if (plateau.find(pair<int,int>(abs-1,ord))!=plateau.end())
-    {
-        //il existe une pierre en abs-1,ord
-        Pierre* a = plateau.find(pair<int,int>(abs-1,ord))->second;
-        if (a->getCoup()->getJoueur()->couleur() == p->getCoup()->getJoueur()->couleur())
-        resultat.push_back(a);
-    }
-
-    return resultat;
-}
-
-
-void Goban::supprimerPierre(Pierre* p)
+void Goban::supprimerPierre(boost::shared_ptr<Pierre> p)
 {
     int a = p->getCoup()->getAbs();
     int o = p->getCoup()->getOrd();
     if (plateau.erase(pair<int,int>(a,o))!=1) throw coup_exception("Erreur à la suppression d'une pierre");
-    Groupe* g = trouverGroupe(p);
-    if (g!=0) g->supprimerPierre(p);
-    groupes.erase(g);
-    removeItem(p->getEllipse());
+
+    removeItem(p->getEllipse().get());
     //delete p;
 }
 
-void Goban::supprimerGroupe(Groupe* g)
-{
-    set<Pierre*> ltmp = g->getPierres();
-    for (set<Pierre*>::iterator it = ltmp.begin() ; it != ltmp.end() ; ++it)
-    {
-        supprimerPierre(*it);
-    }
-    //groupes.erase(g);
-    delete g;
-}
 
 
-vector<Pierre*> Goban::pierresAutourAdversaire(Pierre* p) const
-{
-    int abs = p->getCoup()->getAbs();
-    int ord = p->getCoup()->getOrd();
-    vector<Pierre*> resultat;
-
-    /* On cherche à récupérer les pierres qui sont juste autour de la pierre p
-    On utilise l'attribut plateau = map<pair<abs,ord>,Pierre*> */
-    if ((plateau.find(pair<int,int>(abs,ord-1))!=plateau.end()))
-    {
-        //il existe une pierre en abs,ord-1
-        Pierre* a = plateau.find(pair<int,int>(abs,ord-1))->second;
-        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
-            resultat.push_back(a);
-    }
-    if (plateau.find(pair<int,int>(abs,ord+1))!=plateau.end())
-    {
-        //il existe une pierre en abs,ord+1
-        Pierre* a = plateau.find(pair<int,int>(abs,ord+1))->second;
-        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
-        resultat.push_back(a);
-    }
-    if (plateau.find(pair<int,int>(abs+1,ord))!=plateau.end())
-    {
-        //il existe une pierre en abs+1,ord
-        Pierre* a = plateau.find(pair<int,int>(abs+1,ord))->second;
-        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
-        resultat.push_back(a);
-    }
-    if (plateau.find(pair<int,int>(abs-1,ord))!=plateau.end())
-    {
-        //il existe une pierre en abs-1,ord
-        Pierre* a = plateau.find(pair<int,int>(abs-1,ord))->second;
-        if (a->getCoup()->getJoueur()->couleur() != p->getCoup()->getJoueur()->couleur())
-        resultat.push_back(a);
-    }
-
-    return resultat;
-}
-
-
-
-unsigned int Goban::nbLibertes(Groupe* g) const
-{
-    vector<pair<int,int> > cases;
-    set<Pierre*> pierres = g->getPierres();
-
-    for (set<Pierre*>::const_iterator it = pierres.begin() ; it!=pierres.end() ; ++it)
-    {
-        /* Pour chaque pierre du groupe, on regarde les quatre cases à côté
-        Si elles sont vides et qu'elles ne font pas déjà partie de cases, on les ajoute au vector*/
-        int abs = (*it)->getCoup()->getAbs(), ord = (*it)->getCoup()->getOrd();
-
-        if (ord >0)
-        {
-            if (plateau.find(pair<int,int>(abs,ord-1))==plateau.end())
-            {
-                //il n'y a pas de pierre en abs,ord-1
-                if (find(cases.begin(),cases.end(),pair<int,int>(abs,ord-1))==cases.end())
-                    // la case ne fait pas déjà partie de cases
-                    cases.push_back(pair<int,int>(abs,ord-1));
-            }
-        }
-
-        if (ord<18)
-        {
-            if (plateau.find(pair<int,int>(abs,ord+1))==plateau.end())
-            {
-                //il n'y a pas de pierre en abs,ord+1
-                if (find(cases.begin(),cases.end(),pair<int,int>(abs,ord+1))==cases.end())
-                    // la case ne fait pas déjà partie de cases
-                    cases.push_back(pair<int,int>(abs,ord+1));
-            }
-        }
-
-        if (abs>0)
-        {
-            if (plateau.find(pair<int,int>(abs-1,ord))==plateau.end())
-            {
-                //il n'y a pas de pierre en abs-1,ord
-                if (find(cases.begin(),cases.end(),pair<int,int>(abs-1,ord))==cases.end())
-                    // la case ne fait pas déjà partie de cases
-                    cases.push_back(pair<int,int>(abs-1,ord));
-            }
-        }
-
-        if (abs<18)
-        {
-            if (plateau.find(pair<int,int>(abs+1,ord))==plateau.end())
-            {
-                //il n'y a pas de pierre en abs+1,ord
-                if (find(cases.begin(),cases.end(),pair<int,int>(abs+1,ord))==cases.end())
-                    // la case ne fait pas déjà partie de cases
-                    cases.push_back(pair<int,int>(abs+1,ord));
-            }
-        }
-
-    }
-
-    return cases.size();
-}
-
-
-bool Goban::estSurPlateau(Pierre* p) const
+bool Goban::estSurPlateau(boost::shared_ptr<Pierre> p) const
 {
     int abs = p->getCoup()->getAbs(), ord = p->getCoup()->getOrd();
     return (plateau.find(pair<int,int>(abs,ord))!=plateau.end());
 }
 
-void Goban::printGroupes() const
+vector<boost::shared_ptr<Pierre> > Goban::pierresSansLibertes() const
 {
-    if (!groupes.empty())
+    vector<boost::shared_ptr<Pierre> > result;
+
+    for (map<pair<int,int>,boost::shared_ptr<Pierre> >::const_iterator it = plateau.begin(); it !=plateau.end(); ++it)
     {
-        for (set<Groupe*>::iterator it=groupes.begin(); it!=groupes.end(); ++it)
+        if (it->second->libertes()==0)
         {
-            (*it)->print();
-            std::cout << "\n";
+            result.push_back(it->second);
         }
     }
-    else std::cout << "Aucun groupe" << std::endl;
+    return result;
+}
+
+set<boost::shared_ptr<Groupe> > Goban::groupesSansLiberte() const
+{
+    set<boost::shared_ptr<Groupe> > result;
+    for (set<boost::shared_ptr<Groupe> >::iterator it = m_groupes.begin(); it != m_groupes.end(); it++)
+    {
+        if ((*it)->nbLibertes()==0)
+        {
+            result.insert(*it);
+        }
+    }
+
+    return result;
+}
+
+std::string Goban::printPlateau() const
+{
+    std::ostringstream result;
+    result << "Etat du plateau : \n";
+    for (map<pair<int,int>,boost::shared_ptr<Pierre> >::const_iterator it = plateau.begin(); it != plateau.end(); ++it)
+    {
+        result << "Pierre " << it->second->getCoup()->getJoueur()->couleur().toStdString() << " en " << it->first.first << "-" << it->first.second << "\n";
+    }
+
+    result << "\n\n";
+    return result.str();
 }

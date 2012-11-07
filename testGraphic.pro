@@ -1,5 +1,6 @@
 SOURCES += \
     main.cpp \
+    debug.cpp \
     FP.cpp \
     partie.cpp \
     goban.cpp \
@@ -8,7 +9,8 @@ SOURCES += \
     groupe.cpp \
     actionNext.cpp \
     bouton.cpp \
-    fenetreInfos.cpp
+    fenetreInfos.cpp \
+
 
 HEADERS += \
     partie.h \
@@ -19,6 +21,9 @@ HEADERS += \
     groupe.h \
     actionNext.h \
     bouton.h \
-    fenetreInfos.h
+    fenetreInfos.h \
+    debug.h
 
 FORMS +=
+
+INCLUDEPATH += 'C:\Program Files (x86)\boost\boost_1_51_0'

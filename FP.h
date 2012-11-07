@@ -7,6 +7,9 @@
 #include "bouton.h"
 #include "fenetreInfos.h"
 #include <stack>
+#include "debug.h"
+
+#include "boost/enable_shared_from_this.hpp"
 
 /***
 Classe infosJoueurs : permet d'afficher les infos sur un joueur (blanc ou noir) telles que
@@ -35,19 +38,19 @@ public:
     try { return QApplication::notify(receiver, event);}
     catch(std::exception& e)
     {
+        SGF::Debug::getInstance()->add(SGF::Exception,e.what());
         qCritical() << "Exception thrown:" << e.what();
     }
     return false;
   }
 };
 
-class FP : public QMainWindow
+class FP : public QMainWindow, public boost::enable_shared_from_this<FP>
 {
     Q_OBJECT
 private :
     modeSGF mode;
-    Goban* goban;
-    partie* Partie;
+    boost::shared_ptr<partie> Partie;
     QHBoxLayout* infosJoueur;
     infosJoueurs* infosNoir;
     infosJoueurs* infosBlanc;
@@ -59,20 +62,28 @@ private :
     QTextEdit* commentaires;
     QUndoStack* pileUndo;
     QUndoView* viewUndo;
-    QStatusBar *barreEtat;
+    QStatusBar* barreEtat;
     QLabel* nomFichier;
     QGridLayout* grilleBoutonsGoban;
     QTextEdit* messagesExecution;
 
+    static double ECART;
+
 public :
     FP();
     ~FP();
+    boost::shared_ptr<FP> f()
+   {
+       return shared_from_this();
+   }
+
+    static double ECART_T() {return ECART;}
+
     QUndoCommand* nextaction();
     QGraphicsView* getVue() const {return vue;}
     void setVue(QGraphicsView* v) {vue = v;}
-    Goban* getGoban() const {return goban;}
-    partie* getPartie() const {return Partie;}
-    void setPartie(partie* p) {Partie = p;}
+    boost::shared_ptr<partie> getPartie() const {return Partie;}
+    void setPartie(boost::shared_ptr<partie> p) {Partie = p;}
     infosJoueurs* getInfosNoir() const {return infosNoir;}
     infosJoueurs* getInfosBlanc() const {return infosBlanc;}
     QTextEdit* getComm() const {return commentaires;}
@@ -103,7 +114,7 @@ class infosJoueurs : public QGridLayout
     QLabel* nom;
     QLabel* niveau;
     QLabel* pierresCapturees;
-    Joueur* j;
+    boost::shared_ptr<Joueur> j;
 
 public :
     infosJoueurs();
@@ -115,7 +126,7 @@ public :
     void setNiveau(QLabel* n) {niveau=n;}
     void setCapt(QString const& c) {pierresCapturees->setText(c);}
     void setCapt(QLabel* c) {pierresCapturees=c;}
-    void setJoueur(Joueur* J);
+    void setJoueur(boost::shared_ptr<Joueur> J);
 };
 
 #endif // FORM_H

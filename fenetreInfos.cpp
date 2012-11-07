@@ -7,42 +7,42 @@
 /******************************************************************************************************************/
 
 /********** Constructeur **********************************************************/
-FenetreInfos::FenetreInfos(FP* f) : QWidget(), fenPrincipale(f)
+FenetreInfos::FenetreInfos(boost::shared_ptr<FP> f) : QWidget(), fenPrincipale(f)
 {
     /*** Définition d'un layout pour positionner les infos à demander */
-    QGridLayout* layoutGrille = new QGridLayout;
-    QGroupBox* box = new QGroupBox("Informations sur la partie");
-    QLabel* jn = new QLabel("<b>Joueur noir</b>");
-    QLabel* jb = new QLabel("<b>Joueur blanc</b>");
-    QLabel* nn = new QLabel("Nom");
-    QLabel* nb = new QLabel("Nom");
-    QLabel* Nn = new QLabel("Niveau");
-    QLabel* Nb = new QLabel("Niveau");
-    QLabel* d = new QLabel("Date");
+    boost::shared_ptr<QGridLayout> layoutGrille (new QGridLayout);
+    boost::shared_ptr<QGroupBox> box (new QGroupBox("Informations sur la partie"));
+    boost::shared_ptr<QLabel> jn (new QLabel("<b>Joueur noir</b>"));
+    boost::shared_ptr<QLabel> jb (new QLabel("<b>Joueur blanc</b>"));
+    boost::shared_ptr<QLabel> nn (new QLabel("Nom"));
+    boost::shared_ptr<QLabel> nb (new QLabel("Nom"));
+    boost::shared_ptr<QLabel> Nn (new QLabel("Niveau"));
+    boost::shared_ptr<QLabel> Nb (new QLabel("Niveau"));
+    boost::shared_ptr<QLabel> d (new QLabel("Date"));
 
-    nomNoir = new QLineEdit("Noir");
-    nomBlanc = new QLineEdit("Blanc");
-    niveauNoir = new QLineEdit("-");
-    niveauBlanc = new QLineEdit("-");
-    datePartie = new QLineEdit("date");
+    nomNoir = boost::shared_ptr<QLineEdit>(new QLineEdit("Noir"));
+    nomBlanc =boost::shared_ptr<QLineEdit>( new QLineEdit("Blanc"));
+    niveauNoir = boost::shared_ptr<QLineEdit>(new QLineEdit("-"));
+    niveauBlanc = boost::shared_ptr<QLineEdit>(new QLineEdit("-"));
+    datePartie = boost::shared_ptr<QLineEdit>(new QLineEdit("date"));
 
-    layoutGrille->addWidget(jn,0,0,1,2,Qt::AlignCenter); layoutGrille->addWidget(jb,0,2,1,2,Qt::AlignCenter);
-    layoutGrille->addWidget(nn,1,0); layoutGrille->addWidget(nomNoir,1,1);
-    layoutGrille->addWidget(nb,1,2); layoutGrille->addWidget(nomBlanc,1,3);
-    layoutGrille->addWidget(Nn,2,0); layoutGrille->addWidget(niveauNoir,2,1);
-    layoutGrille->addWidget(Nb,2,2); layoutGrille->addWidget(niveauBlanc,2,3);
-    layoutGrille->addWidget(d,3,0,1,2,Qt::AlignRight); layoutGrille->addWidget(datePartie,3,2,1,2);
+    layoutGrille->addWidget(jn.get(),0,0,1,2,Qt::AlignCenter); layoutGrille->addWidget(jb.get(),0,2,1,2,Qt::AlignCenter);
+    layoutGrille->addWidget(nn.get(),1,0); layoutGrille->addWidget(nomNoir.get(),1,1);
+    layoutGrille->addWidget(nb.get(),1,2); layoutGrille->addWidget(nomBlanc.get(),1,3);
+    layoutGrille->addWidget(Nn.get(),2,0); layoutGrille->addWidget(niveauNoir.get(),2,1);
+    layoutGrille->addWidget(Nb.get(),2,2); layoutGrille->addWidget(niveauBlanc.get(),2,3);
+    layoutGrille->addWidget(d.get(),3,0,1,2,Qt::AlignRight); layoutGrille->addWidget(datePartie.get(),3,2,1,2);
 
-    QPushButton* valider = new QPushButton("Valider");
-    QPushButton* annuler = new QPushButton("Annuler");
-    layoutGrille->addWidget(valider,4,0,1,2);
-    layoutGrille->addWidget(annuler,4,2,1,2);
-    box->setLayout(layoutGrille);
-    QVBoxLayout* layoutP = new QVBoxLayout;
-    layoutP->addWidget(box);
-    setLayout(layoutP);
-    connect(valider,SIGNAL(clicked()),this,SLOT(valider()));
-    connect(annuler,SIGNAL(clicked()),this,SLOT(annuler()));
+    boost::shared_ptr<QPushButton> valider (new QPushButton("Valider"));
+    boost::shared_ptr<QPushButton> annuler (new QPushButton("Annuler"));
+    layoutGrille->addWidget(valider.get(),4,0,1,2);
+    layoutGrille->addWidget(annuler.get(),4,2,1,2);
+    box->setLayout(layoutGrille.get());
+    boost::shared_ptr<QVBoxLayout> layoutP (new QVBoxLayout);
+    layoutP->addWidget(box.get());
+    setLayout(layoutP.get());
+    connect(valider.get(),SIGNAL(clicked()),this,SLOT(valider()));
+    connect(annuler.get(),SIGNAL(clicked()),this,SLOT(annuler()));
 }
 
 /**********  SLOT annuler : fermeture de la fenêtre **********/
@@ -53,7 +53,7 @@ void FenetreInfos::annuler()
 
 FenetreInfos::~FenetreInfos()
 {
-    delete nomNoir; delete nomBlanc; delete niveauNoir; delete niveauBlanc; delete datePartie;
+    //delete nomNoir; delete nomBlanc; delete niveauNoir; delete niveauBlanc; delete datePartie;
 }
 
 /******** SLOT valider : vérification des infos entrées et création d'une instance de Partie ********/

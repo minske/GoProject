@@ -11,10 +11,7 @@ class BoutonGoban : public QPushButton
     int ord;
 
 public :
-    BoutonGoban(int a, int o) : QPushButton(), abs(a), ord(o)
-    {
-        setFixedSize(E,E); setFlat(true);
-    }
+    BoutonGoban(int a, int o);
     int getAbs() const {return abs;}
     int getOrd() const {return ord;}
 

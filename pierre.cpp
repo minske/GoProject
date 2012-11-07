@@ -1,13 +1,13 @@
 #include "pierre.h"
+#include "FP.h"
 
-
-Pierre::Pierre(const Coup* c)
+Pierre::Pierre(boost::shared_ptr<const Coup> c) : corres(c)
 {
     if (c->getJoueur()->getNom()=="Kiral")
-        ellipse = new QGraphicsPixmapItem(QPixmap("pierreRose.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("pierreRose.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
 
     else if (c->getJoueur()->couleur()=="Noir")
-    ellipse = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
 
 
     else
@@ -16,12 +16,11 @@ Pierre::Pierre(const Coup* c)
         ostringstream os;
         os << "pierreBlanche" << nb << ".png";
         QString nomFichier = QString::fromStdString(os.str());
-        ellipse = new QGraphicsPixmapItem(QPixmap(nomFichier).scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap(nomFichier).scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
     }
-    corres = c;
 
-    ellipse->setX((c->getAbs()+1)*E-(E*R/2));
-    ellipse->setY((c->getOrd()+1)*E-(E*R/2));
+    ellipse->setX((c->getAbs()+1)*FP::ECART_T()-(FP::ECART_T()*R/2));
+    ellipse->setY((c->getOrd()+1)*FP::ECART_T()-(FP::ECART_T()*R/2));
 
     //rect.setWidth(E*0.9);
     //rect.setHeight(E*0.9);
@@ -31,7 +30,82 @@ Pierre::Pierre(const Coup* c)
 }
 
 
-void Pierre::setEllipse(QGraphicsPixmapItem* el)
+void Pierre::setEllipse(boost::shared_ptr<QGraphicsPixmapItem> el)
 {
     ellipse = el;
+}
+
+
+int Pierre::libertes() const
+{
+    ostringstream os;
+    os << "Calcul du nombre de libertés de la pierre " << corres->print();
+    //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
+    vector<pair<int,int> > adj = intersectionsAdjacentes();
+
+    ostringstream oss;
+    oss << "Nombre d'intersections adjacentes : " << adj.size();
+    //SGF::Debug::getInstance()->add(SGF::Normal,oss.str());
+
+    int libertes = adj.size();
+    for (vector<pair<int,int> >::iterator it = adj.begin(); it != adj.end(); it++)
+    {
+        if (Goban::getInstance()->getPlateau().find(*it)!=Goban::getInstance()->getPlateau().end())
+        {
+            libertes--;
+        }
+    }
+
+    ostringstream libs;
+    libs << "Nombre de libertés : " << libertes;
+    //SGF::Debug::getInstance()->add(SGF::Normal,libs.str());
+    return libertes;
+}
+
+vector<pair<int,int> > Pierre::intersectionsAdjacentes() const
+{
+    vector<pair<int, int> > resultat;
+    int abs = getCoup()->getAbs();
+    int ord = getCoup()->getOrd();
+
+    resultat.push_back(pair<int,int>(abs,ord+1));
+    resultat.push_back(pair<int,int>(abs,ord-1));
+    resultat.push_back(pair<int,int>(abs+1,ord));
+    resultat.push_back(pair<int,int>(abs-1,ord));
+
+    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end(); it++)
+    {
+        int a = it->first; int o = it->second;
+        if (a<0 || a>=Goban::SIZE())
+        {
+            it = resultat.erase(it);
+        }
+        else if (o<0 || o>=Goban::SIZE())
+        {
+            it = resultat.erase(it);
+        }
+    }
+
+    return resultat;
+}
+
+vector<boost::shared_ptr<Pierre> > Pierre::pierresAutourMemeCouleur() const
+{
+    vector<pair<int,int> > intersect = intersectionsAdjacentes();
+    vector<boost::shared_ptr<Pierre> > result;
+    Goban* g = Goban::getInstance();
+
+    for (vector<pair<int,int> >::iterator it = intersect.begin(); it != intersect.end(); it++)
+    {
+        if (g->getPlateau().find(*it) != g->getPlateau().end())
+        {
+            boost::shared_ptr<Pierre> pierrePtr = g->getPlateau().find(*it)->second;
+            if (pierrePtr->couleur() == this->couleur())
+            {
+                result.push_back(pierrePtr);
+            }
+        }
+    }
+
+    return result;
 }

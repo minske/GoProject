@@ -402,16 +402,16 @@ void FP::bouton_goban(int a, int o)
     {
         /* Si la partie n'a encore aucun coup, c'est le premier, donc à noir de jouer
         Sinon, on regarde le dernier coup joué.*/
-        if (goban->getCourant()==Partie->debut())
+       /* if (goban->getCourant()==Partie->debut())
         {
-            boost::shared_ptr<Coup> c (new Coup(a,o,Partie->getNoir()));
+            boost::shared_ptr<Coup> c (new Coup(a,o,Partie->getNoir()));*/
             /*if (!commentaires->toPlainText().toStdString().empty())
             {
                 //s'il y a du texte dans la zone de commentaires, on l'ajoute au coup
                 c->addComm(commentaires->toPlainText());
             }*/
 
-            Partie->ajouterCoup(*c);
+            /*Partie->ajouterCoup(*c);
             boost::shared_ptr<Pierre> p (new Pierre(c));
             goban->ajouterPierre(p);
             goban->setCourant(Partie->debut());
@@ -434,7 +434,7 @@ void FP::bouton_goban(int a, int o)
             goban->ajouterPierre(p);
             goban->avancer();
         }
-        else throw coup_exception("Impossible d'ajouter un coup.");
+        else throw coup_exception("Impossible d'ajouter un coup.");*/
 
         /* Test : ok
         boost::shared_ptr<QGraphicsPixmapItem> ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));

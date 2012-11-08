@@ -1,12 +1,12 @@
 #include "pierre.h"
 #include "FP.h"
 
-Pierre::Pierre(boost::shared_ptr<const Coup> c) : corres(c)
+Pierre::Pierre(Coup c) : m_coup(c)
 {
-    if (c->getJoueur()->getNom()=="Kiral")
+    if (c.getJoueur()->getNom()=="Kiral")
         ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("pierreRose.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
 
-    else if (c->getJoueur()->couleur()=="Noir")
+    else if (c.getJoueur()->couleur()=="Noir")
     ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
 
 
@@ -19,13 +19,17 @@ Pierre::Pierre(boost::shared_ptr<const Coup> c) : corres(c)
         ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap(nomFichier).scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
     }
 
-    ellipse->setX((c->getAbs()+1)*FP::ECART_T()-(FP::ECART_T()*R/2));
-    ellipse->setY((c->getOrd()+1)*FP::ECART_T()-(FP::ECART_T()*R/2));
+    ellipse->setX((c.getAbs()+1)*FP::ECART_T()-(FP::ECART_T()*R/2));
+    ellipse->setY((c.getOrd()+1)*FP::ECART_T()-(FP::ECART_T()*R/2));
 
     //rect.setWidth(E*0.9);
     //rect.setHeight(E*0.9);
     //les pierres font 100 pixels de diamètre, on veut qu'elles fassent E*0,9
     //ellipse->setScale(E*0.9/100);
+
+    ostringstream name;
+    name << rand() % 300 +1;
+    m_name = name.str();
 
 }
 
@@ -39,7 +43,7 @@ void Pierre::setEllipse(boost::shared_ptr<QGraphicsPixmapItem> el)
 int Pierre::libertes() const
 {
     ostringstream os;
-    os << "Calcul du nombre de libertés de la pierre " << corres->print();
+    os << "Calcul du nombre de libertés de la pierre " << m_coup.print();
     //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
     vector<pair<int,int> > adj = intersectionsAdjacentes();
 
@@ -65,8 +69,8 @@ int Pierre::libertes() const
 vector<pair<int,int> > Pierre::intersectionsAdjacentes() const
 {
     vector<pair<int, int> > resultat;
-    int abs = getCoup()->getAbs();
-    int ord = getCoup()->getOrd();
+    int abs = getCoup().getAbs();
+    int ord = getCoup().getOrd();
 
     resultat.push_back(pair<int,int>(abs,ord+1));
     resultat.push_back(pair<int,int>(abs,ord-1));

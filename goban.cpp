@@ -125,14 +125,17 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     //if (coupCourant!=0) removeItem(coupCourant);
 
     SGF::Debug* dbg = SGF::Debug::getInstance();
-    //os << "\n ---------- \n Coup n°" << p->getCoup()->getNum() << std::endl;
+    //os << "\n ---------- \n Coup n°" << p->getCoup().getNum() << std::endl;
 
     /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
-    const int ord = p->getCoup()->getOrd();
-    const int abs = p->getCoup()->getAbs();
+    const int ord = p->getCoup().getOrd();
+    const int abs = p->getCoup().getAbs();
     pair<int,int> coord = make_pair(abs,ord);
-    if (plateau.insert(pair<pair<int,int>,boost::shared_ptr<Pierre> >(coord,p)).second)
-        dbg->add(SGF::Normal,"Ajout de la pierre à la map plateau : ok");
+    plateau.insert(pair<pair<int,int>,boost::shared_ptr<Pierre> >(coord,p));
+
+    ostringstream msg;
+    msg << "!!!!!! Ajout de la pierre " << p->couleur() << " en " << abs << "-" << ord << "\n";
+    dbg->add(SGF::Normal,msg.str()); /// INFOS CORRECTES
 
 
     ostringstream os;
@@ -210,7 +213,7 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
                     //pour chaque pierre du groupe à supprimer
                     pierresSupprimees.push_back(*it_pierre);
                     int abs, ord;
-                    abs = (*it_pierre)->getCoup()->getAbs(); ord = (*it_pierre)->getCoup()->getOrd();
+                    abs = (*it_pierre)->getCoup().getAbs(); ord = (*it_pierre)->getCoup().getOrd();
                     supprimerPierre(*it_pierre);
 
                 }
@@ -235,8 +238,8 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
 
 void Goban::supprimerPierre(boost::shared_ptr<Pierre> p)
 {
-    int a = p->getCoup()->getAbs();
-    int o = p->getCoup()->getOrd();
+    int a = p->getCoup().getAbs();
+    int o = p->getCoup().getOrd();
     if (plateau.erase(pair<int,int>(a,o))!=1) throw coup_exception("Erreur à la suppression d'une pierre");
 
     removeItem(p->getEllipse().get());
@@ -247,7 +250,7 @@ void Goban::supprimerPierre(boost::shared_ptr<Pierre> p)
 
 bool Goban::estSurPlateau(boost::shared_ptr<Pierre> p) const
 {
-    int abs = p->getCoup()->getAbs(), ord = p->getCoup()->getOrd();
+    int abs = p->getCoup().getAbs(), ord = p->getCoup().getOrd();
     return (plateau.find(pair<int,int>(abs,ord))!=plateau.end());
 }
 
@@ -285,7 +288,9 @@ std::string Goban::printPlateau() const
     result << "Etat du plateau : \n";
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::const_iterator it = plateau.begin(); it != plateau.end(); ++it)
     {
-        result << "Pierre " << it->second->getCoup()->getJoueur()->couleur().toStdString() << " en " << it->first.first << "-" << it->first.second << "\n";
+       // result << "Pierre " << it->second->getCoup().getJoueur()->couleur().toStdString() << " en " << it->first.first << "-" << it->first.second << "\n";
+        result << "Pierre " << it->second->getCoup().print() << " m_name=" << it->second->getName() <<"\n";
+
     }
 
     result << "\n\n";

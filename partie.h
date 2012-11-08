@@ -5,10 +5,12 @@
 #include <vector>
 #include <sstream>
 #include "joueur.h"
+#include <boost/enable_shared_from_this.hpp>
+
 
 using namespace std;
 
-class Coup
+class Coup : public boost::enable_shared_from_this<Coup>
 {
     int abscisse;
     int ordonnee;
@@ -49,24 +51,7 @@ public :
     vector<Coup> getListeCoups() const {return listeCoups;}
     void ajouterCoup(Coup const& c);
 
-    /*class iterateur
-    {
-        const boost::shared_ptr<Coup> ptr;
 
-        public :
-            iterateur(boost::shared_ptr<Coup> c) : ptr(c) {}
-            iterateur(Coup const& c) : ptr(&c) {}
-            const boost::shared_ptr<Coup> getPtr() const {return ptr;}
-            void operator++() {++(ptr.get());}
-            void operator--() {--(ptr.get());}
-            bool operator!=(iterateur const& i) const {return i.ptr!=ptr;}
-            bool operator==(iterateur const& i) const {return i.ptr==ptr;}
-            const Coup& operator*() const {return ptr.get();}
-    };
-
-    iterateur dernierCoup() const {return iterateur(listeCoups.back());}
-    iterateur fin() const { iterateur it(listeCoups.back()); ++it; return it; }
-    iterateur debut() const { return iterateur(listeCoups.front()); }*/
     vector<Coup>::const_iterator debut() const {return listeCoups.begin();}
     vector<Coup>::const_iterator fin() const {return listeCoups.end();}
     boost::shared_ptr<Blanc> getBlanc() const {return joueurBlanc;}

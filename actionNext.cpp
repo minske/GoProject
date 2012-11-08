@@ -25,13 +25,13 @@ void actionNext::undo()
     try
     {
         g->supprimerPierre(m_pierre);
-        dbg->add(SGF::Normal,"Suppression de la pierre : "+m_pierre->getCoup()->print());
+        dbg->add(SGF::Normal,"Suppression de la pierre : "+m_pierre->getCoup().print());
 
         if (pierresSupprimees.size()!=0)
         {
             for (vector<boost::shared_ptr<Pierre> >::iterator it = pierresSupprimees.begin(); it!=pierresSupprimees.end(); ++it)
             {
-                dbg->add(SGF::Normal,"Rajout de la pierre : "+(*it)->getCoup()->print());
+                dbg->add(SGF::Normal,"Rajout de la pierre : "+(*it)->getCoup().print());
                 g->ajouterPierre(*it);
             }
         }
@@ -75,18 +75,18 @@ void actionNext::redo()
             {
                 Coup c = goban->getCourant().operator *();
                 dbg->add(SGF::Normal, c.print());
-                boost::shared_ptr<Pierre> p (new Pierre(boost::shared_ptr<Coup>(&c))); //on récupère l'itérateur courant
+                boost::shared_ptr<Pierre> p (new Pierre(c)); //on récupère l'itérateur courant
                 m_pierre = p;
 
                 std::ostringstream pierreCreee;
-                pierreCreee << "Création de la pierre : " << p->getCoup()->getJoueur()->couleur().toStdString()
-                            << " en " << p->getCoup()->getAbs()
-                            << "-" << p->getCoup()->getOrd() << "\n";
+                pierreCreee << "Création de la pierre : " << p->getCoup().getJoueur()->couleur().toStdString()
+                            << " en " << p->getCoup().getAbs()
+                            << "-" << p->getCoup().getOrd() << "\n";
                 SGF::Debug::getInstance()->add(SGF::Normal,pierreCreee.str());
-                os << p->getCoup()->getNum();
-                fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup()->getComm());
+                os << p->getCoup().getNum();
+                fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup().getComm());
 
-                int abs = p->getCoup()->getAbs(); int ord = p->getCoup()->getOrd();
+                int abs = p->getCoup().getAbs(); int ord = p->getCoup().getOrd();
                 pierresSupprimees = goban->ajouterPierre(p);
                 //on ajoute la pierre au goban, ce qui renvoie les pierres capturées
                 unsigned int nbCapt = pierresSupprimees.size();
@@ -96,7 +96,7 @@ void actionNext::redo()
                     os <<  nbCapt << " pierre(s) à supprimer.";
                     setText(QString::fromStdString(os.str()));
 
-                    if (p->getCoup()->getJoueur()->couleur()=="Blanc")
+                    if (p->getCoup().getJoueur()->couleur()=="Blanc")
                     {
                         ostringstream oss;
                         oss << Partie->getBlanc()->getCapt() + nbCapt;

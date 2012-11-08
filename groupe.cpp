@@ -27,7 +27,7 @@ void Groupe::ajouterPierre(boost::shared_ptr<Pierre> p)
     if (faitPartie(p))
     {
         ostringstream res;
-        res << "La pierre " << p->getCoup()->getAbs() << "-" << p->getCoup()->getOrd() << " appartient déjà au groupe";
+        res << "La pierre " << p->getCoup().getAbs() << "-" << p->getCoup().getOrd() << " appartient déjà au groupe";
         throw coup_exception(res.str());
     }
     m_pierres.push_back(p);
@@ -66,7 +66,7 @@ void Groupe::print() const
     if (m_pierres.size()!=0)
     {
         for (vector<boost::shared_ptr<Pierre> >::const_iterator it=m_pierres.begin(); it!=m_pierres.end(); ++it)
-            std::cout << (*it)->getCoup()->getAbs() <<"-" << (*it)->getCoup()->getOrd() <<" + ";
+            std::cout << (*it)->getCoup().getAbs() <<"-" << (*it)->getCoup().getOrd() <<" + ";
     }
     else std::cout << "Groupe vide";
 }
@@ -78,7 +78,7 @@ std::string Groupe::printToString() const
     if (m_pierres.size()!=0)
     {
         for (vector<boost::shared_ptr<Pierre> >::const_iterator it=m_pierres.begin(); it!=m_pierres.end(); ++it)
-            os << (*it)->getCoup()->getAbs() <<"-" << (*it)->getCoup()->getOrd() <<" + ";
+            os << (*it)->getCoup().getAbs() <<"-" << (*it)->getCoup().getOrd() <<" + ";
     }
     else os << "Groupe vide";
 

@@ -12,13 +12,14 @@
 class Pierre
 {
 public :
-    Pierre(boost::shared_ptr<const Coup> c);
+    Pierre(Coup c);
 
-    const boost::shared_ptr<const Coup> getCoup() const {return corres;}
-    boost::shared_ptr<const Coup> getCoup() {return corres;}
+    Coup getCoup() const {return m_coup;}
+    Coup getCoup() {return m_coup;}
     const QRect& getRect() const {return rect;}
     boost::shared_ptr<QGraphicsPixmapItem> getEllipse() const {return ellipse;}
     boost::shared_ptr<Groupe> getGroupe() {return m_groupe.lock();}
+    std::string getName() const {return m_name;}
 
     int libertes() const;
     vector<pair<int,int> > intersectionsAdjacentes() const;
@@ -29,13 +30,15 @@ public :
     void setGroupe(boost::shared_ptr<Groupe> groupePtr) {m_groupe = boost::weak_ptr<Groupe>(groupePtr);}
     ~Pierre() {}
 
-    std::string couleur() const {return corres->getJoueur()->couleur().toStdString();}
+    std::string couleur() const {return m_coup.getJoueur()->couleur().toStdString();}
 
 private :
     QRect rect;
-    const boost::shared_ptr<const Coup> corres;
+    Coup m_coup;
     boost::shared_ptr<QGraphicsPixmapItem> ellipse;
     boost::weak_ptr<Groupe> m_groupe;
+
+    std::string m_name;
 };
 
 #endif // PIERRE_H

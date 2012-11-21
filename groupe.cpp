@@ -1,6 +1,8 @@
 #include "groupe.h"
 #include "pierre.h"
 
+using namespace std;
+
 Groupe::Groupe() : statut(0)
 {}
 
@@ -31,14 +33,31 @@ void Groupe::ajouterPierre(boost::shared_ptr<Pierre> p)
         throw coup_exception(res.str());
     }
     m_pierres.push_back(p);
+    p->setGroupe(this->shared_from_this());
 }
 
 void Groupe::ajouterGroupe(boost::shared_ptr<Groupe> g)
 {
+    cout << "Groupe::ajouterGroupe" << endl;
+    cout << "this.size()=" << m_pierres.size() << endl;
+    if (g.get()!=0)
+    {
+    cout << g->getPierres().size() << " pierres a ajouter\n";
+    int i = 1;
     for (vector<boost::shared_ptr<Pierre> >::iterator it = g->getPierres().begin(); it != g->getPierres().end(); it++)
     {
+        cout << "pierre " << i << endl;
         boost::shared_ptr<Pierre> pierrePtr = *it;
+        cout << "ajouter pierre : " <<pierrePtr->getCoup().print() << endl;
         ajouterPierre(pierrePtr);
+        pierrePtr->setGroupe(this->shared_from_this());
+        i++;
+    }
+    cout << "fin ajouter Groupe\n";
+    }
+    else
+    {
+        cout << "Pointeur sur groupe à ajouter nul" << endl;
     }
 }
 
@@ -77,6 +96,7 @@ std::string Groupe::printToString() const
 
     if (m_pierres.size()!=0)
     {
+        os << couleur() << " - ";
         for (vector<boost::shared_ptr<Pierre> >::const_iterator it=m_pierres.begin(); it!=m_pierres.end(); ++it)
             os << (*it)->getCoup().getAbs() <<"-" << (*it)->getCoup().getOrd() <<" + ";
     }

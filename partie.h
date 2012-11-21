@@ -21,7 +21,8 @@ class Coup : public boost::enable_shared_from_this<Coup>
 
 public :
     Coup() : abscisse(0), ordonnee(0), numero(0), commentaires(QString()) {}
-    Coup(int abs, int ord, boost::shared_ptr<Joueur> jou) : abscisse(abs), ordonnee(ord), j(jou) {}
+    Coup(int abs, int ord, boost::shared_ptr<Joueur> jou) : abscisse(abs), ordonnee(ord), j(jou)
+    {std::cout << "coup créé\n";}
     Coup(std::string const& s, std::string com=std::string());
     std::string print() const;
     int getAbs() const {return abscisse;}
@@ -33,6 +34,8 @@ public :
     QString getComm() const {return commentaires;}
     void addComm(QString const& s);
 
+    std::string couleur() const {return j->couleur().toStdString();}
+
     ~Coup();
 };
 
@@ -40,10 +43,10 @@ public :
 class partie
 {
 public :
-    typedef vector<Coup>::const_iterator iterateur;
+    typedef vector<Coup>::iterator iterateur;
 
-    static boost::shared_ptr<partie> donneInstance();
-    static boost::shared_ptr<partie> donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+    static boost::shared_ptr<partie> instance();
+    static boost::shared_ptr<partie> instance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
                                  QString const& blancNiveau, QString const& partieDate);
     void chargerFichier(std::string const& nomFichier);
     //void avancer() {++courant;}
@@ -52,8 +55,8 @@ public :
     void ajouterCoup(Coup const& c);
 
 
-    vector<Coup>::const_iterator debut() const {return listeCoups.begin();}
-    vector<Coup>::const_iterator fin() const {return listeCoups.end();}
+    iterateur debut() {return listeCoups.begin();}
+    iterateur fin() {return listeCoups.end();}
     boost::shared_ptr<Blanc> getBlanc() const {return joueurBlanc;}
     boost::shared_ptr<Noir> getNoir() const {return joueurNoir;}
     std::string infos() const;

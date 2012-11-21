@@ -177,19 +177,19 @@ void partie::chargerFichier(string const& f)
     else dbg->add(SGF::Exception,"Ce fichier n'existe pas.\n");
 }
 
-boost::shared_ptr<partie> partie::donneInstance()
+boost::shared_ptr<partie> partie::instance()
 {
-    if (instanceUnique == 0)
+    if (instanceUnique.get() == 0)
     {
         instanceUnique = boost::shared_ptr<partie>(new partie());
     }
     return instanceUnique;
 }
 
-boost::shared_ptr<partie> partie::donneInstance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
+boost::shared_ptr<partie> partie::instance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
                              QString const& blancNiveau, QString const& partieDate)
 {
-    if (instanceUnique == 0)
+    if (instanceUnique.get() == 0)
     {
         instanceUnique = boost::shared_ptr<partie>(new partie());
 

@@ -50,7 +50,7 @@ class FP : public QMainWindow, public boost::enable_shared_from_this<FP>
     Q_OBJECT
 private :
     modeSGF mode;
-    boost::shared_ptr<partie> Partie;
+    //boost::shared_ptr<partie> Partie;
     QHBoxLayout* infosJoueur;
     infosJoueurs* infosNoir;
     infosJoueurs* infosBlanc;
@@ -82,8 +82,8 @@ public :
     QUndoCommand* nextaction();
     QGraphicsView* getVue() const {return vue;}
     void setVue(QGraphicsView* v) {vue = v;}
-    boost::shared_ptr<partie> getPartie() const {return Partie;}
-    void setPartie(boost::shared_ptr<partie> p) {Partie = p;}
+    //boost::shared_ptr<partie> getPartie() const {return Partie;}
+    //void setPartie(boost::shared_ptr<partie> p) {Partie = p;}
     infosJoueurs* getInfosNoir() const {return infosNoir;}
     infosJoueurs* getInfosBlanc() const {return infosBlanc;}
     QTextEdit* getComm() const {return commentaires;}

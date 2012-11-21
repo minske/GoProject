@@ -1,6 +1,8 @@
 #include "actionNext.h"
 #include "debug.h"
 
+using namespace std;
+
 actionNext::actionNext() : QUndoCommand()
 {
     SGF::Debug::getInstance()->add(SGF::Normal,"actionNext::constructeur\n");
@@ -64,18 +66,21 @@ void actionNext::redo()
     SGF::Debug* dbg = SGF::Debug::getInstance();
 
     try {
-
+        cout << "REDO\n";
         dbg->add(SGF::Normal, "\n-- (Re)do --");
-        boost::shared_ptr<partie> Partie = fp->getPartie();
+        //boost::shared_ptr<partie> Partie = fp->getPartie();
         Goban* goban = Goban::getInstance();
         ostringstream os;
-        if (Partie!=0) //s'il y a bien une partie ouverte
+        if (partie::instance().get()!=0) //s'il y a bien une partie ouverte
         {
-            if(goban->getCourant()!=Partie->fin()) //et que la partie n'est pas terminée
+            if(goban->getCourant()!=partie::instance()->fin()) //et que la partie n'est pas terminée
             {
-                Coup c = goban->getCourant().operator *();
+
+                Coup c = *(goban->getCourant());
+                cout << "Coup : "<< c.print() << endl;
                 dbg->add(SGF::Normal, c.print());
                 boost::shared_ptr<Pierre> p (new Pierre(c)); //on récupère l'itérateur courant
+                cout << "Pierre créée\n";
                 m_pierre = p;
 
                 std::ostringstream pierreCreee;
@@ -83,11 +88,13 @@ void actionNext::redo()
                             << " en " << p->getCoup().getAbs()
                             << "-" << p->getCoup().getOrd() << "\n";
                 SGF::Debug::getInstance()->add(SGF::Normal,pierreCreee.str());
+                cout << pierreCreee.str();
                 os << p->getCoup().getNum();
                 fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup().getComm());
 
                 int abs = p->getCoup().getAbs(); int ord = p->getCoup().getOrd();
                 pierresSupprimees = goban->ajouterPierre(p);
+                cout << "Ajout au goban : ok" << endl;
                 //on ajoute la pierre au goban, ce qui renvoie les pierres capturées
                 unsigned int nbCapt = pierresSupprimees.size();
                 if (nbCapt>0) //si ce nombre est positif, il faut les ajouter aux joueurs
@@ -99,16 +106,16 @@ void actionNext::redo()
                     if (p->getCoup().getJoueur()->couleur()=="Blanc")
                     {
                         ostringstream oss;
-                        oss << Partie->getBlanc()->getCapt() + nbCapt;
-                        Partie->getBlanc()->addCapt(nbCapt);
+                        oss << partie::instance()->getBlanc()->getCapt() + nbCapt;
+                        partie::instance()->getBlanc()->addCapt(nbCapt);
                         fp->getInfosBlanc()->setCapt(QString::fromStdString(oss.str()));
 
                     }
                     else
                     {
                         ostringstream oss;
-                        oss << Partie->getNoir()->getCapt() + nbCapt;
-                        Partie->getNoir()->addCapt(nbCapt);
+                        oss << partie::instance()->getNoir()->getCapt() + nbCapt;
+                        partie::instance()->getNoir()->addCapt(nbCapt);
                         fp->getInfosNoir()->setCapt(QString::fromStdString(oss.str()));
 
                     }
@@ -124,7 +131,7 @@ void actionNext::redo()
 
 
             }
-            if (goban->getCourant()==Partie->fin()) fp->getComm()->setText("Fin de la partie. Résultat : " + Partie->getResultat());
+            if (goban->getCourant()==partie::instance()->fin()) fp->getComm()->setText("Fin de la partie. Résultat : " + partie::instance()->getResultat());
         }
 
         //os << "\n" << goban->getLogMsg().toStdString();

@@ -3,6 +3,8 @@
 #include "actionNext.h"
 #include "debug.h"
 
+using namespace std;
+
 double FP::ECART = 0;
 
 /******************************************************************************************************************/
@@ -215,19 +217,19 @@ void FP::ouvrirFichier()
     SGF::Debug* dbg = SGF::Debug::getInstance();
     dbg->add(SGF::Normal,"Ouverture du fichier");
 
-    if (Partie.get()!=0) FP::fermerFichier();
+    if (partie::instance().get()!=0) FP::fermerFichier();
 
     QString fichier = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", QString(), "Fichier SGF (*.sgf)");
     QMessageBox::information(this, "Fichier", "Vous avez sélectionné :\n" + fichier);
     dbg->add(SGF::Normal,"Fichier : "+ fichier.toStdString());
-    Partie = partie::donneInstance();
-    Partie->chargerFichier(fichier.toStdString());
-    goban->setCourant(partie::iterateur(Partie->debut()));
+    partie::instance();
+    partie::instance()->chargerFichier(fichier.toStdString());
+    goban->setCourant(partie::iterateur(partie::instance()->debut()));
 
-    infosNoir->setJoueur(Partie->getNoir());
-    infosBlanc->setJoueur(Partie->getBlanc());
+    infosNoir->setJoueur(partie::instance()->getNoir());
+    infosBlanc->setJoueur(partie::instance()->getBlanc());
 
-    commentaires->setText("Fichier : "+fichier+". Début de la partie.\n Partie jouée le "+Partie->getDate());
+    commentaires->setText("Fichier : "+fichier+". Début de la partie.\n Partie jouée le "+partie::instance()->getDate());
     nomFichier->setText("Fichier : "+fichier);
     barreEtat->addWidget(nomFichier);
 }
@@ -246,7 +248,7 @@ void FP::nextMove()
         pileUndo->redo();
     }
 
-    else if ((Partie.get()!=0) && (goban->getCourant()!=Partie->fin()))
+    else if ((partie::instance().get()!=0) && (goban->getCourant()!=partie::instance()->fin()))
     {
         //std::cout << "Ajout dans la pile undoStack" << std::endl;
         dbg->add(SGF::Normal,"Création d'un new ActionNext");
@@ -275,7 +277,7 @@ void FP::fermerFichier()
     //delete Partie;
     pileUndo->clear();
     //Partie.get()=0;
-    Partie.reset();
+    partie::libereInstance();
     goban->init();
     infosNoir->setNom(" "); infosNoir->setNiveau(" ");
     infosBlanc->setNom(" "); infosBlanc->setNiveau(" ");
@@ -303,9 +305,9 @@ void FP::debutPartie()
     Goban* goban = Goban::getInstance();
     pileUndo->clear();
     goban->init();
-    Partie->getBlanc()->setCapt(0); Partie->getNoir()->setCapt(0);
-    goban->setCourant(Partie->debut());
-    commentaires->setText("Début de la partie.\n Partie jouée le "+Partie->getDate());
+    partie::instance()->getBlanc()->setCapt(0); partie::instance()->getNoir()->setCapt(0);
+    goban->setCourant(partie::instance()->debut());
+    commentaires->setText("Début de la partie.\n Partie jouée le "+partie::instance()->getDate());
 
     SGF::Debug::getInstance()->add(SGF::Normal,"\nRetour au début de la partie, nettoyage de la pile d'Undo/Redo, init du goban.\n\n");
 
@@ -313,7 +315,7 @@ void FP::debutPartie()
 
 void FP::next5Moves()
 {
-    if (Partie!=0)
+    if (partie::instance().get()!=0)
     {
         for (unsigned int i = 0; i<5; i++)
             FP::nextMove();
@@ -323,9 +325,9 @@ void FP::next5Moves()
 void FP::finPartie()
 {
     Goban* goban = Goban::getInstance();
-    if (Partie!=0)
+    if (partie::instance().get()!=0)
     {
-        while (goban->getCourant()!=Partie->fin())
+        while (goban->getCourant()!=partie::instance()->fin())
             FP::nextMove();
     }
 }
@@ -361,11 +363,11 @@ void FP::changerFondSansMotif()
 
 void FP::enregistrerFichier()
 {
-    if ((Partie!=0) && (mode==creationSGF))
+    if ((partie::instance().get()!=0) && (mode==creationSGF))
     {
         QString nomFich = QFileDialog::getSaveFileName(this, "Enregistrer un fichier", QString(), "SGF (*.sgf)");
         if (nomFich.size()!=0)
-            Partie->enregistrerFichier(nomFich);
+            partie::instance()->enregistrerFichier(nomFich);
     }
 }
 
@@ -373,20 +375,20 @@ void FP::nouveauFichier()
 {
     /*** ouverture d'une boîte de dialogue pour demander le nom des joueurs, leur niveau,
     la date de la partie ***/
-    if ((Partie!=0) && (mode==creationSGF))
+    if ((partie::instance().get()!=0) && (mode==creationSGF))
     {
         enregistrerFichier();
     }
-    else if (Partie!=0)
+    else if (partie::instance().get()!=0)
     {
         fermerFichier();
-        boost::shared_ptr<FenetreInfos> fi (new FenetreInfos(this->f()));
+        FenetreInfos* fi = new FenetreInfos(this);
         fi->show();
         mode=creationSGF;
     }
     else
     {
-        boost::shared_ptr<FenetreInfos> fi (new FenetreInfos(this->f()));
+        FenetreInfos* fi = new FenetreInfos(this);
         fi->show();
         mode=creationSGF;
 
@@ -397,44 +399,46 @@ void FP::bouton_goban(int a, int o)
 {
     Goban* goban = Goban::getInstance();
 
-
-    if ((mode==creationSGF) && (Partie!=0))
+    cout << "Clicked : " << a << "-" << o << endl;
+    if ((mode==creationSGF) && (partie::instance().get()!=0))
     {
         /* Si la partie n'a encore aucun coup, c'est le premier, donc à noir de jouer
         Sinon, on regarde le dernier coup joué.*/
-       /* if (goban->getCourant()==Partie->debut())
+        if (partie::instance()->getListeCoups().empty())
         {
-            boost::shared_ptr<Coup> c (new Coup(a,o,Partie->getNoir()));*/
+            cout << "Debut :\n";
+            Coup c (a,o,partie::instance()->getNoir());
+            cout << "Ajout du premier coup pour noir en " << a << "-" << o << endl;
             /*if (!commentaires->toPlainText().toStdString().empty())
             {
                 //s'il y a du texte dans la zone de commentaires, on l'ajoute au coup
                 c->addComm(commentaires->toPlainText());
             }*/
 
-            /*Partie->ajouterCoup(*c);
+            partie::instance()->ajouterCoup(c);
             boost::shared_ptr<Pierre> p (new Pierre(c));
             goban->ajouterPierre(p);
-            goban->setCourant(Partie->debut());
+            goban->setCourant(partie::instance()->debut());
         }
-        else if ((*(goban->getCourant())).getJoueur()->couleur()=="Noir")
+        else if (goban->getCourant()->couleur()=="Noir")
         {
-            boost::shared_ptr<Coup> c(new Coup(a,o,Partie->getBlanc()));
+            Coup c(a,o,partie::instance()->getBlanc());
 
-            Partie->ajouterCoup(*c);
+            partie::instance()->ajouterCoup(c);
             boost::shared_ptr<Pierre> p(new Pierre(c));
             goban->ajouterPierre(p);
             goban->avancer();
         }
-        else if ((*(goban->getCourant())).getJoueur()->couleur()=="Blanc")
+        else if (goban->getCourant()->couleur()=="Blanc")
         {
-            boost::shared_ptr<Coup> c(new Coup(a,o,Partie->getNoir()));
+            Coup c(a,o,partie::instance()->getNoir());
 
-            Partie->ajouterCoup(*c);
+            partie::instance()->ajouterCoup(c);
             boost::shared_ptr<Pierre> p(new Pierre(c));
             goban->ajouterPierre(p);
-            goban->avancer();
+            //goban->avancer();
         }
-        else throw coup_exception("Impossible d'ajouter un coup.");*/
+        //else throw coup_exception("Impossible d'ajouter un coup.");*/
 
         /* Test : ok
         boost::shared_ptr<QGraphicsPixmapItem> ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));

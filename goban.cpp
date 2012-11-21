@@ -8,6 +8,8 @@ QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
 Goban* Goban::m_instance = 0;
 
+using namespace std;
+
 Goban* Goban::getInstance()
 {
     if (m_instance==0)
@@ -128,10 +130,13 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     //os << "\n ---------- \n Coup n°" << p->getCoup().getNum() << std::endl;
 
     /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
+    cout << "Goban::ajouterPierre\n";
     const int ord = p->getCoup().getOrd();
     const int abs = p->getCoup().getAbs();
     pair<int,int> coord = make_pair(abs,ord);
     plateau.insert(pair<pair<int,int>,boost::shared_ptr<Pierre> >(coord,p));
+
+    cout << "plateau.insert : ok \n";
 
     ostringstream msg;
     msg << "!!!!!! Ajout de la pierre " << p->couleur() << " en " << abs << "-" << ord << "\n";
@@ -141,20 +146,25 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     ostringstream os;
     os << "Nombre de libertés de la pierre ajoutée : " << p->libertes();
     dbg->add(SGF::Normal,os.str());
+    cout << os.str() << endl;
 
     /**************************************** FUSION DES GROUPES ***********************************/
 
     vector<boost::shared_ptr<Pierre> > pierresAutour = p->pierresAutourMemeCouleur();
+    cout << pierresAutour.size() << " pierres autour de la même couleur\n";
     vector<boost::shared_ptr<Groupe> > groupesAutour;
 
     for (vector<boost::shared_ptr<Pierre> >::iterator it = pierresAutour.begin(); it != pierresAutour.end(); it++)
     {
         boost::shared_ptr<Groupe> m_groupe = (*it)->getGroupe();
+        cout << m_groupe->getPierres().size() << endl;
         if (find(groupesAutour.begin(), groupesAutour.end(), m_groupe)==groupesAutour.end())
         {
             groupesAutour.push_back(m_groupe);
         }
     }
+
+    cout << groupesAutour.size() << " groupes autour de la même couleur\n";
 
     if (groupesAutour.size()==0)
     {
@@ -169,16 +179,26 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
         /*il y a plusieurs groupes à fusionner : on prend le premier, on lui ajoute les autres
           un par un, puis on ajoute la nouvelle pierre créée */
         boost::shared_ptr<Groupe> groupePtr = groupesAutour[0];
+        cout << "boost::shared_ptr<Groupe> groupePtr = groupesAutour[0];\n";
+        cout << "groupePtr.size()=" << groupePtr->getPierres().size() << endl;
+        int i = 1;
         for (vector<boost::shared_ptr<Groupe> >::iterator it = groupesAutour.begin(); it != groupesAutour.end(); it++)
         {
+            cout << i << "\n";
             if (it!=groupesAutour.begin())
             {
+                cout << i << endl;
                 groupePtr->ajouterGroupe(*it);
+                cout << "fusion du groupe\n";
                 m_groupes.erase(*it);
+                cout << "suppression de l'ancien groupe\n";
             }
+            i++;
         }
 
         groupePtr->ajouterPierre(p);
+        cout << "Ajout de la pierre au groupe : ok\n";
+        cout << "Ce nouveau groupe a maintenant " << groupePtr->getPierres().size() << " pierres\n";
         p->setGroupe(groupePtr->shared_from_this());
     }
 
@@ -289,8 +309,13 @@ std::string Goban::printPlateau() const
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::const_iterator it = plateau.begin(); it != plateau.end(); ++it)
     {
        // result << "Pierre " << it->second->getCoup().getJoueur()->couleur().toStdString() << " en " << it->first.first << "-" << it->first.second << "\n";
-        result << "Pierre " << it->second->getCoup().print() << " m_name=" << it->second->getName() <<"\n";
+        result << "Pierre " << it->second->getCoup().print() << "\n";
 
+    }
+
+    for (std::set<boost::shared_ptr<Groupe> >::iterator it = m_groupes.begin(); it != m_groupes.end(); it++)
+    {
+        result << "Groupe : " << (*it)->printToString() << std::endl;
     }
 
     result << "\n\n";

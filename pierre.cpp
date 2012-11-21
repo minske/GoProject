@@ -4,7 +4,7 @@
 Pierre::Pierre(Coup c) : m_coup(c)
 {
     if (c.getJoueur()->getNom()=="Kiral")
-        ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("pierreRose.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
+        ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("circle_rose.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
 
     else if (c.getJoueur()->couleur()=="Noir")
     ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(FP::ECART_T()*R,FP::ECART_T()*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));

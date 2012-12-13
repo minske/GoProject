@@ -1,7 +1,7 @@
 #ifndef ACTIONNEXT_H
 #define ACTIONNEXT_H
 
-#include "FP.h"
+#include "FenetreSGF.h"
 
 
 /***
@@ -12,25 +12,25 @@ Lorsqu'une instance d'actionNext est ajoutée à la pile UndoStack, sa méthode red
 et modifie le goban.
 ****/
 
-class actionNext : public QUndoCommand
+class ActionNext : public QUndoCommand
 {
 public :
-    actionNext();
-    actionNext(boost::shared_ptr<FP> f);
-    ~actionNext() {}
+    ActionNext();
+    ActionNext(boost::shared_ptr<FenetreSGF> f);
+    ~ActionNext() {}
     int id() const {return 42;}
     bool mergeWith(const boost::shared_ptr<QUndoCommand> other);
     void redo();
     void undo();
     //QString getLogMsg() const { return logMsg;}
-    void setFpPtr(boost::shared_ptr<FP> fpPtr) {fp = fpPtr;}
+    void setFenetrePrincipalePtr(boost::shared_ptr<FenetreSGF> fpPtr) {fp = fpPtr;}
 
 private :
     boost::shared_ptr<Pierre> m_pierre;
-    vector<boost::shared_ptr<Pierre> > pierresSupprimees;
-    boost::shared_ptr<FP> fp;
+    std::vector<boost::shared_ptr<Pierre> > pierresSupprimees;
+    boost::weak_ptr<FenetreSGF> fp;
     //QString logMsg;
 
 };
 
-#endif // ACTIONNEXT_H
+#endif // ActionNext_H

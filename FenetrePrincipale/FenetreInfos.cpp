@@ -1,4 +1,5 @@
 #include "fenetreInfos.h"
+#include "../Partie/PartieManager.h"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ using namespace std;
 /******************************************************************************************************************/
 
 /********** Constructeur **********************************************************/
-FenetreInfos::FenetreInfos(FP* f) : QWidget(), fenPrincipale(f)
+FenetreInfos::FenetreInfos(FenetrePrincipale* f) : QWidget(), fenPrincipale(f)
 {
     /*** Définition d'un layout pour positionner les infos à demander */
     QGridLayout* layoutGrille = new QGridLayout();
@@ -68,11 +69,10 @@ void FenetreInfos::valider()
     if (niveauBlanc->text().size()==0) niveau_Blanc="-"; else niveau_Blanc=niveauBlanc->text();
     if (datePartie->text().size()==0) date_partie="inconnue"; else date_partie=datePartie->text();
 
-    partie::instance(nom_noir,nom_Blanc,niveau_Noir,niveau_Blanc,date_partie);
+    fenPrincipale->getGoban()->getPartie()->init(nom_noir,nom_Blanc,niveau_Noir,niveau_Blanc,date_partie);
     //fenPrincipale->setPartie(partie::donneInstance(nom_noir,nom_Blanc,niveau_Noir,niveau_Blanc,date_partie));
-    fenPrincipale->getInfosNoir()->setJoueur(partie::instance()->getNoir());
-    fenPrincipale->getInfosBlanc()->setJoueur(partie::instance()->getBlanc());
-    if (partie::instance().get()!=0)
+    fenPrincipale->getInfosNoir()->setJoueur(fenPrincipale->getGoban()->getPartie()->getNoir());
+    fenPrincipale->getInfosBlanc()->setJoueur(fenPrincipale->getGoban()->getPartie()->getBlanc());
     cout << "Partie initialisée\n";
     close();
 }

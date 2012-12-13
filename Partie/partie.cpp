@@ -1,69 +1,22 @@
-#include "partie.h"
-#include "debug.h"
+#include "Partie.h"
+#include "../Tools/debug.h"
+#include "../Tools/CoupException.h"
 
 using namespace std;
 
 
-boost::shared_ptr<partie> partie::instanceUnique;// = boost::shared_ptr<partie>(0);
-
-coup_exception::coup_exception(const std::string& i) throw():info(i){}
-
-const char* coup_exception::what() const throw() { return info.c_str(); }
-
-/******************* CLASSE COUP ***********************************************************************************/
-
-Coup::Coup(std::string const& s, std::string com)
-{
-    numero = 0;
-    // un coup donné dans le fichier est normalement de la forme B[mc]BL[151.84]OB[11]C[commentaires ...]
-    /*
-    On cherche à extraire :
-    l'abscisse et l'ordonnée du coup
-    on ne s'occupe pas du temps et des commentaires pour le moment
-    */
-    if (s.size() < 5) throw coup_exception("Fichier invalide !\n");
-    //les abscisses et ordonnées vont de 0 à 18 en commençant en haut à gauche
-
-    int p=com.size();
-    for (int n=0; n<p; n++)
-    {
-        if (com[n]=='&') com.replace(n,1,1,'\n');
-    }
-    commentaires=QString::fromStdString(com);
-    abscisse = s[2]-'a';
-    ordonnee = s[3]-'a';
-    j.reset();
-}
-
-string Coup::print() const
-{
-    stringstream r;
-    r << "Coup n°" << numero << " - " <<j->couleur().toStdString() << " : " << abscisse+1 << "-" << ordonnee+1;
-    return r.str();
-}
-
-Coup::~Coup(){}
-
-void Coup::addComm(QString const& s)
-{
-    commentaires.append(s);
-}
-
-
-/***************************** CLASSE PARTIE **********************************************************************/
-
 /***** Chargement d'un SGF *****/
-void partie::chargerFichier(string const& f)
+void Partie::chargerFichier(string const& f)
 {
     SGF::Debug* dbg = SGF::Debug::getInstance();
-    dbg->add(SGF::Normal,"Chargement de la partie. \n");
+    dbg->add(SGF::Normal,"Chargement de la Partie. \n");
     int numero = 1; //sert à numéroter les coups au fur et à mesure qu'on lit le fichier
 
     /********** Ouverture du fichier et test **************/
     ifstream sgf(f.c_str(),ios::in);
     if (sgf) //si l'ouverture a réussi
     {
-        /* Le début du fichier contient des informations sur la partie
+        /* Le début du fichier contient des informations sur la Partie
         La liste des coups commence au deuxième ';'
         On va récupérer toutes ces infos dans une chaîne pour les traiter ensuite */
         string contenu, ligne;
@@ -74,7 +27,7 @@ void partie::chargerFichier(string const& f)
             contenu += '&'; //on ajoute un caractère spécial à la fin de chaque ligne
         }
 
-        /********** Récupération des infos sur la partie **************/
+        /********** Récupération des infos sur la Partie **************/
         unsigned int i = 2;
         while (contenu[i] != ';') i++; // on avance jusqu'à ce qu'on trouve un ';'
         //i = position avant le premier coup
@@ -104,20 +57,20 @@ void partie::chargerFichier(string const& f)
                 else if (inf.substr(0,2)=="PB") jnoir=inf.substr(3);
                 else if (inf.substr(0,2)=="WR") nblanc=inf.substr(3);
                 else if (inf.substr(0,2)=="BR") nnoir=inf.substr(3);
-                else if (inf.substr(0,2)=="DT") date=QString::fromStdString(inf.substr(3));
-                else if (inf.substr(0,2)=="RE") resultat=QString::fromStdString(inf.substr(3));
+                else if (inf.substr(0,2)=="DT") m_date=QString::fromStdString(inf.substr(3));
+                else if (inf.substr(0,2)=="RE") m_resultat=QString::fromStdString(inf.substr(3));
             }
 
             j++;
         }
 
         //Initialisation des joueurs
-        joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
-        joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+        m_joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
+        m_joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
         dbg->add(SGF::Normal,"Joueur Noir : "+jnoir+" "+nnoir);
         dbg->add(SGF::Normal,"Joueur Blanc : "+jblanc+" "+nblanc+"\n");
 
-        /***  init en attendant que les infos de la partie fonctionnent  ***/
+        /***  init en attendant que les infos de la Partie fonctionnent  ***/
         //joueurNoir = Noir::donneInstance("Noir","NiveauNoir");
         //joueurBlanc = Blanc::donneInstance("Blanc","NiveauBlanc");
 
@@ -159,13 +112,13 @@ void partie::chargerFichier(string const& f)
             /* Sinon, on crée un objet de type coup et on l'ajoute à la liste des coups */
             //cout << coup << endl;
             comCom.erase(0,1);
-            listeCoups.push_back(Coup(coup, comCom));
+            m_coups.push_back(Coup(coup, comCom));
             if (coup[0]=='B')
-                listeCoups.back().setJoueur(joueurNoir);
-            else listeCoups.back().setJoueur(joueurBlanc);
-            listeCoups.back().setNum(numero);
+                m_coups.back().setJoueur(m_joueurNoir);
+            else m_coups.back().setJoueur(m_joueurBlanc);
+            m_coups.back().setNum(numero);
             numero++;
-            dbg->add(SGF::Normal,listeCoups.back().print());
+            dbg->add(SGF::Normal,m_coups.back().print());
             if (contenu[i]==')') break;
             if (contenu[i]=='&') i++;
             if (contenu[i]!=';') i++;
@@ -177,27 +130,13 @@ void partie::chargerFichier(string const& f)
     else dbg->add(SGF::Exception,"Ce fichier n'existe pas.\n");
 }
 
-boost::shared_ptr<partie> partie::instance()
+void Partie::init(QString const& noirNom, QString const& blancNom, QString const& noirNiveau, QString const& blancNiveau, QString const& partieDate)
 {
-    if (instanceUnique.get() == 0)
-    {
-        instanceUnique = boost::shared_ptr<partie>(new partie());
-    }
-    return instanceUnique;
-}
 
-boost::shared_ptr<partie> partie::instance(QString const& noirNom, QString const& blancNom, QString const& noirNiveau,
-                             QString const& blancNiveau, QString const& partieDate)
-{
-    if (instanceUnique.get() == 0)
-    {
-        instanceUnique = boost::shared_ptr<partie>(new partie());
+    m_joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
+    m_joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
+    m_date = partieDate;
 
-        instanceUnique->joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
-        instanceUnique->joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
-        instanceUnique->date = partieDate;
-    }
-    return instanceUnique;
 }
 
 
@@ -208,37 +147,33 @@ ostream& operator<<(ostream& f, Coup const& c)
 }
 
 
-std::string partie::infos() const
+std::string Partie::infos() const
 {
     std::stringstream r;
-    r << "Noir : " << joueurNoir->getNom().toStdString() << " - " << joueurNoir->getRank().toStdString() << std::endl;
-    r << "Blanc : " << joueurBlanc->getNom().toStdString() << " - " << joueurBlanc->getRank().toStdString() << std::endl;
+    r << "Noir : " << m_joueurNoir->getNom().toStdString() << " - " << m_joueurNoir->getRank().toStdString() << std::endl;
+    r << "Blanc : " << m_joueurBlanc->getNom().toStdString() << " - " << m_joueurBlanc->getRank().toStdString() << std::endl;
     return r.str();
 }
 
-void partie::libereInstance()
+
+Partie::~Partie()
 {
-    instanceUnique.reset();
+    //delete joueurBlanc; delete joueurNoir; Partie::libereInstance();
 }
 
-partie::~partie()
-{
-    //delete joueurBlanc; delete joueurNoir; partie::libereInstance();
-}
-
-void partie::enregistrerFichier(QString nomFich)
+void Partie::enregistrerFichier(QString nomFich)
 {
     std::ostringstream  os;
-    /* Ecriture des informations en début de partie */
-    os << "(;" << std::endl << "PB[" << joueurNoir->getNom().toStdString() << "]" << std::endl;
-    os << "BR[" << joueurNoir->getRank().toStdString() << "]" << std::endl;
-    os << "PW[" << joueurBlanc->getNom().toStdString() << "]" << std::endl;
-    os << "WR[" << joueurBlanc->getRank().toStdString() << "]" << std::endl;
+    /* Ecriture des informations en début de Partie */
+    os << "(;" << std::endl << "PB[" << m_joueurNoir->getNom().toStdString() << "]" << std::endl;
+    os << "BR[" << m_joueurNoir->getRank().toStdString() << "]" << std::endl;
+    os << "PW[" << m_joueurBlanc->getNom().toStdString() << "]" << std::endl;
+    os << "WR[" << m_joueurBlanc->getRank().toStdString() << "]" << std::endl;
 
     /* Ecriture de la liste des coups */
-    if (!listeCoups.empty())
+    if (!m_coups.empty())
     {
-        for (partie::iterateur it = debut(); it!=fin(); ++it)
+        for (std::vector<Coup>::iterator it = m_coups.begin(); it!=m_coups.end(); ++it)
         {
             /* Pour chaque coup, si joueur=Noir, on écrit B[coup], sinon W
             L'abscisse et l'ordonnée doivent être converties en caractères : a-a pour 0-0 */
@@ -268,7 +203,7 @@ void partie::enregistrerFichier(QString nomFich)
 
 }
 
-void partie::ajouterCoup(Coup const& c)
+void Partie::ajouterCoup(Coup const& c)
 {
-    listeCoups.push_back(c);
+    m_coups.push_back(c);
 }

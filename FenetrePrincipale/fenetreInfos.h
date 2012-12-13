@@ -1,9 +1,8 @@
 #ifndef FENETREINFOS_H
 #define FENETREINFOS_H
-#include "FP.h"
+#include "FenetrePrincipale.h"
 #include "boost/enable_shared_from_this.hpp"
 
-class FP;
 
 class FenetreInfos : public QWidget, public boost::enable_shared_from_this<FenetreInfos>
 {
@@ -14,10 +13,10 @@ class FenetreInfos : public QWidget, public boost::enable_shared_from_this<Fenet
     QLineEdit* niveauNoir;
     QLineEdit* niveauBlanc;
     QLineEdit* datePartie;
-    FP* fenPrincipale;
+    FenetrePrincipale* fenPrincipale;
 
 public :
-    FenetreInfos(FP* f);
+    FenetreInfos(FenetrePrincipale* f);
 
     QLineEdit* getNomNoir() const {return nomNoir;}
     QLineEdit* getNomBlanc() const {return nomBlanc;}

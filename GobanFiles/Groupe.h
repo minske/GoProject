@@ -6,12 +6,14 @@
 #include <vector>
 
 class Pierre;
+class Goban;
 
 class Groupe : public boost::enable_shared_from_this<Groupe>
 {
     int statut; //0 pour mort, 1 pour vivant
     //unsigned int libertes;
     std::vector<boost::shared_ptr<Pierre> > m_pierres;
+    boost::weak_ptr<Goban> m_goban;
 
 public :
     Groupe();
@@ -30,6 +32,9 @@ public :
     void print() const;
     std::string printToString() const;
     std::string couleur() const;
+
+    boost::shared_ptr<Goban> getGoban() const;
+    void setGoban(boost::shared_ptr<Goban> gobanPtr);
 };
 
 Groupe operator+(Groupe const& a, Groupe const& b);

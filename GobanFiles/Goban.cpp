@@ -1,32 +1,14 @@
 #include "goban.h"
-#include "debug.h"
-#include "FP.h"
+#include "../Tools/debug.h"
+#include "../FenetrePrincipale/FenetrePrincipale.h"
+#include "../Tools/CoupException.h"
 
 QPen Goban::pen(Qt::black,1);
 QPen Goban::rouge(Qt::red,1.5);
 QBrush Goban::noir(Qt::black);
 QBrush Goban::blanc(Qt::white);
-Goban* Goban::m_instance = 0;
 
 using namespace std;
-
-Goban* Goban::getInstance()
-{
-    if (m_instance==0)
-    {
-        m_instance =  new Goban();
-    }
-
-    return m_instance;
-}
-
-void Goban::deleteInstance()
-{
-    if (m_instance!=0) delete m_instance;
-}
-
-
-unsigned int Goban::M_SIZE = 19;
 
 QPen Goban::getRouge()
 {
@@ -34,21 +16,22 @@ QPen Goban::getRouge()
 }
 
 
-Goban::Goban() : QGraphicsScene()
+Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(size), M_ECART(ecart), m_hasPartie(false)
 {
     //brush pour la couleur de fond
     //QBrush brush(QColor(236,184,82));
-    fondClair = QBrush(QPixmap("fondBoisClair.png").scaled(FP::ECART_T()*(M_SIZE+1),FP::ECART_T()*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-    fondMoyen = QBrush(QPixmap("fondBois.png").scaled(FP::ECART_T()*(M_SIZE+1),FP::ECART_T()*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-    fondFonce = QBrush(QPixmap("fondBoisFonce.png").scaled(FP::ECART_T()*(M_SIZE+1),FP::ECART_T()*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    m_partie = boost::shared_ptr<Partie>(new Partie());
+    fondClair = QBrush(QPixmap("Images/fondBoisClair.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondMoyen = QBrush(QPixmap("Images/fondBois.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    fondFonce = QBrush(QPixmap("Images/fondBoisFonce.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     sansMotif = QBrush(QColor(236,184,82));
 
     lignes = createItemGroup(QList<QGraphicsItem*>());
 
     for (unsigned int i = 0; i<M_SIZE ; i++)
     {
-        lignes->addToGroup(addLine(FP::ECART_T()*(i+1),FP::ECART_T(),FP::ECART_T()*(i+1),M_SIZE*FP::ECART_T()));
-        lignes->addToGroup(addLine(FP::ECART_T(),FP::ECART_T()*(i+1),M_SIZE*FP::ECART_T(),FP::ECART_T()*(i+1)));
+        lignes->addToGroup(addLine(M_ECART*(i+1),M_ECART,M_ECART*(i+1),M_SIZE*M_ECART));
+        lignes->addToGroup(addLine(M_ECART,M_ECART*(i+1),M_SIZE*M_ECART,M_ECART*(i+1)));
     }
     //ajout des hoshi
     QPen penE(Qt::black,5);
@@ -60,9 +43,9 @@ Goban::Goban() : QGraphicsScene()
         {
             for (unsigned int i = 0; i<3; i++)
             {
-                lignes->addToGroup(addEllipse((FP::ECART_T()*4+(i*FP::ECART_T()*6))-1,FP::ECART_T()*4-1,2,2,penE,noir));
-                lignes->addToGroup(addEllipse((FP::ECART_T()*4+(i*FP::ECART_T()*6))-1,FP::ECART_T()*10-1,2,2,penE,noir));
-                lignes->addToGroup(addEllipse((FP::ECART_T()*4+(i*FP::ECART_T()*6))-1,FP::ECART_T()*16-1,2,2,penE,noir));
+                lignes->addToGroup(addEllipse((M_ECART*4+(i*M_ECART*6))-1,M_ECART*4-1,2,2,penE,noir));
+                lignes->addToGroup(addEllipse((M_ECART*4+(i*M_ECART*6))-1,M_ECART*10-1,2,2,penE,noir));
+                lignes->addToGroup(addEllipse((M_ECART*4+(i*M_ECART*6))-1,M_ECART*16-1,2,2,penE,noir));
             }
 
             break;
@@ -70,22 +53,22 @@ Goban::Goban() : QGraphicsScene()
 
         case 13 :
         {
-            lignes->addToGroup(addEllipse((FP::ECART_T()*4)-1,FP::ECART_T()*4-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse((FP::ECART_T()*4)-1,FP::ECART_T()*10-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse((FP::ECART_T()*10)-1,FP::ECART_T()*4-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse((FP::ECART_T()*10)-1,FP::ECART_T()*10-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse((FP::ECART_T()*7)-1,FP::ECART_T()*7-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((M_ECART*4)-1,M_ECART*4-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((M_ECART*4)-1,M_ECART*10-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((M_ECART*10)-1,M_ECART*4-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((M_ECART*10)-1,M_ECART*10-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse((M_ECART*7)-1,M_ECART*7-1,2,2,penE,noir));
 
             break;
         }
 
         case 9 :
         {
-            lignes->addToGroup(addEllipse(FP::ECART_T()*3-1,FP::ECART_T()*3-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse(FP::ECART_T()*3-1,FP::ECART_T()*7-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse(FP::ECART_T()*7-1,FP::ECART_T()*3-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse(FP::ECART_T()*7-1,FP::ECART_T()*7-1,2,2,penE,noir));
-            lignes->addToGroup(addEllipse(FP::ECART_T()*5-1,FP::ECART_T()*5-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(M_ECART*3-1,M_ECART*3-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(M_ECART*3-1,M_ECART*7-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(M_ECART*7-1,M_ECART*3-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(M_ECART*7-1,M_ECART*7-1,2,2,penE,noir));
+            lignes->addToGroup(addEllipse(M_ECART*5-1,M_ECART*5-1,2,2,penE,noir));
 
             break;
         }
@@ -97,29 +80,21 @@ Goban::Goban() : QGraphicsScene()
 
 Goban::Goban(Goban const& g)
 {
-    Goban::Goban();
-    /*QGraphicsItemGroup* lignes;
-    set<Groupe*> groupes;
-    map<pair<int,int>,Pierre*> plateau;
-    QGraphicsEllipseItem* coupCourant;*/
-
-    /*lignes=g.lignes;*/
-    //groupes=g.groupes;
-    plateau=g.plateau;
-    coupCourant = g.coupCourant; courant=g.courant;
-    M_SIZE = g.M_SIZE;
+    Goban::Goban(g.M_SIZE);
+    coupCourant = g.coupCourant; m_courant=g.m_courant;
 }
 
 void Goban::init()
 {
     /*if (coupCourant!=0) removeItem(coupCourant.get());
     coupCourant=0; courant=0;*/
+    map<pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {
         removeItem((*it).second->getEllipse().get());
     }
     //groupes.clear();
-    plateau.clear();
+    m_courant = -1;
 }
 
 vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre> p)
@@ -133,8 +108,6 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     cout << "Goban::ajouterPierre\n";
     const int ord = p->getCoup().getOrd();
     const int abs = p->getCoup().getAbs();
-    pair<int,int> coord = make_pair(abs,ord);
-    plateau.insert(pair<pair<int,int>,boost::shared_ptr<Pierre> >(coord,p));
 
     cout << "plateau.insert : ok \n";
 
@@ -144,13 +117,13 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
 
 
     ostringstream os;
-    os << "Nombre de libertés de la pierre ajoutée : " << p->libertes();
+    os << "Nombre de libertés de la pierre ajoutée : " << p->libertes(shared_from_this());
     dbg->add(SGF::Normal,os.str());
     cout << os.str() << endl;
 
     /**************************************** FUSION DES GROUPES ***********************************/
 
-    vector<boost::shared_ptr<Pierre> > pierresAutour = p->pierresAutourMemeCouleur();
+    vector<boost::shared_ptr<Pierre> > pierresAutour = p->pierresAutourMemeCouleur(shared_from_this());
     cout << pierresAutour.size() << " pierres autour de la même couleur\n";
     vector<boost::shared_ptr<Groupe> > groupesAutour;
 
@@ -173,6 +146,7 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
         groupePtr->ajouterPierre(p);
         p->setGroupe(groupePtr->shared_from_this());
         m_groupes.insert(groupePtr);
+        groupePtr->setGoban(shared_from_this());
     }
     else
     {
@@ -206,7 +180,7 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     addItem(p->getEllipse().get());
     if (coupCourant.get()==0)
     {
-        QRect rect((abs+1)*FP::ECART_T()-(FP::ECART_T()*0.31),(ord+1)*FP::ECART_T()-(FP::ECART_T()*0.31),FP::ECART_T()*0.6,FP::ECART_T()*0.6);
+        QRect rect((abs+1)*M_ECART-(M_ECART*0.31),(ord+1)*M_ECART-(M_ECART*0.31),M_ECART*0.6,M_ECART*0.6);
         coupCourant=  boost::shared_ptr<QGraphicsEllipseItem>(this->addEllipse(rect,rouge));
 
     }
@@ -260,7 +234,6 @@ void Goban::supprimerPierre(boost::shared_ptr<Pierre> p)
 {
     int a = p->getCoup().getAbs();
     int o = p->getCoup().getOrd();
-    if (plateau.erase(pair<int,int>(a,o))!=1) throw coup_exception("Erreur à la suppression d'une pierre");
 
     removeItem(p->getEllipse().get());
     //delete p;
@@ -271,14 +244,16 @@ void Goban::supprimerPierre(boost::shared_ptr<Pierre> p)
 bool Goban::estSurPlateau(boost::shared_ptr<Pierre> p) const
 {
     int abs = p->getCoup().getAbs(), ord = p->getCoup().getOrd();
+    map<pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
     return (plateau.find(pair<int,int>(abs,ord))!=plateau.end());
 }
 
 vector<boost::shared_ptr<Pierre> > Goban::pierresSansLibertes() const
 {
     vector<boost::shared_ptr<Pierre> > result;
+    map<pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
 
-    for (map<pair<int,int>,boost::shared_ptr<Pierre> >::const_iterator it = plateau.begin(); it !=plateau.end(); ++it)
+    for (map<pair<int,int>,boost::shared_ptr<Pierre> >::iterator it = plateau.begin(); it !=plateau.end(); ++it)
     {
         if (it->second->libertes()==0)
         {
@@ -306,6 +281,7 @@ std::string Goban::printPlateau() const
 {
     std::ostringstream result;
     result << "Etat du plateau : \n";
+    map<pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::const_iterator it = plateau.begin(); it != plateau.end(); ++it)
     {
        // result << "Pierre " << it->second->getCoup().getJoueur()->couleur().toStdString() << " en " << it->first.first << "-" << it->first.second << "\n";
@@ -320,4 +296,26 @@ std::string Goban::printPlateau() const
 
     result << "\n\n";
     return result.str();
+}
+
+std::map<std::pair<int,int>,boost::shared_ptr<Pierre> >  Goban::getPlateau() const
+{
+    std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > result;
+
+    for(std::set<boost::shared_ptr<Groupe> >::iterator it = m_groupes.begin(); it != m_groupes.end(); it++)
+    {
+        boost::shared_ptr<Groupe> groupePtr = *it;
+        std::vector<boost::shared_ptr<Pierre> > pierres = groupePtr->getPierres();
+
+        for (std::vector<boost::shared_ptr<Pierre> >::iterator itp = pierres.begin(); itp != pierres.end(); itp++)
+        {
+            boost::shared_ptr<Pierre> pierrePtr = *itp;
+            int abs = pierrePtr->getCoup().getAbs();
+            int ord = pierrePtr->getCoup().getOrd();
+
+            result.insert(std::pair<std::pair<int,int>,boost::shared_ptr<Pierre> >(std::pair<int,int>(abs,ord),pierrePtr));
+        }
+    }
+
+    return result;
 }

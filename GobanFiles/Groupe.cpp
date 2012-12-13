@@ -1,5 +1,6 @@
 #include "groupe.h"
 #include "pierre.h"
+#include "../Tools/CoupException.h"
 
 using namespace std;
 
@@ -111,4 +112,14 @@ std::string Groupe::couleur() const
     {
         return m_pierres[0]->couleur();
     }
+}
+
+boost::shared_ptr<Goban> Groupe::getGoban() const
+{
+    return m_goban.lock();
+}
+
+void Groupe::setGoban(boost::shared_ptr<Goban> gobanPtr)
+{
+    m_goban = boost::weak_ptr<Goban>(gobanPtr);
 }

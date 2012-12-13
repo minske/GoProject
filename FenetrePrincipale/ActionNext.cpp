@@ -1,21 +1,24 @@
-#include "actionNext.h"
-#include "debug.h"
+#include "ActionNext.h"
+#include "../Tools/debug.h"
+#include "../GobanFiles/GobanManager.h"
 
 using namespace std;
 
-actionNext::actionNext() : QUndoCommand()
+ActionNext::ActionNext() : QUndoCommand()
 {
-    SGF::Debug::getInstance()->add(SGF::Normal,"actionNext::constructeur\n");
+    SGF::Debug::getInstance()->add(SGF::Normal,"ActionNext::constructeur\n");
 }
 
-actionNext::actionNext(boost::shared_ptr<FP> f) : QUndoCommand(), fp(f)
+ActionNext::ActionNext(boost::shared_ptr<FenetreSGF> f) : QUndoCommand()
 {
-    SGF::Debug::getInstance()->add(SGF::Normal,"actionNext::constructeur\n");
+    fp = boost::weak_ptr<FenetreSGF>(f);
+    SGF::Debug::getInstance()->add(SGF::Normal,"ActionNext::constructeur\n");
 }
 
-void actionNext::undo()
+void ActionNext::undo()
 {
-    Goban* g = Goban::getInstance();
+    boost::shared_ptr<Goban> g = fp.lock()->getGoban();
+    boost::shared_ptr<Partie> p = fp.lock()->getGoban()->getPartie();
     SGF::Debug* dbg = SGF::Debug::getInstance();
     //dbg->add(SGF::Normal,"\n == Undo ==");
     *dbg << "\n == Undo ==";
@@ -38,16 +41,16 @@ void actionNext::undo()
             }
         }
         g->reculer();
-        int abs = g->getCourant()->getAbs();
-        int ord = g->getCourant()->getOrd();
+        int abs = p->getCoup(g->getCourant()).getAbs();
+        int ord = p->getCoup(g->getCourant()).getOrd();
 
 
         ostringstream os;
-        os << g->getCourant()->getNum();
-        fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+g->getCourant()->getComm());
+        os << p->getCoup(g->getCourant()).getNum();
+        fp.lock()->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup(g->getCourant()).getComm());
 
         g->removeItem(&(g->getCoupCourant().operator *()));
-        QRect rect((abs+1)*FP::ECART_T()-(FP::ECART_T()*0.31),(ord+1)*FP::ECART_T()-(FP::ECART_T()*0.31),FP::ECART_T()*0.6,FP::ECART_T()*0.6);
+        QRect rect((abs+1)*g->ECART()-(g->ECART()*0.31),(ord+1)*g->ECART()-(g->ECART()*0.31),g->ECART()*0.6,g->ECART()*0.6);
         g->setCoupCourant(boost::shared_ptr<QGraphicsEllipseItem>(g->addEllipse(rect,Goban::getRouge())));
         //g->setCoupCourant((abs+1)*E-(E*0.31),(ord+1)*E-(E*0.31));
     }
@@ -61,25 +64,28 @@ void actionNext::undo()
     dbg->add(SGF::Normal,"== fin Undo ==\n");
 }
 
-void actionNext::redo()
+void ActionNext::redo()
 {
     SGF::Debug* dbg = SGF::Debug::getInstance();
 
-    try {
+    try
+    {
         cout << "REDO\n";
         dbg->add(SGF::Normal, "\n-- (Re)do --");
         //boost::shared_ptr<partie> Partie = fp->getPartie();
-        Goban* goban = Goban::getInstance();
+        boost::shared_ptr<Goban> goban = fp.lock()->getGoban();
         ostringstream os;
-        if (partie::instance().get()!=0) //s'il y a bien une partie ouverte
+        cout << "nb de coups : " << goban->getPartie()->getListeCoups().size() << endl;
+        if(!goban->partieTerminee()) //et que la partie n'est pas terminée
         {
-            if(goban->getCourant()!=partie::instance()->fin()) //et que la partie n'est pas terminée
-            {
-
-                Coup c = *(goban->getCourant());
+            std::cout << "partie non terminée" << std::endl;
+                goban->avancer();
+                boost::shared_ptr<Partie> partie = goban->getPartie();
+                Coup c = partie->getCoup(goban->getCourant());
                 cout << "Coup : "<< c.print() << endl;
                 dbg->add(SGF::Normal, c.print());
-                boost::shared_ptr<Pierre> p (new Pierre(c)); //on récupère l'itérateur courant
+                int ecartGoban = goban->ECART();
+                boost::shared_ptr<Pierre> p (new Pierre(c, ecartGoban)); //on récupère l'itérateur courant
                 cout << "Pierre créée\n";
                 m_pierre = p;
 
@@ -90,7 +96,7 @@ void actionNext::redo()
                 SGF::Debug::getInstance()->add(SGF::Normal,pierreCreee.str());
                 cout << pierreCreee.str();
                 os << p->getCoup().getNum();
-                fp->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup().getComm());
+                fp.lock()->getComm()->setText("Coup numéro "+QString::fromStdString(os.str())+"\n "+p->getCoup().getComm());
 
                 int abs = p->getCoup().getAbs(); int ord = p->getCoup().getOrd();
                 pierresSupprimees = goban->ajouterPierre(p);
@@ -106,37 +112,35 @@ void actionNext::redo()
                     if (p->getCoup().getJoueur()->couleur()=="Blanc")
                     {
                         ostringstream oss;
-                        oss << partie::instance()->getBlanc()->getCapt() + nbCapt;
-                        partie::instance()->getBlanc()->addCapt(nbCapt);
-                        fp->getInfosBlanc()->setCapt(QString::fromStdString(oss.str()));
+                        oss << partie->getBlanc()->getCapt() + nbCapt;
+                        partie->getBlanc()->addCapt(nbCapt);
+                        fp.lock()->getInfosBlanc()->setCapt(QString::fromStdString(oss.str()));
 
                     }
                     else
                     {
                         ostringstream oss;
-                        oss << partie::instance()->getNoir()->getCapt() + nbCapt;
-                        partie::instance()->getNoir()->addCapt(nbCapt);
-                        fp->getInfosNoir()->setCapt(QString::fromStdString(oss.str()));
+                        oss << goban->getPartie()->getNoir()->getCapt() + nbCapt;
+                        goban->getPartie()->getNoir()->addCapt(nbCapt);
+                        fp.lock()->getInfosNoir()->setCapt(QString::fromStdString(oss.str()));
 
                     }
                 }
 
 
-                goban->avancer();
-
                 goban->removeItem(goban->getCoupCourant().get());
-                QRect rect((abs+1)*FP::ECART_T()-(FP::ECART_T()*0.31),(ord+1)*FP::ECART_T()-(FP::ECART_T()*0.31),FP::ECART_T()*0.6,FP::ECART_T()*0.6);
+                QRect rect((abs+1)*goban->ECART()-(goban->ECART()*0.31),(ord+1)*goban->ECART()-(goban->ECART()*0.31),goban->ECART()*0.6,goban->ECART()*0.6);
                 goban->setCoupCourant(boost::shared_ptr<QGraphicsEllipseItem>(goban->addEllipse(rect,Goban::getRouge())));
                 //goban->printGroupes();
 
 
             }
-            if (goban->getCourant()==partie::instance()->fin()) fp->getComm()->setText("Fin de la partie. Résultat : " + partie::instance()->getResultat());
-        }
+            if (goban->getCourant()==goban->getPartie()->getListeCoups().size()) fp.lock()->getComm()->setText("Fin de la partie. Résultat : " + goban->getPartie()->getResultat());
+
 
         //os << "\n" << goban->getLogMsg().toStdString();
         setText(QString::fromStdString(os.str()));
-        dbg->add(SGF::Normal,Goban::getInstance()->printPlateau());
+        dbg->add(SGF::Normal,fp.lock()->getGoban()->printPlateau());
 
         dbg->add(SGF::Normal,"--Fin Redo\n");
     }
@@ -148,7 +152,7 @@ void actionNext::redo()
     }
 }
 
-bool actionNext::mergeWith(const boost::shared_ptr<QUndoCommand> other)
+bool ActionNext::mergeWith(const boost::shared_ptr<QUndoCommand> other)
 {
     return false;
 }

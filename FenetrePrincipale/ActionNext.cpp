@@ -90,7 +90,7 @@ void ActionNext::redo()
                 m_pierre = p;
 
                 std::ostringstream pierreCreee;
-                pierreCreee << "Création de la pierre : " << p->getCoup().getJoueur()->couleur().toStdString()
+                pierreCreee << "Création de la pierre : " << p->getCoup().getJoueur()->couleur()
                             << " en " << p->getCoup().getAbs()
                             << "-" << p->getCoup().getOrd() << "\n";
                 SGF::Debug::getInstance()->add(SGF::Normal,pierreCreee.str());

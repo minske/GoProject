@@ -9,6 +9,55 @@ using namespace std;
 
 FenetrePrincipale::FenetrePrincipale() : QMainWindow()
 {
+    menuFichier = menuBar()->addMenu("&Fichier");
+    menuOptions = menuBar()->addMenu("&Options");
+
+    QAction* actionQuitter =menuFichier->addAction("Quitter");
+    actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
+    connect(actionQuitter,SIGNAL(triggered()),qApp,SLOT(quit()));
+
+    changerFond = menuOptions->addMenu("Choisir le fond du goban");
+    QAction* changerFondClair = changerFond->addAction("Fond clair");
+    QAction* changerFondMoyen = changerFond->addAction("Fond moyen");
+    QAction* changerFondFonce = changerFond->addAction("Fond foncé");
+    QAction* changerFondSansMotif = changerFond->addAction("Aucun motif");
+    connect(changerFondClair,SIGNAL(triggered()),this,SLOT(changerFondClair()));
+    connect(changerFondMoyen,SIGNAL(triggered()),this,SLOT(changerFondMoyen()));
+    connect(changerFondFonce,SIGNAL(triggered()),this,SLOT(changerFondFonce()));
+    connect(changerFondSansMotif,SIGNAL(triggered()),this,SLOT(changerFondSansMotif()));
+
+    //Layout horizontal principal : à gauche le goban, à droite les infos
+    layoutPrincipal = new QHBoxLayout();
+    //Layout vertical pour le goban de la fenêtre :
+    layoutV = new QVBoxLayout();
+
+
+
+    //Définition du widget pour affichage des infos
+    infosJoueur = new QHBoxLayout();
+
+    //construction du widget pour les infos de noir et blanc
+    infosNoir =new infosJoueurs();
+    infosBlanc = new infosJoueurs();
+    infosNoir->setTitre("<b>Noir</b>"); infosBlanc->setTitre("<b>Blanc</b>");
+
+    infosJoueur->addLayout(infosNoir);
+    infosJoueur->addLayout(infosBlanc);
+
+    widgetsCote = new QVBoxLayout();
+    widgetsCote->addLayout(infosJoueur);
+
+    layoutPrincipal->addLayout(layoutV);
+    layoutPrincipal->addLayout(widgetsCote);
+    layoutPrincipal->addSpacing(200);
+
+    QWidget* m = new QWidget();
+    m->setLayout(layoutPrincipal);
+
+    setCentralWidget(m);
+
+
+
 }
 
 
@@ -43,70 +92,7 @@ void FenetrePrincipale::changerFondSansMotif()
 
 
 
-void FenetrePrincipale::bouton_goban(int a, int o)
-{
 
-    cout << "Clicked : " << a << "-" << o << endl;
-
-        /* Si la partie n'a encore aucun coup, c'est le premier, donc à noir de jouer
-        Sinon, on regarde le dernier coup joué.*/
-        if (m_goban->getPartie()->getListeCoups().empty())
-        {
-            cout << "Debut :\n";
-            Coup c (a,o,m_goban->getPartie()->getNoir());
-            cout << "Ajout du premier coup pour noir en " << a << "-" << o << endl;
-            /*if (!commentaires->toPlainText().toStdString().empty())
-            {
-                //s'il y a du texte dans la zone de commentaires, on l'ajoute au coup
-                c->addComm(commentaires->toPlainText());
-            }*/
-
-            m_goban->getPartie()->ajouterCoup(c);
-            boost::shared_ptr<Pierre> p (new Pierre(c, m_goban->ECART()));
-            m_goban->ajouterPierre(p);
-            m_goban->setCourant(-1);
-        }
-        else if (m_goban->getPartie()->getCoup(m_goban->getCourant()).couleur()=="Noir")
-        {
-            Coup c(a,o,m_goban->getPartie()->getBlanc());
-
-            m_goban->getPartie()->ajouterCoup(c);
-            boost::shared_ptr<Pierre> p(new Pierre(c, m_goban->ECART()));
-            m_goban->ajouterPierre(p);
-            m_goban->avancer();
-        }
-        else if (m_goban->getPartie()->getCoup(m_goban->getCourant()).couleur()=="Blanc")
-        {
-            Coup c(a,o,m_goban->getPartie()->getNoir());
-
-            m_goban->getPartie()->ajouterCoup(c);
-            boost::shared_ptr<Pierre> p(new Pierre(c, m_goban->ECART()));
-            m_goban->ajouterPierre(p);
-            //goban->avancer();
-        }
-        //else throw coup_exception("Impossible d'ajouter un coup.");*/
-
-        /* Test : ok
-        boost::shared_ptr<QGraphicsPixmapItem> ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-        ellipse2->setX((a+1)*E-(E*R/2));
-        ellipse2->setY((o+1)*E-(E*R/2));
-        goban->addItem(ellipse2);*/
-
-
-
-    /* TEST : on récupère les coordonnées correctes
-
-    ostringstream os;
-    os << "Vous avez cliqué sur " << a << "-" << o;
-    QWidget* widg = new QWidget;
-    QVBoxLayout* lv = new QVBoxLayout;
-    boost::shared_ptr<QLabel> txt = new QLabel(QString::fromStdString(os.str()));
-    QPushButton* ok = new QPushButton("Ok");
-    lv->addWidget(txt); lv->addWidget(ok);
-    connect(ok,SIGNAL(clicked()),widg,SLOT(close()));
-    widg->setLayout(lv);
-    widg->show();*/
-}
 
 void FenetrePrincipale::afficherMsgExec()
 {

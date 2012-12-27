@@ -65,8 +65,10 @@ void Partie::chargerFichier(string const& f)
         }
 
         //Initialisation des joueurs
-        m_joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
-        m_joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+//        m_joueurNoir = Noir::donneInstance(QString::fromStdString(jnoir),QString::fromStdString(nnoir));
+//        m_joueurBlanc = Blanc::donneInstance(QString::fromStdString(jblanc),QString::fromStdString(nblanc));
+        m_joueurNoir.reset(new Joueur(QString::fromStdString(jnoir),QString::fromStdString(nnoir),"noir"));
+        m_joueurBlanc.reset(new Joueur(QString::fromStdString(jblanc),QString::fromStdString(nblanc),"blanc"));
         dbg->add(SGF::Normal,"Joueur Noir : "+jnoir+" "+nnoir);
         dbg->add(SGF::Normal,"Joueur Blanc : "+jblanc+" "+nblanc+"\n");
 
@@ -133,8 +135,10 @@ void Partie::chargerFichier(string const& f)
 void Partie::init(QString const& noirNom, QString const& blancNom, QString const& noirNiveau, QString const& blancNiveau, QString const& partieDate)
 {
 
-    m_joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
-    m_joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
+//    m_joueurNoir = Noir::donneInstance(noirNom,noirNiveau);
+//    m_joueurBlanc = Blanc::donneInstance(blancNom,blancNiveau);
+    m_joueurNoir.reset(new Joueur(noirNom,noirNiveau,"noir"));
+    m_joueurBlanc.reset(new Joueur(blancNom,blancNiveau,"blanc"));
     m_date = partieDate;
 
 }

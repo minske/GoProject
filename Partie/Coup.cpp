@@ -31,7 +31,7 @@ Coup::Coup(std::string const& s, std::string com) :  m_numero(0)
 string Coup::print() const
 {
     std::ostringstream r;
-    r << "Coup n°" << m_numero << " - " <<m_joueur->couleur().toStdString() << " : " << m_abscisse+1 << "-" << m_ordonnee+1;
+    r << "Coup n°" << m_numero << " - " <<m_joueur->couleur() << " : " << m_abscisse+1 << "-" << m_ordonnee+1;
     return r.str();
 }
 

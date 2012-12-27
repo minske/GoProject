@@ -2,6 +2,9 @@
 #include "fenetreInfos.h"
 #include "ActionNext.h"
 #include "../GobanFiles/GobanManager.h"
+#include "../GobanFiles/GobanIA.h"
+
+using namespace std;
 
 FenetreSGF::FenetreSGF() : FenetrePrincipale()
 {
@@ -10,7 +13,23 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
     ECART = ceil((m_height-150)/(20));
     m_goban.reset(new Goban(ECART,19));
 
+    vue = new QGraphicsView(m_goban.get());
+    vue->setFixedSize(ECART*(m_goban->SIZE()+1),ECART*(m_goban->SIZE()+1));
+    layoutV->addWidget(vue);
 
+    /********* Définition d'une grille de boutons correspondant aux intersections *********/
+    grilleBoutonsGoban =new QGridLayout();
+    for (unsigned int i = 0; i<m_goban->SIZE(); i++)
+        for (unsigned int j = 0; j<m_goban->SIZE(); j++)
+        {
+            BoutonGoban* bouton =new BoutonGoban(i,j,m_goban);
+            grilleBoutonsGoban->addWidget(bouton,j+1,i+1);
+            connect(bouton,SIGNAL(clicked()),bouton,SLOT(envoyerSignalClicked()));
+            connect(bouton,SIGNAL(clickedBouton(int,int)),this,SLOT(bouton_goban(int,int)));
+        }
+    grilleBoutonsGoban->setSpacing(0);
+    grilleBoutonsGoban->setMargin(ECART/2);
+    vue->setLayout(grilleBoutonsGoban);
 
     std::ostringstream os;
     os << "Taille de l'écran : " << m_height << std::endl;
@@ -29,27 +48,9 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
         viewUndo = new QUndoView(pileUndo);
         messagesExecution = new QTextEdit("Ouverture du programme.");
         //menu
-        menuFichier = menuBar()->addMenu("&Fichier");
-        menuOptions = menuBar()->addMenu("&Options");
 
-        QAction* actionQuitter =menuFichier->addAction("Quitter");
-        actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
-        connect(actionQuitter,SIGNAL(triggered()),qApp,SLOT(quit()));
 
-        changerFond = menuOptions->addMenu("Choisir le fond du goban");
-        QAction* changerFondClair = changerFond->addAction("Fond clair");
-        QAction* changerFondMoyen = changerFond->addAction("Fond moyen");
-        QAction* changerFondFonce = changerFond->addAction("Fond foncé");
-        QAction* changerFondSansMotif = changerFond->addAction("Aucun motif");
-        connect(changerFondClair,SIGNAL(triggered()),this,SLOT(changerFondClair()));
-        connect(changerFondMoyen,SIGNAL(triggered()),this,SLOT(changerFondMoyen()));
-        connect(changerFondFonce,SIGNAL(triggered()),this,SLOT(changerFondFonce()));
-        connect(changerFondSansMotif,SIGNAL(triggered()),this,SLOT(changerFondSansMotif()));
 
-        //Layout horizontal principal : à gauche le goban, à droite les infos
-        layoutPrincipal = new QHBoxLayout();
-        //Layout vertical pour le goban de la fenêtre :
-        layoutV = new QVBoxLayout();
 
         /************ BARRE D'ETAT ***********************/
         barreEtat = statusBar();
@@ -59,6 +60,9 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
         /*************** BARRE D'OUTILS ******************/
         barreOutils = new QToolBar("nom");
         addToolBar(barreOutils);
+        QAction* actionQuitter =menuFichier->addAction("Quitter");
+        actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
+        connect(actionQuitter,SIGNAL(triggered()),qApp,SLOT(quit()));
         barreOutils->addAction(actionQuitter);
 
         layoutBoutonsNP =new QHBoxLayout();
@@ -66,42 +70,14 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
         //on ajoute les boutons au layout goban
         //layoutV->addLayout(layoutBoutonsNP);
 
-        vue = new QGraphicsView(m_goban.get());
-        vue->setFixedSize(ECART*(m_goban->SIZE()+1),ECART*(m_goban->SIZE()+1));
-        layoutV->addWidget(vue);
 
-        /********* Définition d'une grille de boutons correspondant aux intersections *********/
-        grilleBoutonsGoban =new QGridLayout();
-        for (unsigned int i = 0; i<m_goban->SIZE(); i++)
-            for (unsigned int j = 0; j<m_goban->SIZE(); j++)
-            {
-                BoutonGoban* bouton =new BoutonGoban(i,j,m_goban);
-                grilleBoutonsGoban->addWidget(bouton,j+1,i+1);
-                connect(bouton,SIGNAL(clicked()),bouton,SLOT(envoyerSignalClicked()));
-                connect(bouton,SIGNAL(clickedBouton(int,int)),this,SLOT(bouton_goban(int,int)));
-            }
-        grilleBoutonsGoban->setSpacing(0);
-        grilleBoutonsGoban->setMargin(ECART/2);
-        vue->setLayout(grilleBoutonsGoban);
-
-        //Définition du widget pour affichage des infos
-        infosJoueur = new QHBoxLayout();
-
-        //construction du widget pour les infos de noir et blanc
-        infosNoir =new infosJoueurs();
-        infosBlanc = new infosJoueurs();
-        infosNoir->setTitre("<b>Noir</b>"); infosBlanc->setTitre("<b>Blanc</b>");
-
-        infosJoueur->addLayout(infosNoir);
-        infosJoueur->addLayout(infosBlanc);
 
         //widget pour l'affichage des commentaires
         commentaires = new QTextEdit();
         commentaires->setFixedHeight(350); commentaires->setFixedWidth(300);
         commentaires->setFrameStyle(2);
 
-        widgetsCote = new QVBoxLayout();
-        widgetsCote->addLayout(infosJoueur);
+
         widgetsCote->addLayout(layoutBoutonsNP);
         widgetsCote->addWidget(commentaires);
         //widgetsCote->addWidget(viewUndo);
@@ -109,14 +85,7 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
         //widgetsCote->addSpacing(200);
         //infosPartie->setFont();
 
-        layoutPrincipal->addLayout(layoutV);
-        layoutPrincipal->addLayout(widgetsCote);
-        layoutPrincipal->addSpacing(200);
 
-        QWidget* m = new QWidget();
-        m->setLayout(layoutPrincipal);
-
-        setCentralWidget(m);
 
         /*Quand on met une pierre sur un bord pour la première fois, le goban se décale ... En attendant d'avoir
         réglé le problème, on met des pierres dans les coins pour que le goban soit à la bonne
@@ -132,7 +101,6 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
         ellipse2->setY(m_goban->SIZE()*ECART-(ECART*R/2));
         ellipse2->setVisible(false);
         m_goban->addItem(ellipse2);
-
         //dbg->printToFile();
     }
     catch (std::exception const& e)
@@ -329,4 +297,70 @@ void FenetreSGF::nouveauFichier()
         FenetreInfos* fi = new FenetreInfos(this);
         fi->show();
     }
+}
+
+
+void FenetreSGF::bouton_goban(int a, int o)
+{
+
+    cout << "Clicked : " << a << "-" << o << endl;
+
+        /* Si la partie n'a encore aucun coup, c'est le premier, donc à noir de jouer
+        Sinon, on regarde le dernier coup joué.*/
+        if (m_goban->getPartie()->getListeCoups().empty())
+        {
+            cout << "Debut :\n";
+            Coup c (a,o,m_goban->getPartie()->getNoir());
+            cout << "Ajout du premier coup pour noir en " << a << "-" << o << endl;
+            /*if (!commentaires->toPlainText().toStdString().empty())
+            {
+                //s'il y a du texte dans la zone de commentaires, on l'ajoute au coup
+                c->addComm(commentaires->toPlainText());
+            }*/
+
+            m_goban->getPartie()->ajouterCoup(c);
+            boost::shared_ptr<Pierre> p (new Pierre(c, m_goban->ECART()));
+            m_goban->ajouterPierre(p);
+            m_goban->setCourant(-1);
+        }
+        else if (m_goban->getPartie()->getCoup(m_goban->getCourant()).couleur()=="Noir")
+        {
+            Coup c(a,o,m_goban->getPartie()->getBlanc());
+
+            m_goban->getPartie()->ajouterCoup(c);
+            boost::shared_ptr<Pierre> p(new Pierre(c, m_goban->ECART()));
+            m_goban->ajouterPierre(p);
+            m_goban->avancer();
+        }
+        else if (m_goban->getPartie()->getCoup(m_goban->getCourant()).couleur()=="Blanc")
+        {
+            Coup c(a,o,m_goban->getPartie()->getNoir());
+
+            m_goban->getPartie()->ajouterCoup(c);
+            boost::shared_ptr<Pierre> p(new Pierre(c, m_goban->ECART()));
+            m_goban->ajouterPierre(p);
+            //goban->avancer();
+        }
+        //else throw coup_exception("Impossible d'ajouter un coup.");*/
+
+        /* Test : ok
+        boost::shared_ptr<QGraphicsPixmapItem> ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(E*R,E*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        ellipse2->setX((a+1)*E-(E*R/2));
+        ellipse2->setY((o+1)*E-(E*R/2));
+        goban->addItem(ellipse2);*/
+
+
+
+    /* TEST : on récupère les coordonnées correctes
+
+    ostringstream os;
+    os << "Vous avez cliqué sur " << a << "-" << o;
+    QWidget* widg = new QWidget;
+    QVBoxLayout* lv = new QVBoxLayout;
+    boost::shared_ptr<QLabel> txt = new QLabel(QString::fromStdString(os.str()));
+    QPushButton* ok = new QPushButton("Ok");
+    lv->addWidget(txt); lv->addWidget(ok);
+    connect(ok,SIGNAL(clicked()),widg,SLOT(close()));
+    widg->setLayout(lv);
+    widg->show();*/
 }

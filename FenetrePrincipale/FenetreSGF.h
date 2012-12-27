@@ -2,6 +2,9 @@
 #define FENETRESGF_H
 
 #include "FenetrePrincipale.h"
+#include "../Partie/PartieIA.h"
+
+class GobanIA;
 
 class FenetreSGF : public FenetrePrincipale
 {
@@ -22,6 +25,9 @@ public slots :
     void debutPartie();
     void finPartie();
     void fermerFichier();
+    void bouton_goban(int a, int o);
+
+
 };
 
 #endif // FENETRESGF_H

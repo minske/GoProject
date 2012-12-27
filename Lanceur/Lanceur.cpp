@@ -1,4 +1,5 @@
 #include "Lanceur.h"
+#include "../FenetrePrincipale/DebutJeu.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -49,6 +50,13 @@ void Lanceur::LancerSGF()
 
 void Lanceur::LancerJeu()
 {
+    if (m_fenetreJeu.get()==0)
+    {
+        DebutJeu* debut = new DebutJeu(this);
+        debut->show();
+        //m_fenetreJeu.reset(new FenetreJeu());
+        //m_fenetreJeu->show();
+    }
 }
 
 void Lanceur::Quitter()

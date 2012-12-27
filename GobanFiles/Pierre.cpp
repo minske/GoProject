@@ -12,7 +12,7 @@ Pierre::Pierre(Coup c, int ecartGoban) : m_coup(c)
         cout << "joueur = kiral" << endl;
         ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("Images/circle_rose.png").scaled(ecartGoban*R,ecartGoban*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
     }
-    else if (c.getJoueur()->couleur()=="Noir")
+    else if (c.getJoueur()->couleur()=="noir")
     {
 
         ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ecartGoban*R,ecartGoban*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));

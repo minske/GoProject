@@ -14,6 +14,7 @@ class Lanceur : public QFrame
 
 public :
     Lanceur();
+    void setFenetreJeu(boost::shared_ptr<FenetreJeu> fjeuPtr) {m_fenetreJeu = fjeuPtr;}
 
 public slots :
     void LancerSGF();

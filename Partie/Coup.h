@@ -19,6 +19,7 @@ class Coup : public boost::enable_shared_from_this<Coup>
 public :
     Coup() : m_abscisse(0), m_ordonnee(0), m_numero(0), m_commentaires(QString()) {}
     Coup(int abs, int ord, boost::shared_ptr<Joueur> jou) : m_abscisse(abs), m_ordonnee(ord), m_joueur(jou) {}
+    Coup(int abs, int ord) : m_abscisse(abs), m_ordonnee(ord) {}
     Coup(std::string const& s, std::string com=std::string());
 
 
@@ -34,7 +35,7 @@ public :
     QString getComm() const {return m_commentaires;}
     void addComm(QString const& s);
 
-    std::string couleur() const {return m_joueur->couleur().toStdString();}
+    std::string couleur() const {return m_joueur->couleur();}
 
     ~Coup();
 };

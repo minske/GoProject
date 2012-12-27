@@ -59,7 +59,7 @@ public :
     bool hasPartie() const {return m_hasPartie;}
     void setHasPartie(bool p) {m_hasPartie=p;}
 
-private :
+protected :
     std::string m_name; //"SGF" ou "JEU"
     bool m_hasPartie;
 

@@ -81,7 +81,6 @@ public slots :
     void changerFondClair();
     void changerFondMoyen();
     void changerFondSansMotif();
-    void bouton_goban(int a, int o);
     void afficherMsgExec();
 };
 

@@ -35,7 +35,7 @@ public :
     void setGroupe(boost::shared_ptr<Groupe> groupePtr) {m_groupe = boost::weak_ptr<Groupe>(groupePtr);}
     ~Pierre() {}
 
-    std::string couleur() const {return m_coup.getJoueur()->couleur().toStdString();}
+    std::string couleur() const {return m_coup.getJoueur()->couleur();}
 
 
 private :

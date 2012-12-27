@@ -20,7 +20,13 @@ SOURCES += \
     FenetrePrincipale/FenetreSGF.cpp \
     FenetrePrincipale/InfosJoueur.cpp \
     GobanFiles/GobanManager.cpp \
-    Partie/PartieManager.cpp
+    Partie/PartieManager.cpp \
+    FenetrePrincipale/FenetreJeu.cpp \
+    FenetrePrincipale/DebutJeu.cpp \
+    GobanFiles/GobanIA.cpp \
+    Partie/PartieIA.cpp \
+    IA/IA.cpp \
+    IA/User.cpp
 
 
 
@@ -51,7 +57,11 @@ HEADERS += \
     \
     Lanceur/Lanceur.h \
     GobanFiles/GobanManager.h \
-    Partie/PartieManager.h
+    FenetrePrincipale/DebutJeu.h \
+    Partie/PartieIA.h \
+    GobanFiles/GobanIA.h \
+    IA/IA.h \
+    IA/User.h
 
 
 FORMS +=

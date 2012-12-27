@@ -10,6 +10,8 @@
 #include "Coup.h"
 #include <boost/enable_shared_from_this.hpp>
 
+class Goban;
+
 
 class Partie : public boost::enable_shared_from_this<Partie>
 {
@@ -17,6 +19,8 @@ public :
     Partie() : m_date(QString()), m_resultat(QString()), m_contenuFichier(std::string())
     {
         std::cout << "Partie créée\n";
+        m_joueurBlanc.reset();
+        m_joueurNoir.reset();
     }
     void init(QString const& noirNom, QString const& blancNom, QString const& noirNiveau, QString const& blancNiveau, QString const& PartieDate);
 
@@ -40,7 +44,6 @@ public :
 
     void chargerFichier(std::string const& nomFichier);
     void enregistrerFichier(QString nomFich);
-
 
 protected :
     std::vector<Coup> m_coups;

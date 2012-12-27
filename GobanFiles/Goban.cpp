@@ -20,7 +20,8 @@ Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(s
 {
     //brush pour la couleur de fond
     //QBrush brush(QColor(236,184,82));
-    m_partie = boost::shared_ptr<Partie>(new Partie());
+//    m_partie = boost::shared_ptr<Partie>(new Partie());
+    m_partie.reset(new Partie());
     fondClair = QBrush(QPixmap("Images/fondBoisClair.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     fondMoyen = QBrush(QPixmap("Images/fondBois.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     fondFonce = QBrush(QPixmap("Images/fondBoisFonce.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
@@ -75,7 +76,7 @@ Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(s
     }
 
     setBackgroundBrush(fondClair);
-
+    std::cout << "goban créé\n";
 }
 
 Goban::Goban(Goban const& g)
@@ -88,6 +89,7 @@ void Goban::init()
 {
     /*if (coupCourant!=0) removeItem(coupCourant.get());
     coupCourant=0; courant=0;*/
+    std::cout << "init goban\n";
     map<pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {

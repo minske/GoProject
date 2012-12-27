@@ -12,8 +12,9 @@ std::pair<int,int> IA::choixCoup()
 {
     int abs = -1, ord = -1;
 
-    while (!m_goban.lock()->coupPossible(abs,ord))
+    while (!(m_goban.lock()->coupPossible(abs,ord)))
     {
+        std::cout << "o\n";
         abs = rand() % 9;
         ord = rand() % 9;
     }

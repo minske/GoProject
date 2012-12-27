@@ -14,7 +14,7 @@ class Goban;
 class Pierre
 {
 public :
-    Pierre(Coup c, int tailleGoban);
+    Pierre(Coup c, int ecartGoban);
 
     Coup getCoup() const {return m_coup;}
     Coup getCoup() {return m_coup;}

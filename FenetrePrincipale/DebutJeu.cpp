@@ -39,6 +39,7 @@ void DebutJeu::valider()
 {
     boost::shared_ptr<FenetreJeu> fjeu (new FenetreJeu());
     m_lanceur->setFenetreJeu(fjeu);
+    fjeu->init();
     fjeu->show();
     this->close();
 }

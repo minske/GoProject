@@ -1,6 +1,7 @@
 #include "FenetreJeu.h"
 #include "DebutJeu.h"
 #include "../GobanFiles/GobanIA.h"
+#include "../IA/IA.h"
 
 FenetreJeu::FenetreJeu() : FenetrePrincipale()
 {
@@ -9,6 +10,7 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
     qreal m_height = desk.height();
     ECART = ceil((m_height-150)/(10));
     m_goban.reset(new GobanIA(ECART,9));
+//    m_goban->init();
 
     std::cout << "0";
     vue = new QGraphicsView(m_goban.get());
@@ -69,18 +71,37 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
 void FenetreJeu::bouton_goban(int a, int o)
 {
     std::cout << "Clicked : " << a << "-" << o << std::endl;
-    if (!m_goban->getPartieIA()->partieFinie())
+    boost::shared_ptr<GobanIA> gobanPtr = boost::dynamic_pointer_cast<GobanIA>(m_goban);
+
+    if (!gobanPtr->getPartieIA()->partieFinie())
     {
-        if (m_goban->getPartieIA()->couleurAJouer()!=m_goban->getPartieIA()->getCouleurIA())
+        std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeee\n";
+        std::cout << "couleur ia = " << gobanPtr->getPartieIA()->getCouleurIA()
+                  << ", couleur à jouer = " << gobanPtr->getPartieIA()->couleurAJouer()
+                     << std::endl;
+        if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
         {
             //si c'est bien à l'utilisateur de jouer
-            boost::shared_ptr<Joueur> joueurUser = m_goban->getPartieIA()->getJoueur(m_goban->getPartieIA()->couleurAJouer());
+            std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
+            boost::shared_ptr<Joueur> joueurUser = gobanPtr->getPartieIA()->getJoueur(gobanPtr->getPartieIA()->couleurAJouer());
             Coup c(a,o,joueurUser);
-            m_goban->getPartieIA()->ajouterCoup(c);
-            boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,9));
-            m_goban->ajouterPierre(pierrePtr);
+            gobanPtr->getPartieIA()->ajouterCoup(c);
+            boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,gobanPtr->ECART()));
+            gobanPtr->ajouterPierre(pierrePtr);
 
             //ensuite, l'IA doit choisir un coup
+            std::pair<int,int> coupIA = gobanPtr->getPartieIA()->getIA()->choixCoup();
+            std::cout << "Choix de l'ia : " << coupIA.first << " - " << coupIA.second << std::endl;
+            Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
+            gobanPtr->getPartieIA()->ajouterCoup(c2);
+            boost::shared_ptr<Pierre> pierre2 (new Pierre(c2,gobanPtr->ECART()));
+            gobanPtr->ajouterPierre(pierre2);
         }
     }
+}
+
+
+void FenetreJeu::init()
+{
+    m_goban->init();
 }

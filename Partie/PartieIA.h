@@ -7,14 +7,15 @@
 class IA;
 class User;
 class GobanIA;
+//class Partie;
 
 class PartieIA : public Partie
 {
 public :
-    PartieIA(boost::shared_ptr<GobanIA> goban, std::string couleurIA="noir",int handicap=0,double komi=6.5);
-    bool partieFinie() {return false; } ///TODO
+    PartieIA(std::string couleurIA="blanc",int handicap=0,double komi=6.5);
+    bool partieFinie() {std::cout << "partie finie\n"; return false; } ///TODO
     std::string couleurAJouer();
-
+    void init(boost::shared_ptr<GobanIA> gobanPtr);
     std::string getCouleurIA() {return m_couleurIA;}
     int getHandicap() {return m_handicap;}
     double getKomi() {return m_komi;}
@@ -22,10 +23,8 @@ public :
     boost::shared_ptr<IA> getIA();
     boost::shared_ptr<User> getUser();
 
-    boost::shared_ptr<PartieIA> sharedFromThis()
-    {
-        return boost::dynamic_pointer_cast<PartieIA>(Partie::shared_from_this());
-    }
+    boost::shared_ptr<PartieIA> sharedFromThis();
+
 
 private :
     int m_handicap;

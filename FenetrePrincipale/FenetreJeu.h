@@ -10,6 +10,7 @@ class FenetreJeu : public FenetrePrincipale
 
 public :
     FenetreJeu();
+    void init();
 
 public slots :
     void bouton_goban(int a, int o);

@@ -35,15 +35,59 @@ void GobanIA::init()
 
 bool GobanIA::coupPossible(int abs, int ord)
 {
-    std::pair<int,int> coord (abs,ord);
-    std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
-
-    if ((plateau.find(coord)!=plateau.end()) || (abs < 0) || (abs > 9) || (ord < 0) || (ord > 9))
+    try
     {
-        return false;
+        std::pair<int,int> coord (abs,ord);
+        std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
+
+        if ((plateau.find(coord)!=plateau.end()) || (abs < 0) || (abs > 9) || (ord < 0) || (ord > 9))
+        {
+            return false;
+        }
+        else
+        {
+            boost::shared_ptr<Pierre> p;
+            if ("noir"==getPartieIA()->couleurAJouer())
+            {
+                Coup c(abs,ord, m_partie->getNoir());
+                c.setNum(getPartieIA()->getListeCoups().size());
+                p.reset(new Pierre(c,ECART()));
+            }
+            else
+            {
+                Coup c(abs,ord, m_partie->getBlanc());
+                c.setNum(getPartieIA()->getListeCoups().size());
+                p.reset(new Pierre(c,ECART()));
+            }
+
+            m_copie.reset(new GobanIA(5,9));
+            m_copie->m_partie = m_partie;
+            m_copie->copieGroupes(sharedFromThis());
+
+            m_copie->ajouterPierre(p,false);
+            if (p->getGroupe().get()!=0)
+            {
+                if (p->getGroupe()->nbLibertes()==0)
+                {
+                    std::cout << "Groupe auquel la pierre ajoutée appartient n'a pas de libertés\n";
+                    return false;
+                }
+
+                std::cout << "coup possible !\n";
+            }
+            else throw coup_exception("Erreur pierre mal ajoutée au goban copie");
+            m_copie.reset();
+        }
+
+        return true;
+        ///TODO à terminer
     }
-    else return true;
-    ///TODO à terminer
+    catch(std::exception const& e)
+    {
+        std::ostringstream errorMsg;
+        errorMsg << "Impossible de déterminer si le coup " << abs << " - " << ord << " est possible : \n " << e.what();
+        throw coup_exception(errorMsg.str());
+    }
 }
 
 boost::shared_ptr<GobanIA> GobanIA::sharedFromThis()
@@ -58,4 +102,20 @@ boost::shared_ptr<GobanIA> GobanIA::sharedFromThis()
         std::cout << "Impossible de créer un shared ptr à partir de GobanIA : " << e.what();
         throw std::exception(e);
     }
+}
+
+void GobanIA::copieGroupes(boost::shared_ptr<Goban> gobanPtr)
+{
+    for(std::set<boost::shared_ptr<Groupe> >::iterator it = gobanPtr->getGroupes().begin(); it != gobanPtr->getGroupes().end(); it++)
+    {
+        //copie de chaque groupe
+        boost::shared_ptr<Groupe> groupePtr (new Groupe(*((*it).get())));
+        ajouterGroupe(groupePtr);
+    }
+}
+
+void GobanIA::ajouterGroupe(boost::shared_ptr<Groupe> groupePtr)
+{
+    m_groupes.insert(groupePtr);
+    groupePtr->setGoban(sharedFromThis());
 }

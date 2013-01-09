@@ -15,7 +15,7 @@ public :
     Goban(double ecart, int size=19);
     Goban(Goban const& g);
 
-    std::vector<boost::shared_ptr<Pierre> > ajouterPierre(boost::shared_ptr<Pierre> p); //renvoie les pierres qui ont été supprimées du goban
+    std::vector<boost::shared_ptr<Pierre> > ajouterPierre(boost::shared_ptr<Pierre> p, bool trueGoban=true); //renvoie les pierres qui ont été supprimées du goban
     std::vector<boost::shared_ptr<Pierre> > pierresSansLibertes() const;
     std::set<boost::shared_ptr<Groupe> > groupesSansLiberte() const;
 

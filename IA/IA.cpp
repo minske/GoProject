@@ -1,6 +1,9 @@
 #include "IA.h"
 #include "../Partie/PartieIA.h"
 #include "../GobanFiles/GobanIA.h"
+#include "../Tools/CoupException.h"
+
+#include <random>
 
 IA::IA(boost::shared_ptr<PartieIA> partie, boost::shared_ptr<GobanIA> goban, std::string couleur)
     : Joueur("ia","ia",couleur), m_partie(partie), m_goban(goban)
@@ -10,14 +13,21 @@ IA::IA(boost::shared_ptr<PartieIA> partie, boost::shared_ptr<GobanIA> goban, std
 
 std::pair<int,int> IA::choixCoup()
 {
+    std::random_device rd;
     int abs = -1, ord = -1;
+    int i = 0;
 
-    while (!(m_goban.lock()->coupPossible(abs,ord)))
+    while (!(m_goban.lock()->coupPossible(abs,ord)) && (i<100))
     {
         std::cout << "o\n";
-        abs = rand() % 9;
-        ord = rand() % 9;
+
+        abs = rd() % 9;
+        ord = rd() % 9;
+
+        i++;
     }
+
+    if (i==100) throw coup_exception("Impossible de trouver un coup à jouer pour l'IA\n");
 
     return std::pair<int,int>(abs,ord);
 }

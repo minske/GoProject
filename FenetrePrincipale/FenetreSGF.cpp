@@ -90,13 +90,13 @@ FenetreSGF::FenetreSGF() : FenetrePrincipale()
         /*Quand on met une pierre sur un bord pour la première fois, le goban se décale ... En attendant d'avoir
         réglé le problème, on met des pierres dans les coins pour que le goban soit à la bonne
         place*/
-        QGraphicsPixmapItem* ellipse = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        QGraphicsPixmapItem* ellipse = new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
         ellipse->setX(ECART-(ECART*R/2));
         ellipse->setY(ECART-(ECART*R/2));
         ellipse->setVisible(false);
         m_goban->addItem(ellipse);
 
-        QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
         ellipse2->setX(m_goban->SIZE()*ECART-(ECART*R/2));
         ellipse2->setY(m_goban->SIZE()*ECART-(ECART*R/2));
         ellipse2->setVisible(false);

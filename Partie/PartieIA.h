@@ -7,13 +7,14 @@
 class IA;
 class User;
 class GobanIA;
+class Joueur;
 //class Partie;
 
 class PartieIA : public Partie
 {
 public :
     PartieIA(std::string couleurIA="blanc",int handicap=0,double komi=6.5);
-    bool partieFinie() {std::cout << "partie finie\n"; return false; } ///TODO
+    bool partieFinie() {std::cout << "partie finie ?\n"; return false; } ///TODO
     std::string couleurAJouer();
     void init(boost::shared_ptr<GobanIA> gobanPtr);
     std::string getCouleurIA() {return m_couleurIA;}
@@ -22,6 +23,7 @@ public :
 
     boost::shared_ptr<IA> getIA();
     boost::shared_ptr<User> getUser();
+
 
     boost::shared_ptr<PartieIA> sharedFromThis();
 

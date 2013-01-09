@@ -50,13 +50,13 @@ void Pierre::setEllipse(boost::shared_ptr<QGraphicsPixmapItem> el)
 
 int Pierre::libertes() const
 {
-    ostringstream os;
-    os << "Calcul du nombre de libertés de la pierre " << m_coup.print();
+    //ostringstream os;
+    std::cout << "Calcul du nombre de libertés de la pierre " << m_coup.print();
     //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
     vector<pair<int,int> > adj = intersectionsAdjacentes();
 
-    ostringstream oss;
-    oss << "Nombre d'intersections adjacentes : " << adj.size();
+    //ostringstream oss;
+    std::cout << "Nombre d'intersections adjacentes : " << adj.size();
     //SGF::Debug::getInstance()->add(SGF::Normal,oss.str());
     std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = m_groupe.lock()->getGoban()->getPlateau();
 
@@ -69,8 +69,8 @@ int Pierre::libertes() const
         }
     }
 
-    ostringstream libs;
-    libs << "Nombre de libertés : " << libertes;
+    //ostringstream libs;
+    std::cout << "Nombre de libertés : " << libertes;
     //SGF::Debug::getInstance()->add(SGF::Normal,libs.str());
     return libertes;
 }
@@ -86,7 +86,7 @@ vector<pair<int,int> > Pierre::intersectionsAdjacentes() const
     resultat.push_back(pair<int,int>(abs+1,ord));
     resultat.push_back(pair<int,int>(abs-1,ord));
 
-    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end(); it++)
+    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end();)
     {
         int a = it->first; int o = it->second;
         if (a<0 || a>=m_groupe.lock()->getGoban()->SIZE())
@@ -97,10 +97,40 @@ vector<pair<int,int> > Pierre::intersectionsAdjacentes() const
         {
             it = resultat.erase(it);
         }
+        else it++;
     }
 
     return resultat;
 }
+
+vector<pair<int,int> > Pierre::intersectionsAdjacentes(int gobanSize) const
+{
+    vector<pair<int, int> > resultat;
+    int abs = getCoup().getAbs();
+    int ord = getCoup().getOrd();
+
+    resultat.push_back(pair<int,int>(abs,ord+1));
+    resultat.push_back(pair<int,int>(abs,ord-1));
+    resultat.push_back(pair<int,int>(abs+1,ord));
+    resultat.push_back(pair<int,int>(abs-1,ord));
+
+    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end();)
+    {
+        int a = it->first; int o = it->second;
+        if (a<0 || a>=gobanSize)
+        {
+            it = resultat.erase(it);
+        }
+        else if (o<0 || o>=gobanSize)
+        {
+            it = resultat.erase(it);
+        }
+        else it++;
+    }
+
+    return resultat;
+}
+
 
 vector<boost::shared_ptr<Pierre> > Pierre::pierresAutourMemeCouleur() const
 {
@@ -164,8 +194,9 @@ vector<pair<int,int> > Pierre::intersectionsAdjacentes(boost::shared_ptr<Goban> 
     resultat.push_back(pair<int,int>(abs+1,ord));
     resultat.push_back(pair<int,int>(abs-1,ord));
 
-    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end(); it++)
+    for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end();)
     {
+        cout << "i " ;
         int a = it->first; int o = it->second;
         if (a<0 || a>=gobanPtr->SIZE())
         {
@@ -175,6 +206,7 @@ vector<pair<int,int> > Pierre::intersectionsAdjacentes(boost::shared_ptr<Goban> 
         {
             it = resultat.erase(it);
         }
+        else it++;
     }
 
     return resultat;

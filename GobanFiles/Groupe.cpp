@@ -11,11 +11,15 @@ Groupe::Groupe() : statut(0)
 unsigned int Groupe::nbLibertes() const
 {
     unsigned int result=0;
+    std::cout << "nombre de libertes du groupe\n";
 
     for (vector<boost::shared_ptr<Pierre> >::const_iterator it = m_pierres.begin(); it != m_pierres.end() ; ++it)
     {
+        std::cout << "e";
         result += (*it)->libertes();
     }
+
+    std::cout << "fin nombre de libertes\n";
 
     return result;
 }

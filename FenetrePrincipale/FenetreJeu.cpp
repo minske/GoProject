@@ -2,6 +2,7 @@
 #include "DebutJeu.h"
 #include "../GobanFiles/GobanIA.h"
 #include "../IA/IA.h"
+#include "../Tools/CoupException.h"
 
 FenetreJeu::FenetreJeu() : FenetrePrincipale()
 {
@@ -10,7 +11,7 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
     qreal m_height = desk.height();
     ECART = ceil((m_height-150)/(10));
     m_goban.reset(new GobanIA(ECART,9));
-//    m_goban->init();
+    //    m_goban->init();
 
     std::cout << "0";
     vue = new QGraphicsView(m_goban.get());
@@ -50,18 +51,22 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
     /*Quand on met une pierre sur un bord pour la première fois, le goban se décale ... En attendant d'avoir
     réglé le problème, on met des pierres dans les coins pour que le goban soit à la bonne
     place*/
-    QGraphicsPixmapItem* ellipse = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    QGraphicsPixmapItem* ellipse = new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     ellipse->setX(ECART-(ECART*R/2));
     ellipse->setY(ECART-(ECART*R/2));
+
     ellipse->setVisible(false);
     m_goban->addItem(ellipse);
+    std::cout << "ajout d'une pierre invisible au coin " << ECART-(ECART*R/2) << " - " << ECART-(ECART*R/2) << std::endl;
 
-    QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     ellipse2->setX(m_goban->SIZE()*ECART-(ECART*R/2));
     ellipse2->setY(m_goban->SIZE()*ECART-(ECART*R/2));
+
     ellipse2->setVisible(false);
     m_goban->addItem(ellipse2);
-    std::cout << "D";
+    std::cout << "ajout d'une pierre invisible au coin " << m_goban->SIZE()*ECART-(ECART*R/2) << " - " << m_goban->SIZE()*ECART-(ECART*R/2) << std::endl;
+
     //DebutJeu* wdw = new DebutJeu();
     //wdw->show();
     std::cout << "Fenêtre de jeu créée\n";
@@ -70,33 +75,52 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
 
 void FenetreJeu::bouton_goban(int a, int o)
 {
-    std::cout << "Clicked : " << a << "-" << o << std::endl;
-    boost::shared_ptr<GobanIA> gobanPtr = boost::dynamic_pointer_cast<GobanIA>(m_goban);
-
-    if (!gobanPtr->getPartieIA()->partieFinie())
+    try
     {
-        std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeee\n";
-        std::cout << "couleur ia = " << gobanPtr->getPartieIA()->getCouleurIA()
-                  << ", couleur à jouer = " << gobanPtr->getPartieIA()->couleurAJouer()
-                     << std::endl;
-        if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
-        {
-            //si c'est bien à l'utilisateur de jouer
-            std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
-            boost::shared_ptr<Joueur> joueurUser = gobanPtr->getPartieIA()->getJoueur(gobanPtr->getPartieIA()->couleurAJouer());
-            Coup c(a,o,joueurUser);
-            gobanPtr->getPartieIA()->ajouterCoup(c);
-            boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,gobanPtr->ECART()));
-            gobanPtr->ajouterPierre(pierrePtr);
+        std::cout << "Clicked : " << a << "-" << o << std::endl;
+        boost::shared_ptr<GobanIA> gobanPtr = boost::dynamic_pointer_cast<GobanIA>(m_goban);
 
-            //ensuite, l'IA doit choisir un coup
-            std::pair<int,int> coupIA = gobanPtr->getPartieIA()->getIA()->choixCoup();
-            std::cout << "Choix de l'ia : " << coupIA.first << " - " << coupIA.second << std::endl;
-            Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
-            gobanPtr->getPartieIA()->ajouterCoup(c2);
-            boost::shared_ptr<Pierre> pierre2 (new Pierre(c2,gobanPtr->ECART()));
-            gobanPtr->ajouterPierre(pierre2);
+        if (!gobanPtr->getPartieIA()->partieFinie())
+        {
+            std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeee\n";
+            std::cout << "couleur ia = " << gobanPtr->getPartieIA()->getCouleurIA()
+                      << ", couleur à jouer = " << gobanPtr->getPartieIA()->couleurAJouer()
+                      << std::endl;
+            if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
+            {
+                //si c'est bien à l'utilisateur de jouer
+                std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
+                if (gobanPtr->coupPossible(a,o))
+                {
+                    std::cout << "coup utilisateur possible\n";
+                    boost::shared_ptr<Joueur> joueurUser = gobanPtr->getPartieIA()->getJoueur(gobanPtr->getPartieIA()->couleurAJouer());
+                    Coup c(a,o,joueurUser);
+                    c.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
+                    gobanPtr->getPartieIA()->ajouterCoup(c);
+                    boost::shared_ptr<Pierre> pierrePtr(new Pierre(c,gobanPtr->ECART()));
+                    gobanPtr->ajouterPierre(pierrePtr);
+
+                    std::cout << "coup de l'utilisateur : ok, maintenant choix de l'ia\n";
+
+                    //ensuite, l'IA doit choisir un coup
+                    std::pair<int,int> coupIA = gobanPtr->getPartieIA()->getIA()->choixCoup();
+                    std::cout << "Choix de l'ia : " << coupIA.first << " - " << coupIA.second << std::endl;
+                    Coup c2(coupIA.first,coupIA.second,gobanPtr->getPartieIA()->getIA());
+                    c2.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
+                    gobanPtr->getPartieIA()->ajouterCoup(c2);
+                    boost::shared_ptr<Pierre> pierre2 (new Pierre(c2,gobanPtr->ECART()));
+                    gobanPtr->ajouterPierre(pierre2);
+                }
+                else
+                    std::cout << "!!!!! COUP IMPOSSIBLE !!!!!\n";
+            }
         }
+    }
+    catch(std::exception const& e)
+    {
+        std::ostringstream errorMsg;
+        errorMsg << "Erreur après clic de l'utilisateur : \n " << e.what();
+        throw coup_exception(errorMsg.str());
     }
 }
 

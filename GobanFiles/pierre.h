@@ -25,6 +25,7 @@ public :
 
     int libertes() const;
     std::vector<std::pair<int,int> > intersectionsAdjacentes() const;
+    std::vector<std::pair<int,int> > intersectionsAdjacentes(int gobanSize) const;
     std::vector<boost::shared_ptr<Pierre> > pierresAutourMemeCouleur() const;
 
     int libertes(boost::shared_ptr<Goban> gobanPtr) const;

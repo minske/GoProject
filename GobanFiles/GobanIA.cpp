@@ -4,24 +4,17 @@
 
 GobanIA::GobanIA(double ecart, int size) : Goban(ecart,size)
 {
-    std::cout << "GobanIA en cours de création\n";
     boost::shared_ptr<PartieIA> partiePtr (new PartieIA());
-    std::cout << "eeeeeeeeeeeee";
-//    partiePtr->init(sharedFromThis());
-    std::cout << "oooo";
     m_partie = partiePtr;
-    std::cout << "okokokok\n";
 }
 
 void GobanIA::init()
 {
     try
     {
-        std::cout << "init goban ia";
         boost::shared_ptr<PartieIA> partiePtr = boost::dynamic_pointer_cast<PartieIA>(m_partie);
         if (partiePtr.get()==0) throw coup_exception("\n!!!!!! partie NULL !!!!!\n"); ///ERREUR
         boost::shared_ptr<GobanIA> shrdThis = sharedFromThis();
-        std::cout << "hahahahahahahahahah\n";
         if (shrdThis.get()!=0)
             partiePtr->init(shrdThis);
         else throw coup_exception("sharedFromThis de GobanIA = NULL");
@@ -59,27 +52,37 @@ bool GobanIA::coupPossible(int abs, int ord)
                 c.setNum(getPartieIA()->getListeCoups().size());
                 p.reset(new Pierre(c,ECART()));
             }
-
             m_copie.reset(new GobanIA(5,9));
-            m_copie->m_partie = m_partie;
+            m_copie->m_partie=m_partie;
             m_copie->copieGroupes(sharedFromThis());
-
-            m_copie->ajouterPierre(p,false);
-            if (p->getGroupe().get()!=0)
+            try
             {
-                if (p->getGroupe()->nbLibertes()==0)
-                {
-                    std::cout << "Groupe auquel la pierre ajoutée appartient n'a pas de libertés\n";
-                    return false;
-                }
-
-                std::cout << "coup possible !\n";
+                m_copie->ajouterPierre(p,false);
             }
-            else throw coup_exception("Erreur pierre mal ajoutée au goban copie");
-            m_copie.reset();
+            catch(coupImpossible& e)
+            {
+                std::cout << "Coup impossible\n";
+                return false;
+            }
+
+            return true;
+
+//            if (p->getGroupe().get()!=0)
+//            {
+////                if (p->getGroupe()->nbLibertes()==0)
+////                {
+////                    std::cout << "Groupe auquel la pierre ajoutée appartient n'a pas de libertés\n";
+////                    return false;
+////                }
+
+//                std::cout << "coup possible !\n";
+//                return true;
+//            }
+//            else throw coup_exception("Erreur pierre mal ajoutée au goban copie");
+//            m_copie.reset();
         }
 
-        return true;
+//        return true;
         ///TODO à terminer
     }
     catch(std::exception const& e)
@@ -94,7 +97,6 @@ boost::shared_ptr<GobanIA> GobanIA::sharedFromThis()
 {
     try
     {
-        std::cout << "NOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
         return boost::shared_dynamic_cast<GobanIA,Goban>(shared_from_this());
     }
     catch(std::exception const& e)
@@ -108,9 +110,9 @@ void GobanIA::copieGroupes(boost::shared_ptr<Goban> gobanPtr)
 {
     for(std::set<boost::shared_ptr<Groupe> >::iterator it = gobanPtr->getGroupes().begin(); it != gobanPtr->getGroupes().end(); it++)
     {
-        //copie de chaque groupe
-        boost::shared_ptr<Groupe> groupePtr (new Groupe(*((*it).get())));
+        boost::shared_ptr<Groupe> groupePtr (new Groupe(*it));
         ajouterGroupe(groupePtr);
+        groupePtr->copyPierres(*it);
     }
 }
 

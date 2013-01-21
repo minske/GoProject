@@ -11,15 +11,8 @@ Groupe::Groupe() : statut(0)
 unsigned int Groupe::nbLibertes() const
 {
     unsigned int result=0;
-    std::cout << "nombre de libertes du groupe\n";
-
     for (vector<boost::shared_ptr<Pierre> >::const_iterator it = m_pierres.begin(); it != m_pierres.end() ; ++it)
-    {
-        std::cout << "e";
         result += (*it)->libertes();
-    }
-
-    std::cout << "fin nombre de libertes\n";
 
     return result;
 }
@@ -43,22 +36,16 @@ void Groupe::ajouterPierre(boost::shared_ptr<Pierre> p)
 
 void Groupe::ajouterGroupe(boost::shared_ptr<Groupe> g)
 {
-    cout << "Groupe::ajouterGroupe" << endl;
-    cout << "this.size()=" << m_pierres.size() << endl;
     if (g.get()!=0)
     {
-    cout << g->getPierres().size() << " pierres a ajouter\n";
-    int i = 1;
-    for (vector<boost::shared_ptr<Pierre> >::iterator it = g->getPierres().begin(); it != g->getPierres().end(); it++)
-    {
-        cout << "pierre " << i << endl;
-        boost::shared_ptr<Pierre> pierrePtr = *it;
-        cout << "ajouter pierre : " <<pierrePtr->getCoup().print() << endl;
-        ajouterPierre(pierrePtr);
-        pierrePtr->setGroupe(this->shared_from_this());
-        i++;
-    }
-    cout << "fin ajouter Groupe\n";
+        int i = 1;
+        for (vector<boost::shared_ptr<Pierre> >::iterator it = g->getPierres().begin(); it != g->getPierres().end(); it++)
+        {
+            boost::shared_ptr<Pierre> pierrePtr = *it;
+            ajouterPierre(pierrePtr);
+            pierrePtr->setGroupe(this->shared_from_this());
+            i++;
+        }
     }
     else
     {
@@ -72,16 +59,15 @@ void Groupe::capture()
 
 
 
-Groupe::Groupe(Groupe const& g)
+Groupe::Groupe(Groupe const& g, bool copyPtr)
 {
-    /*int statut; //0 pour mort, 1 pour vivant
-    unsigned int libertes;
-    set<Pierre*> m_pierres;*/
-
     statut = g.statut;
     for (vector<boost::shared_ptr<Pierre> >::const_iterator it=g.m_pierres.begin(); it!=g.m_pierres.end() ; ++it)
     {
-        m_pierres.push_back(*it);
+        //copie de la pierre
+        boost::shared_ptr<Pierre> newPierre (new Pierre(*((*it).get()),copyPtr));
+        m_pierres.push_back(newPierre);
+        newPierre->setGroupe(shared_from_this());
     }
 }
 
@@ -126,4 +112,23 @@ boost::shared_ptr<Goban> Groupe::getGoban() const
 void Groupe::setGoban(boost::shared_ptr<Goban> gobanPtr)
 {
     m_goban = boost::weak_ptr<Goban>(gobanPtr);
+}
+
+Groupe::Groupe(boost::shared_ptr<Groupe> groupePtr)
+{
+    statut = groupePtr->statut;
+    if (groupePtr.get()==0) throw coup_exception("GroupePtr=NULL\n");
+
+}
+
+
+void Groupe::copyPierres(boost::shared_ptr<Groupe> groupePtr, bool copyPtr)
+{
+    for (vector<boost::shared_ptr<Pierre> >::const_iterator it=groupePtr->m_pierres.begin(); it!=groupePtr->m_pierres.end() ; ++it)
+    {
+        //copie de la pierre
+        boost::shared_ptr<Pierre> newPierre (new Pierre(*it,copyPtr));
+        m_pierres.push_back(newPierre);
+        newPierre->setGroupe(shared_from_this());
+    }
 }

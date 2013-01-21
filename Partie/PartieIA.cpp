@@ -13,11 +13,11 @@ PartieIA::PartieIA(std::string couleurIA,int handicap,double komi)
 
 void PartieIA::init(boost::shared_ptr<GobanIA> gobanPtr)
 {
-    std::cout << "init partie ia\n";
+//    std::cout << "init partie ia\n";
 
     try
     {
-        std::cout << "hmhmhm\n";
+//        std::cout << "hmhmhm\n";
         if (m_couleurIA=="noir")
         {
             m_joueurNoir.reset(new IA(sharedFromThis(),gobanPtr,"noir"));
@@ -25,7 +25,7 @@ void PartieIA::init(boost::shared_ptr<GobanIA> gobanPtr)
         }
         else
         {
-            std::cout << "hmmmm" << std::endl;
+//            std::cout << "hmmmm" << std::endl;
 
             m_joueurBlanc.reset(new IA(sharedFromThis(),gobanPtr,"blanc"));
             m_joueurNoir.reset(new User(sharedFromThis(),gobanPtr,"noir"));

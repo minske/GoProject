@@ -19,8 +19,6 @@ QPen Goban::getRouge()
 Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(size), M_ECART(ecart), m_hasPartie(false)
 {
     //brush pour la couleur de fond
-    //QBrush brush(QColor(236,184,82));
-    //    m_partie = boost::shared_ptr<Partie>(new Partie());
     m_partie.reset(new Partie());
     fondClair = QBrush(QPixmap("Images/fondBoisClair.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     fondMoyen = QBrush(QPixmap("Images/fondBois.png").scaled(M_ECART*(M_SIZE+1),M_ECART*(M_SIZE+1),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
@@ -76,7 +74,6 @@ Goban::Goban(double ecart, int size) : QGraphicsScene(), m_courant(-1), M_SIZE(s
     }
 
     setBackgroundBrush(fondClair);
-    std::cout << "goban créé\n";
 }
 
 Goban::Goban(Goban const& g)
@@ -87,43 +84,21 @@ Goban::Goban(Goban const& g)
 
 void Goban::init()
 {
-    /*if (coupCourant!=0) removeItem(coupCourant.get());
-    coupCourant=0; courant=0;*/
-    std::cout << "init goban\n";
     map<pair<int,int>,boost::shared_ptr<Pierre> > plateau = getPlateau();
     for (map<pair<int,int>,boost::shared_ptr<Pierre> >::iterator it = plateau.begin(); it!=plateau.end(); ++it)
     {
         removeItem((*it).second->getEllipse().get());
     }
-    //groupes.clear();
     m_courant = -1;
+    m_groupes.clear();
 }
 
 vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre> p, bool trueGoban)
 {
-    //if (coupCourant!=0) removeItem(coupCourant);
-
     std::cout << "\n\n- - - - - - - Debut ajouter pierre (p)\n\n";
-
-    SGF::Debug* dbg = SGF::Debug::getInstance();
-    //os << "\n ---------- \n Coup n°" << p->getCoup().getNum() << std::endl;
-
     /* On ajoute la nouvelle pierre au map de pierres référencées par leurs coordonnées */
-    cout << "Goban::ajouterPierre\n";
     const int ord = p->getCoup().getOrd();
     const int abs = p->getCoup().getAbs();
-
-    cout << "plateau.insert : ok \n";
-
-    ostringstream msg;
-    msg << "!!!!!! Ajout de la pierre " << p->couleur() << " en " << abs << "-" << ord << "\n";
-    dbg->add(SGF::Normal,msg.str()); /// INFOS CORRECTES
-
-
-    ostringstream os;
-    os << "Nombre de libertés de la pierre ajoutée : " << p->libertes(shared_from_this());
-    dbg->add(SGF::Normal,os.str());
-    cout << os.str() << endl;
 
     /**************************************** FUSION DES GROUPES ***********************************/
 
@@ -134,7 +109,6 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     for (vector<boost::shared_ptr<Pierre> >::iterator it = pierresAutour.begin(); it != pierresAutour.end(); it++)
     {
         boost::shared_ptr<Groupe> m_groupe = (*it)->getGroupe();
-        cout << m_groupe->getPierres().size() << endl;
         if (find(groupesAutour.begin(), groupesAutour.end(), m_groupe)==groupesAutour.end())
         {
             groupesAutour.push_back(m_groupe);
@@ -158,26 +132,18 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
         /*il y a plusieurs groupes à fusionner : on prend le premier, on lui ajoute les autres
           un par un, puis on ajoute la nouvelle pierre créée */
         boost::shared_ptr<Groupe> groupePtr = groupesAutour[0];
-        cout << "boost::shared_ptr<Groupe> groupePtr = groupesAutour[0];\n";
-        cout << "groupePtr.size()=" << groupePtr->getPierres().size() << endl;
-        int i = 1;
         for (vector<boost::shared_ptr<Groupe> >::iterator it = groupesAutour.begin(); it != groupesAutour.end(); it++)
         {
-            cout << i << "\n";
             if (it!=groupesAutour.begin())
             {
-                cout << i << endl;
                 groupePtr->ajouterGroupe(*it);
-                cout << "fusion du groupe\n";
                 m_groupes.erase(*it);
                 cout << "suppression de l'ancien groupe\n";
             }
-            i++;
+
         }
 
         groupePtr->ajouterPierre(p);
-        cout << "Ajout de la pierre au groupe : ok\n";
-        cout << "Ce nouveau groupe a maintenant " << groupePtr->getPierres().size() << " pierres\n";
         p->setGroupe(groupePtr->shared_from_this());
     }
 
@@ -185,32 +151,23 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
     if (trueGoban)
     {
         addItem(p->getEllipse().get());
-//        p->getEllipse()->setZValue(15);
         QRect rect((abs+1)*M_ECART-(M_ECART*0.31),(ord+1)*M_ECART-(M_ECART*0.31),M_ECART*0.6,M_ECART*0.6);
 
         coupCourant.reset(this->addEllipse(rect,rouge));
         coupCourant->setZValue(10);
         std::cout << "Ajout du coup courant\n";
-//        if (coupCourant.get()==0)
-//        {
-//            QRect rect((abs+1)*M_ECART-(M_ECART*0.31),(ord+1)*M_ECART-(M_ECART*0.31),M_ECART*0.6,M_ECART*0.6);
-//            coupCourant.reset(this->addEllipse(rect,rouge));
-
-//        }
     }
 
 
     /************************* Suppression des pierres *********************************************/
-    //unsigned int nbcapt = 0;
     vector<boost::shared_ptr<Pierre> > pierresSupprimees;
     set<boost::shared_ptr<Groupe> > sansLibertes = groupesSansLiberte();
-    std::cout << sansLibertes.size() << " groupes sans libertés" << std::endl;
+
 
     if (sansLibertes.size()>0)
     {
         std::ostringstream os;
         os << sansLibertes.size() << " groupes sans liberté sur le plateau";
-        dbg->add(SGF::Normal,os.str());
         for (set<boost::shared_ptr<Groupe> >::iterator it = sansLibertes.begin() ; it != sansLibertes.end() ; ++it)
         {
             boost::shared_ptr<Groupe> groupePtr = *it;
@@ -225,16 +182,23 @@ vector<boost::shared_ptr<Pierre> > Goban::ajouterPierre(boost::shared_ptr<Pierre
                     int abs, ord;
                     abs = (*it_pierre)->getCoup().getAbs(); ord = (*it_pierre)->getCoup().getOrd();
                     supprimerPierre(*it_pierre);
-
                 }
+                m_groupes.erase(groupePtr);
             }
-
-            m_groupes.erase(groupePtr);
 
         }
     }
 
+    int ajoutLibertes = p->getGroupe()->nbLibertes();
+    std::cout << "nombre de libertés du groupe de la pierre ajoutée : " << ajoutLibertes << std::endl;
+    if (ajoutLibertes==0)
+        throw coupImpossible("aucune liberté");
+
     std::cout << " - - - - - - - end ajouter pierre(p)\n\n";
+    if (p->getGroupe().get()==0)
+    {
+        throw coup_exception("La pierre n'appartient à aucun groupe !!");
+    }
     return pierresSupprimees;
 }
 
@@ -280,15 +244,11 @@ set<boost::shared_ptr<Groupe> > Goban::groupesSansLiberte() const
     set<boost::shared_ptr<Groupe> > result;
     for (set<boost::shared_ptr<Groupe> >::iterator it = m_groupes.begin(); it != m_groupes.end(); it++)
     {
-        std::cout << " a" ;
         if ((*it)->nbLibertes()==0)
         {
             result.insert(*it);
         }
-        std::cout << " b ";
     }
-
-    std::cout << "groupes sans libertes : done \n";
     return result;
 }
 

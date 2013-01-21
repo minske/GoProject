@@ -17,7 +17,8 @@ class Groupe : public boost::enable_shared_from_this<Groupe>
 
 public :
     Groupe();
-    Groupe(Groupe const& g);
+    Groupe(Groupe const& g, bool copyPtr=false);
+    Groupe(boost::shared_ptr<Groupe> groupePtr);
     int getStatut() const {return statut;}
     unsigned int nbLibertes() const;
     std::vector<boost::shared_ptr<Pierre> >& getPierres() {return m_pierres;}
@@ -35,6 +36,8 @@ public :
 
     boost::shared_ptr<Goban> getGoban() const;
     void setGoban(boost::shared_ptr<Goban> gobanPtr);
+
+    void copyPierres(boost::shared_ptr<Groupe> groupePtr, bool copyPtr=false);
 };
 
 Groupe operator+(Groupe const& a, Groupe const& b);

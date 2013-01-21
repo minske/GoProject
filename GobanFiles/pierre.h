@@ -15,6 +15,8 @@ class Pierre
 {
 public :
     Pierre(Coup c, int ecartGoban);
+    Pierre(Pierre const& p, bool copyGroupe=false);
+    Pierre(boost::shared_ptr<Pierre> p, bool copyGroupe=false);
 
     Coup getCoup() const {return m_coup;}
     Coup getCoup() {return m_coup;}

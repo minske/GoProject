@@ -6,17 +6,11 @@ using namespace std;
 
 Pierre::Pierre(Coup c, int ecartGoban) : m_coup(c)
 {
-    cout << "création p pour le coup " << c.print() << endl;
     if (c.getJoueur()->getNom()=="Kiral")
-    {
-        cout << "joueur = kiral" << endl;
         ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("Images/circle_rose.png").scaled(ecartGoban*R,ecartGoban*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
-    }
-    else if (c.getJoueur()->couleur()=="noir")
-    {
 
+    else if (c.getJoueur()->couleur()=="noir")
         ellipse = boost::shared_ptr<QGraphicsPixmapItem>(new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ecartGoban*R,ecartGoban*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation)));
-    }
 
     else
     {
@@ -30,15 +24,9 @@ Pierre::Pierre(Coup c, int ecartGoban) : m_coup(c)
     ellipse->setX((c.getAbs()+1)*ecartGoban-(ecartGoban*R/2));
     ellipse->setY((c.getOrd()+1)*ecartGoban-(ecartGoban*R/2));
 
-    //rect.setWidth(E*0.9);
-    //rect.setHeight(E*0.9);
-    //les pierres font 100 pixels de diamètre, on veut qu'elles fassent E*0,9
-    //ellipse->setScale(E*0.9/100);
-
     std::ostringstream name;
     name << rand() % 300 +1;
     m_name = name.str();
-
 }
 
 
@@ -50,14 +38,7 @@ void Pierre::setEllipse(boost::shared_ptr<QGraphicsPixmapItem> el)
 
 int Pierre::libertes() const
 {
-    //ostringstream os;
-    std::cout << "Calcul du nombre de libertés de la pierre " << m_coup.print();
-    //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
     vector<pair<int,int> > adj = intersectionsAdjacentes();
-
-    //ostringstream oss;
-    std::cout << "Nombre d'intersections adjacentes : " << adj.size();
-    //SGF::Debug::getInstance()->add(SGF::Normal,oss.str());
     std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = m_groupe.lock()->getGoban()->getPlateau();
 
     int libertes = adj.size();
@@ -69,9 +50,7 @@ int Pierre::libertes() const
         }
     }
 
-    //ostringstream libs;
-    std::cout << "Nombre de libertés : " << libertes;
-    //SGF::Debug::getInstance()->add(SGF::Normal,libs.str());
+//    std::cout << "\nNombre de libertés : " << libertes << std::endl;
     return libertes;
 }
 
@@ -156,19 +135,10 @@ vector<boost::shared_ptr<Pierre> > Pierre::pierresAutourMemeCouleur() const
 
 int Pierre::libertes(boost::shared_ptr<Goban> gobanPtr) const
 {
-    ostringstream os;
-    os << "Calcul du nombre de libertés de la pierre " << m_coup.print();
-    cout << os.str() << endl;
-    //SGF::Debug::getInstance()->add(SGF::Normal,os.str());
     vector<pair<int,int> > adj = intersectionsAdjacentes(gobanPtr);
-
-    ostringstream oss;
-    oss << "Nombre d'intersections adjacentes : " << adj.size();
-    //SGF::Debug::getInstance()->add(SGF::Normal,oss.str());
-    cout << oss.str() << endl;
     int libertes = adj.size();
     std::map<std::pair<int,int>,boost::shared_ptr<Pierre> > plateau = gobanPtr->getPlateau();
-    cout << "plateau" << endl;
+
     for (std::vector<std::pair<int,int> >::iterator it = adj.begin(); it != adj.end(); it++)
     {
         if (plateau.find(*it)!=plateau.end())
@@ -177,9 +147,6 @@ int Pierre::libertes(boost::shared_ptr<Goban> gobanPtr) const
         }
     }
 
-    ostringstream libs;
-    cout << "Nombre de libertés : " << libertes;
-    //SGF::Debug::getInstance()->add(SGF::Normal,libs.str());
     return libertes;
 }
 
@@ -196,7 +163,6 @@ vector<pair<int,int> > Pierre::intersectionsAdjacentes(boost::shared_ptr<Goban> 
 
     for (vector<pair<int,int> >::iterator it = resultat.begin(); it != resultat.end();)
     {
-        cout << "i " ;
         int a = it->first; int o = it->second;
         if (a<0 || a>=gobanPtr->SIZE())
         {
@@ -232,4 +198,22 @@ vector<boost::shared_ptr<Pierre> > Pierre::pierresAutourMemeCouleur(boost::share
     }
 
     return result;
+}
+
+
+Pierre::Pierre(Pierre const& p, bool copyGroupe) : rect(p.rect), m_coup(p.m_coup), m_name(p.m_name), ellipse(p.ellipse)
+{
+    if (copyGroupe)
+    {
+        m_groupe = p.m_groupe;
+    }
+}
+
+
+Pierre::Pierre(boost::shared_ptr<Pierre> p, bool copyGroupe) : rect(p->rect), m_coup(p->m_coup), m_name(p->m_name), ellipse(p->ellipse)
+{
+    if (copyGroupe)
+    {
+        m_groupe = p->m_groupe;
+    }
 }

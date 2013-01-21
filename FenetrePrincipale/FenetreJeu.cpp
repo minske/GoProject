@@ -6,19 +6,17 @@
 
 FenetreJeu::FenetreJeu() : FenetrePrincipale()
 {
-    std::cout << "Création fenêtre de jeu\n";
+//    std::cout << "Création fenêtre de jeu\n";
     QDesktopWidget desk;
     qreal m_height = desk.height();
     ECART = ceil((m_height-150)/(10));
     m_goban.reset(new GobanIA(ECART,9));
     //    m_goban->init();
 
-    std::cout << "0";
     vue = new QGraphicsView(m_goban.get());
     vue->setFixedSize(ECART*(m_goban->SIZE()+1),ECART*(m_goban->SIZE()+1));
     layoutV->addWidget(vue);
 
-    std::cout << "A";
 
     /********* Définition d'une grille de boutons correspondant aux intersections *********/
     grilleBoutonsGoban =new QGridLayout();
@@ -34,20 +32,17 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
     grilleBoutonsGoban->setMargin(ECART/2);
     vue->setLayout(grilleBoutonsGoban);
 
-    std::cout << "B";
 
-    std::ostringstream os;
-    os << "Taille de l'écran : " << m_height << std::endl;
-    SGF::Debug::getInstance()->add(SGF::Normal,os.str());
+//    std::ostringstream os;
+//    os << "Taille de l'écran : " << m_height << std::endl;
+//    SGF::Debug::getInstance()->add(SGF::Normal,os.str());
 
-    if (ECART <= 0)
-    {
-        SGF::Debug::getInstance()->add(SGF::Exception,"Mauvaise récupération de la taille de l'écran");
-    }
+//    if (ECART <= 0)
+//    {
+//        SGF::Debug::getInstance()->add(SGF::Exception,"Mauvaise récupération de la taille de l'écran");
+//    }
 
-    SGF::Debug* dbg = SGF::Debug::getInstance();
 
-    std::cout << "C";
     /*Quand on met une pierre sur un bord pour la première fois, le goban se décale ... En attendant d'avoir
     réglé le problème, on met des pierres dans les coins pour que le goban soit à la bonne
     place*/
@@ -57,7 +52,7 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
 
     ellipse->setVisible(false);
     m_goban->addItem(ellipse);
-    std::cout << "ajout d'une pierre invisible au coin " << ECART-(ECART*R/2) << " - " << ECART-(ECART*R/2) << std::endl;
+//    std::cout << "ajout d'une pierre invisible au coin " << ECART-(ECART*R/2) << " - " << ECART-(ECART*R/2) << std::endl;
 
     QGraphicsPixmapItem* ellipse2 = new QGraphicsPixmapItem(QPixmap("Images/pierreNoire.png").scaled(ECART*R,ECART*R,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
     ellipse2->setX(m_goban->SIZE()*ECART-(ECART*R/2));
@@ -65,11 +60,11 @@ FenetreJeu::FenetreJeu() : FenetrePrincipale()
 
     ellipse2->setVisible(false);
     m_goban->addItem(ellipse2);
-    std::cout << "ajout d'une pierre invisible au coin " << m_goban->SIZE()*ECART-(ECART*R/2) << " - " << m_goban->SIZE()*ECART-(ECART*R/2) << std::endl;
+//    std::cout << "ajout d'une pierre invisible au coin " << m_goban->SIZE()*ECART-(ECART*R/2) << " - " << m_goban->SIZE()*ECART-(ECART*R/2) << std::endl;
 
     //DebutJeu* wdw = new DebutJeu();
     //wdw->show();
-    std::cout << "Fenêtre de jeu créée\n";
+//    std::cout << "Fenêtre de jeu créée\n";
 }
 
 
@@ -82,17 +77,12 @@ void FenetreJeu::bouton_goban(int a, int o)
 
         if (!gobanPtr->getPartieIA()->partieFinie())
         {
-            std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeee\n";
-            std::cout << "couleur ia = " << gobanPtr->getPartieIA()->getCouleurIA()
-                      << ", couleur à jouer = " << gobanPtr->getPartieIA()->couleurAJouer()
-                      << std::endl;
             if (gobanPtr->getPartieIA()->couleurAJouer()!=gobanPtr->getPartieIA()->getCouleurIA())
             {
                 //si c'est bien à l'utilisateur de jouer
-                std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
                 if (gobanPtr->coupPossible(a,o))
                 {
-                    std::cout << "coup utilisateur possible\n";
+                    std::cout << "\ncoup utilisateur possible\n";
                     boost::shared_ptr<Joueur> joueurUser = gobanPtr->getPartieIA()->getJoueur(gobanPtr->getPartieIA()->couleurAJouer());
                     Coup c(a,o,joueurUser);
                     c.setNum(gobanPtr->getPartieIA()->getListeCoups().size());
@@ -112,7 +102,10 @@ void FenetreJeu::bouton_goban(int a, int o)
                     gobanPtr->ajouterPierre(pierre2);
                 }
                 else
+                {
                     std::cout << "!!!!! COUP IMPOSSIBLE !!!!!\n";
+                    ///TODO afficher une fenêtre d'erreur "coup non valide". fenêtre modale ?
+                }
             }
         }
     }
